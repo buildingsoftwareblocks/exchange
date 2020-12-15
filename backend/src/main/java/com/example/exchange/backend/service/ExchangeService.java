@@ -1,12 +1,15 @@
-package com.example.exchange.service;
+package com.example.exchange.backend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.bitstamp.v2.BitstampStreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchangeFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -17,11 +20,14 @@ import javax.annotation.PreDestroy;
 public class ExchangeService {
 
     private final StreamingExchange exchange;
-    private final SimpMessagingTemplate template;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+    private final NewTopic topic;
 
-    public ExchangeService(SimpMessagingTemplate template) {
-        this.template = template;
-        // Use StreamingExchangeFactory instead of ExchangeFactory
+    public ExchangeService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper, NewTopic topic) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
+        this.topic = topic;
         exchange = StreamingExchangeFactory.INSTANCE.createExchange(BitstampStreamingExchange.class);
     }
 
@@ -35,12 +41,12 @@ public class ExchangeService {
                 .subscribe(orderBook -> process(orderBook));
     }
 
-    void process(OrderBook orderBook) {
+    void process(OrderBook orderBook) throws JsonProcessingException {
         log.info("Order book: {}", orderBook);
-        // send orderbook to webbrowser
-        template.convertAndSend("/topic/orderbook", orderBook);
+        kafkaTemplate.send(topic.name(), objectMapper.writeValueAsString(orderBook));
     }
 
+    @PreDestroy
     void teardown() {
         // Disconnect from exchange (blocking again)
         exchange.disconnect().blockingAwait();

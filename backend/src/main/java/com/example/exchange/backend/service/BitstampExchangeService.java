@@ -1,6 +1,5 @@
 package com.example.exchange.backend.service;
 
-import com.example.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.bitstamp.v2.BitstampStreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchange;
@@ -14,7 +13,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import static com.example.exchange.shared.dto.ExchangeEnum.BITSTAMP;
-import static com.example.exchange.shared.dto.ExchangeEnum.KRAKEN;
 
 @Service
 @Slf4j
@@ -28,7 +26,7 @@ public class BitstampExchangeService extends AbstractExchangeService {
         exchange = StreamingExchangeFactory.INSTANCE.createExchange(exchangeSpecification);
     }
 
-    //@PostConstruct
+    @PostConstruct
     void init() {
         super.init(exchange, BITSTAMP);
     }

@@ -1,5 +1,11 @@
 # exchange
 
+## TODO List
+- multiple exchanges
+- multiple CurrencyPairs
+- store exchange in database
+- config server
+
 ## Background Information
 - [Battle of the Bots: How Market Makers Fight It Out on Crypto Exchanges](https://medium.com/swlh/battle-of-the-bots-how-market-makers-fight-it-out-on-crypto-exchanges-2482eb937107)
 - [known / XChange](https://github.com/knowm/XChange)

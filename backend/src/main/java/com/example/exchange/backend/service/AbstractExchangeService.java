@@ -15,7 +15,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.example.exchange.shared.dto.ExchangeEnum.KRAKEN;
 import static org.knowm.xchange.currency.CurrencyPair.*;
 
 @Slf4j
@@ -43,7 +42,7 @@ public abstract class AbstractExchangeService {
         exchange.connect(subscription).blockingAwait();
 
         // Subscribe order book data with the reference to the subscription.
-        CurrencyPairs.stream().forEach(cp -> process(exchange, cp, exchangeEnum, TopicUtils.orderBook(cp)));
+        CurrencyPairs.forEach(cp -> process(exchange, cp, exchangeEnum, TopicUtils.orderBook(cp)));
     }
 
     final protected void process(StreamingExchange exchange, CurrencyPair currencyPair, ExchangeEnum exchangeEnum, String topic) {

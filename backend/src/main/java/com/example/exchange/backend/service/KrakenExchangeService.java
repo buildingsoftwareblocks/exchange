@@ -1,6 +1,5 @@
 package com.example.exchange.backend.service;
 
-import com.example.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchangeFactory;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import static com.example.exchange.shared.dto.ExchangeEnum.BINANCE;
 import static com.example.exchange.shared.dto.ExchangeEnum.KRAKEN;
 
 @Service
@@ -28,7 +26,7 @@ public class KrakenExchangeService extends AbstractExchangeService {
         exchange = StreamingExchangeFactory.INSTANCE.createExchange(exchangeSpecification);
     }
 
-    //@PostConstruct
+    @PostConstruct
     void init() {
         super.init(exchange, KRAKEN);
     }

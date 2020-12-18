@@ -1,12 +1,9 @@
 package com.example.exchange.backend.service;
 
-import com.example.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.binance.BinanceStreamingExchange;
-import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchangeFactory;
-import info.bitrich.xchangestream.kraken.KrakenStreamingExchange;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.ExchangeSpecification;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -16,7 +13,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import static com.example.exchange.shared.dto.ExchangeEnum.BINANCE;
-import static com.example.exchange.shared.dto.ExchangeEnum.KRAKEN;
 
 @Service
 @Slf4j

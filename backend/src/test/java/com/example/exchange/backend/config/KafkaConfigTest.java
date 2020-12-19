@@ -20,7 +20,7 @@ class KafkaConfigTest {
 
     @Test
     void currencyPairTopis() {
-        AbstractExchangeService.CurrencyPairs.stream().forEach(cp -> {
+        AbstractExchangeService.CurrencyPairs.forEach(cp -> {
             var bean = context.getBean(String.format("topic.%s", cp));
             assertThat(bean, is(notNullValue()));
         });

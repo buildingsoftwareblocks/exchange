@@ -41,11 +41,11 @@ public abstract class AbstractExchangeService {
 
         exchange.connect(subscription).blockingAwait();
 
-        // Subscribe order book data with the reference to the subscription.
-        CurrencyPairs.forEach(cp -> process(exchange, cp, exchangeEnum, TopicUtils.orderBook(cp)));
+        // Subscribe order book data with the reference to the currency pair.
+        CurrencyPairs.forEach(cp -> subscribe(exchange, cp, exchangeEnum, TopicUtils.orderBook(cp)));
     }
 
-    final protected void process(StreamingExchange exchange, CurrencyPair currencyPair, ExchangeEnum exchangeEnum, String topic) {
+    final protected void subscribe(StreamingExchange exchange, CurrencyPair currencyPair, ExchangeEnum exchangeEnum, String topic) {
         exchange.getStreamingMarketDataService().getOrderBook(currencyPair).subscribe(orderBook -> process(orderBook, exchangeEnum, topic));
     }
 

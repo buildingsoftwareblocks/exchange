@@ -25,6 +25,8 @@
         <surefire.version>2.22.2</surefire.version>
         <code.coverage.exclusions></code.coverage.exclusions>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
+
+        <docker.repo>local</docker.repo>
     </properties>
 
     <dependencyManagement>
@@ -123,7 +125,7 @@
                         </executions>
                         <configuration>
                             <image>
-                                <name>${project.artifactId}</name>
+                                <name>${docker.repo}/${project.artifactId}</name>
                             </image>
                         </configuration>
                     </plugin>

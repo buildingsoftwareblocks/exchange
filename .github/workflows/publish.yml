@@ -37,6 +37,6 @@ jobs:
       run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Publish Docker image Backend
-      run: docker push $REPO/backend:latest
+      run: docker push $REPO/exchange-backend:latest
     - name: Publish Docker image Frontend
-      run: docker push $REPO/frontend:latest
+      run: docker push $REPO/exchange-frontend:latest

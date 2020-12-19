@@ -38,7 +38,7 @@ public class ExchangeService {
         // Subscribe order book data with the reference to the subscription.
         exchange.getStreamingMarketDataService()
                 .getOrderBook(CurrencyPair.BTC_USD)
-                .subscribe(orderBook -> process(orderBook));
+                .subscribe(this::process);
     }
 
     void process(OrderBook orderBook) throws JsonProcessingException {

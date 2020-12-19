@@ -1,4 +1,4 @@
-package com.example.exchange.backend.service;
+package com.btb.exchange.backend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

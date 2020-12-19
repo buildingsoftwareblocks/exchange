@@ -1,4 +1,4 @@
-package com.example.exchange.frontend.config;
+package com.btb.exchange.frontend.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

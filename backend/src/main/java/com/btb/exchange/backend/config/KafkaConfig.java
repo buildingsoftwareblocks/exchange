@@ -1,4 +1,4 @@
-package com.example.exchange.backend.config;
+package com.btb.exchange.backend.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;

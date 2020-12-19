@@ -1,4 +1,4 @@
-package com.example.exchange.frontend.service;
+package com.btb.exchange.frontend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

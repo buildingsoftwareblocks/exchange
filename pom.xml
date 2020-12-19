@@ -125,7 +125,7 @@
                         </executions>
                         <configuration>
                             <image>
-                                <name>${docker.repo}/${project.artifactId}</name>
+                                <name>${docker.repo}/exchange-${project.artifactId}</name>
                             </image>
                         </configuration>
                     </plugin>

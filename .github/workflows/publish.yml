@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Test - Unit & Integration
+    name: Publish to Docker Hub
     runs-on: ubuntu-latest
     env:
       REPO: ${{ secrets.DOCKER_REPO }}

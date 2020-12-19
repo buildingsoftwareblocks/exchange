@@ -14,10 +14,4 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: ${DOCKER_GATEWAY_HOST:-host.docker.internal}
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
-  mongodb:
-    image: mongo:latest
-    ports:
-      - 27017:27017
-    volumes:
-      - ./data:/data/db
 

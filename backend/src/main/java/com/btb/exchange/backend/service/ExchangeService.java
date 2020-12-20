@@ -41,7 +41,7 @@ public class ExchangeService {
     }
 
     public void process(OrderBook orderBook) throws JsonProcessingException {
-        log.info("Order book: {}", orderBook);
+        log.trace("Order book: {}", orderBook);
         kafkaTemplate.send(topic.name(), objectMapper.writeValueAsString(orderBook));
     }
 

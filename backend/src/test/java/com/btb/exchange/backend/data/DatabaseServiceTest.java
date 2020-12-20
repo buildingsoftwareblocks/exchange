@@ -79,6 +79,7 @@ class DatabaseServiceTest {
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+            var uri = MONGO_DB_CONTAINER.getReplicaSetUrl();
             TestPropertyValues.of(String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl())).applyTo(configurableApplicationContext);
         }
     }

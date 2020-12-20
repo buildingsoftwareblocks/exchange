@@ -26,11 +26,12 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - SPRING_KAFKA_SERVER=kafka
+      - KAFKA_SERVER=kafka
 
   backend:
     image: ${REPO}/exchange-backend
     ports:
       - "8082"
     environment:
-      - SPRING_KAFKA_SERVER=kafka
+      - KAFKA_SERVER=kafka
+      - MONGO_DB_SERVER=mongodb

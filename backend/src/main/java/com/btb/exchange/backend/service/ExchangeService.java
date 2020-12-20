@@ -2,9 +2,7 @@ package com.btb.exchange.backend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.bitrich.xchangestream.bitstamp.v2.BitstampStreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchange;
-import info.bitrich.xchangestream.core.StreamingExchangeFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.knowm.xchange.currency.CurrencyPair;
@@ -14,7 +12,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 @Service
@@ -33,9 +30,8 @@ public class ExchangeService {
         this.exchange = exchange;
     }
 
-    //@PostConstruct
     @EventListener(ApplicationReadyEvent.class)
-    void init() {
+    public void init() {
         // Connect to the Exchange WebSocket API. Here we use a blocking wait.
         exchange.connect().blockingAwait();
         // Subscribe order book data with the reference to the subscription.

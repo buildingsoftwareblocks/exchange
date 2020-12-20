@@ -1,6 +1,7 @@
 package com.btb.exchange.frontend.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -13,6 +14,7 @@ public class ExchangeService {
 
     private final SimpMessagingTemplate template;
 
+    @Synchronized
     @KafkaListener(topics = "orderbook")
     void process(String orderBook) {
         log.info("Order book: {}", orderBook);

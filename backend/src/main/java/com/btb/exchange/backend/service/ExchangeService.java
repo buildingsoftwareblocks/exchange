@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,14 +26,15 @@ public class ExchangeService {
     private final ObjectMapper objectMapper;
     private final NewTopic topic;
 
-    public ExchangeService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper, NewTopic topic) {
+    public ExchangeService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper, NewTopic topic, StreamingExchange exchange) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
         this.topic = topic;
-        exchange = StreamingExchangeFactory.INSTANCE.createExchange(BitstampStreamingExchange.class);
+        this.exchange = exchange;
     }
 
-    @PostConstruct
+    //@PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     void init() {
         // Connect to the Exchange WebSocket API. Here we use a blocking wait.
         exchange.connect().blockingAwait();
@@ -41,7 +44,7 @@ public class ExchangeService {
                 .subscribe(this::process);
     }
 
-    void process(OrderBook orderBook) throws JsonProcessingException {
+    public void process(OrderBook orderBook) throws JsonProcessingException {
         log.info("Order book: {}", orderBook);
         kafkaTemplate.send(topic.name(), objectMapper.writeValueAsString(orderBook));
     }

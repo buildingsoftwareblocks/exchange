@@ -3,6 +3,7 @@ package com.btb.exchange.backend.data;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.util.Date;
 
@@ -12,7 +13,7 @@ public class Message {
 
     @Id
     private String id;
-
+    @Indexed
     private Date created;
     private MessageType messageType;
     private String message;

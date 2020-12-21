@@ -26,6 +26,7 @@ import org.testcontainers.containers.MongoDBContainer;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,28 +60,55 @@ class DatabaseServiceTest {
     }
 
     @Test
-    void testStore() {
-        var startCount = repository.count();
+    void testStore() throws InterruptedException {
+        var latch = new CountDownLatch(1);
+        service.stored().subscribe(r -> latch.countDown());
+
+        var startCount = repository.count().blockingGet();
         var message = "this is a message";
         service.store(message);
-        assertThat("check 1 record is added", repository.count() - startCount, is(1L));
+        latch.await(10000, TimeUnit.MILLISECONDS);
+
+        assertThat("service is called", latch.getCount(), is(0L));
+        assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(1L));
     }
 
     @Test
     void testStoreMessage() throws InterruptedException, JsonProcessingException {
-        var startCount = repository.count();
-        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
-        service.getLatch().await(10000, TimeUnit.MILLISECONDS);
+        var latch = new CountDownLatch(1);
+        service.stored().subscribe(r -> latch.countDown());
 
-        assertThat("service is called", service.getLatch().getCount(), is(0L));
-        assertThat("check 1 record is added", repository.count() - startCount, is(1L));
+        var startCount = repository.count().blockingGet();
+        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
+        latch.await(10000, TimeUnit.MILLISECONDS);
+
+        assertThat("service is called", latch.getCount(), is(0L));
+        assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(1L));
+    }
+
+    @Test
+    void testReplayMessage() throws InterruptedException {
+        // message is stored twice, direct and indirect via replay
+        var latch = new CountDownLatch(2);
+        service.stored().subscribe(r -> latch.countDown());
+
+        var startCount = repository.count().blockingGet();
+        service.store("this is a message");
+        service.replayEvents();
+        latch.await(10000, TimeUnit.MILLISECONDS);
+
+        assertThat("service is called", latch.getCount(), is(0L));
+        assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(2L));
+
     }
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             var uri = MONGO_DB_CONTAINER.getReplicaSetUrl();
-            TestPropertyValues.of(String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl())).applyTo(configurableApplicationContext);
+            TestPropertyValues.of(
+                    String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),
+                    "backend.recording: true", "backend.replay: false").applyTo(configurableApplicationContext);
         }
     }
 

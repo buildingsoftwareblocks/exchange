@@ -9,17 +9,12 @@ docker-compose --env-file env.dev up -d
 
 Create your own *env.dev* file from the *env.template* file.
 
-During Development Kakfa is useful, which can be started with:
-
-``
-docker-compose --env-file env.dev -f docker-compose-kafka.yml up -d
-``
-
 ## TODO List
 - ~~build pipeline~~
-- ~~multiple exchanges~~
-- ~~multiple CurrencyPairs~~
-- store exchange in database
+- ~~store exchange in database~~
+- build pipeline
+- multiple exchanges
+- multiple CurrencyPairs
 - config server
 
 ## Background Information

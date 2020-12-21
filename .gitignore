@@ -6,6 +6,7 @@ target/
 
 data
 /env.dev
+data
 
 ### STS ###
 .apt_generated

@@ -14,16 +14,26 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
+  mongodb:
+    image: mongo
+    volumes:
+    - ./data:/data/db
+    ports:
+    - 27017-27019:27017-27019
+
   frontend:
     image: ${REPO}/exchange-frontend
     ports:
       - "8081:8081"
     environment:
-      - SPRING_KAFKA_SERVER=kafka
+      - KAFKA_SERVER=kafka
 
   backend:
     image: ${REPO}/exchange-backend
     ports:
       - "8082"
     environment:
-      - SPRING_KAFKA_SERVER=kafka
+      - KAFKA_SERVER=kafka
+      - MONGO_DB_SERVER=mongodb
+      - DB_REPLAY=false
+      - DB_RECORDING=true

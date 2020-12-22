@@ -14,6 +14,12 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
 
+    services:
+      kafka:
+        image: confluentinc/cp-kafka:latest
+        ports:
+          - "9092:9092"
+
     steps:
     - uses: actions/checkout@v2
 

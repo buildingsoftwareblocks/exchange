@@ -45,7 +45,7 @@ import static org.hamcrest.Matchers.is;
 class DatabaseServiceTest {
 
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
-    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+    //private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
 
     @Autowired
     DatabaseService service;
@@ -59,7 +59,7 @@ class DatabaseServiceTest {
     @BeforeAll
     static void setUpAll() {
         MONGO_DB_CONTAINER.start();
-        KAFKA_CONTAINER.start();
+        //KAFKA_CONTAINER.start();
     }
 
     @AfterAll
@@ -67,9 +67,9 @@ class DatabaseServiceTest {
         if (!MONGO_DB_CONTAINER.isShouldBeReused()) {
             MONGO_DB_CONTAINER.stop();
         }
-        if (!KAFKA_CONTAINER.isShouldBeReused()) {
-            KAFKA_CONTAINER.stop();
-        }
+//        if (!KAFKA_CONTAINER.isShouldBeReused()) {
+//            KAFKA_CONTAINER.stop();
+//        }
     }
 
     @AfterEach
@@ -130,7 +130,7 @@ class DatabaseServiceTest {
 
             TestPropertyValues.of(
                     String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),
-                    String.format("spring.kafka.bootstrap-servers: %s", KAFKA_CONTAINER.getBootstrapServers()),
+                    String.format("spring.kafka.bootstrap-servers: kafka:9092"),
                     "backend.recording: true", "backend.replay: false")
                     .applyTo(configurableApplicationContext);
         }

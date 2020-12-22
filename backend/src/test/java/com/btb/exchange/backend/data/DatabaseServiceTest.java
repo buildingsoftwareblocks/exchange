@@ -7,6 +7,7 @@ import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,6 +41,7 @@ import static org.hamcrest.Matchers.is;
 @DirtiesContext
 @EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
 @ContextConfiguration(initializers = {DatabaseServiceTest.Initializer.class})
+@Slf4j
 class DatabaseServiceTest {
 
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
@@ -101,7 +103,10 @@ class DatabaseServiceTest {
     void testReplayMessage() throws InterruptedException {
         // message is stored twice, direct and indirect via replay
         var latch = new CountDownLatch(2);
-        composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
+        composite.add(service.subscribeOnStore().subscribe(r -> {
+            log.info("latch called for: '{}'", r);
+            latch.countDown();
+        }));
 
         var startCount = repository.count().blockingGet();
         service.store("this is a message-2");
@@ -109,7 +114,7 @@ class DatabaseServiceTest {
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
-        // because in this test case the replayed records will be stored again, so al least 2 is the answer
+        // because in this test case the replayed records will be stored again, so at least 2 is the answer
         assertThat("check #records are added", repository.count().blockingGet() - startCount, greaterThanOrEqualTo(2L));
     }
 

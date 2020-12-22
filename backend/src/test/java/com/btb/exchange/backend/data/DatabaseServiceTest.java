@@ -111,7 +111,7 @@ class DatabaseServiceTest {
         var startCount = repository.count().blockingGet();
         service.store("this is a message-2");
         composite.add(service.subscribeOnStore().subscribe(r -> service.replayEvents()));
-        var waitResult = latch.await(10, TimeUnit.SECONDS);
+        var waitResult = latch.await(30, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
         // because in this test case the replayed records will be stored again, so at least 2 is the answer

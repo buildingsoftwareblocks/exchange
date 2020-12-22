@@ -22,11 +22,12 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
-import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.lang.NonNull;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.Collections;
 import java.util.Date;
@@ -39,12 +40,12 @@ import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
 @DirtiesContext
-@EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://localhost:9092", "port=9092"})
 @ContextConfiguration(initializers = {DatabaseServiceTest.Initializer.class})
 @Slf4j
 class DatabaseServiceTest {
 
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
 
     @Autowired
     DatabaseService service;
@@ -58,12 +59,16 @@ class DatabaseServiceTest {
     @BeforeAll
     static void setUpAll() {
         MONGO_DB_CONTAINER.start();
+        KAFKA_CONTAINER.start();
     }
 
     @AfterAll
     static void tearDownAll() {
         if (!MONGO_DB_CONTAINER.isShouldBeReused()) {
             MONGO_DB_CONTAINER.stop();
+        }
+        if (!KAFKA_CONTAINER.isShouldBeReused()) {
+            KAFKA_CONTAINER.stop();
         }
     }
 
@@ -93,7 +98,7 @@ class DatabaseServiceTest {
 
         var startCount = repository.count().blockingGet();
         exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
-        var waitResult = latch.await(30, TimeUnit.SECONDS);
+        var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
         assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(1L));
@@ -111,7 +116,7 @@ class DatabaseServiceTest {
         var startCount = repository.count().blockingGet();
         service.store("this is a message-2");
         composite.add(service.subscribeOnStore().subscribe(r -> service.replayEvents()));
-        var waitResult = latch.await(30, TimeUnit.SECONDS);
+        var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
         // because in this test case the replayed records will be stored again, so at least 2 is the answer
@@ -122,9 +127,12 @@ class DatabaseServiceTest {
         @Override
         public void initialize(@NonNull ConfigurableApplicationContext configurableApplicationContext) {
             var uri = MONGO_DB_CONTAINER.getReplicaSetUrl();
+
             TestPropertyValues.of(
                     String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),
-                    "backend.recording: true", "backend.replay: false").applyTo(configurableApplicationContext);
+                    String.format("spring.kafka.bootstrap-servers: %s", KAFKA_CONTAINER.getBootstrapServers()),
+                    "backend.recording: true", "backend.replay: false")
+                    .applyTo(configurableApplicationContext);
         }
     }
 

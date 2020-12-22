@@ -130,7 +130,7 @@ class DatabaseServiceTest {
 
             TestPropertyValues.of(
                     String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),
-                    String.format("spring.kafka.bootstrap-servers: kafka:9092"),
+                    String.format("spring.kafka.bootstrap-servers: PLAINTEXT://kafka:9092"),
                     "backend.recording: true", "backend.replay: false")
                     .applyTo(configurableApplicationContext);
         }

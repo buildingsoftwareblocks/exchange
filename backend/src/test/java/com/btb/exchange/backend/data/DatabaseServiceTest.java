@@ -93,7 +93,7 @@ class DatabaseServiceTest {
 
         var startCount = repository.count().blockingGet();
         exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
-        var waitResult = latch.await(10, TimeUnit.SECONDS);
+        var waitResult = latch.await(30, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
         assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(1L));

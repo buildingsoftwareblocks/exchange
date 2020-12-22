@@ -6,7 +6,9 @@ import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
+import io.reactivex.disposables.CompositeDisposable;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.knowm.xchange.dto.marketdata.OrderBook;
@@ -20,6 +22,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.test.context.EmbeddedKafka;
+import org.springframework.lang.NonNull;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.MongoDBContainer;
@@ -30,6 +33,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
@@ -47,6 +51,8 @@ class DatabaseServiceTest {
     @Autowired
     ExchangeService exchangeService;
 
+    private final CompositeDisposable composite = new CompositeDisposable();
+
     @BeforeAll
     static void setUpAll() {
         MONGO_DB_CONTAINER.start();
@@ -59,30 +65,35 @@ class DatabaseServiceTest {
         }
     }
 
+    @AfterEach
+    void afterEach() {
+        composite.clear();
+    }
+
     @Test
     void testStore() throws InterruptedException {
         var latch = new CountDownLatch(1);
-        service.stored().subscribe(r -> latch.countDown());
+        composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        var message = "this is a message";
+        var message = "this is a message-1";
         service.store(message);
-        latch.await(10000, TimeUnit.MILLISECONDS);
+        var waitResult = latch.await(10, TimeUnit.SECONDS);
 
-        assertThat("service is called", latch.getCount(), is(0L));
+        assertThat("result before timeout", waitResult);
         assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(1L));
     }
 
     @Test
     void testStoreMessage() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
-        service.stored().subscribe(r -> latch.countDown());
+        composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
         exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
-        latch.await(10000, TimeUnit.MILLISECONDS);
+        var waitResult = latch.await(10, TimeUnit.SECONDS);
 
-        assertThat("service is called", latch.getCount(), is(0L));
+        assertThat("result before timeout", waitResult);
         assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(1L));
     }
 
@@ -90,21 +101,21 @@ class DatabaseServiceTest {
     void testReplayMessage() throws InterruptedException {
         // message is stored twice, direct and indirect via replay
         var latch = new CountDownLatch(2);
-        service.stored().subscribe(r -> latch.countDown());
+        composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        service.store("this is a message");
-        service.replayEvents();
-        latch.await(10000, TimeUnit.MILLISECONDS);
+        service.store("this is a message-2");
+        composite.add(service.subscribeOnStore().subscribe(r -> service.replayEvents()));
+        var waitResult = latch.await(10, TimeUnit.SECONDS);
 
-        assertThat("service is called", latch.getCount(), is(0L));
-        assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(2L));
-
+        assertThat("result before timeout", waitResult);
+        // because in this test case the replayed records will be stored again, so al least 2 is the answer
+        assertThat("check #records are added", repository.count().blockingGet() - startCount, greaterThanOrEqualTo(2L));
     }
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
-        public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
+        public void initialize(@NonNull ConfigurableApplicationContext configurableApplicationContext) {
             var uri = MONGO_DB_CONTAINER.getReplicaSetUrl();
             TestPropertyValues.of(
                     String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),

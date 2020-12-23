@@ -15,28 +15,27 @@ jobs:
       REPO: ${{ secrets.DOCKER_REPO }}
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
 
-    - name: Cache local Maven repository
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-    - name: Build with Maven
-      run: mvn -B package -P docker -Ddocker.repo=$REPO
+      - name: Build with Maven
+        run: mvn -B package -P docker -Ddocker.repo=$REPO
 
-    - name: Login to Docker Hub
-      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Publish Docker image Backend
-      run: docker push $REPO/exchange-backend:latest
-    - name: Publish Docker image Frontend
-      run: docker push $REPO/exchange-frontend:latest
+      - name: Publish Docker image Backend
+        run: docker push $REPO/exchange-backend:latest
+      - name: Publish Docker image Frontend
+        run: docker push $REPO/exchange-frontend:latest

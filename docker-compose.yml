@@ -17,9 +17,9 @@ services:
   mongodb:
     image: mongo
     volumes:
-    - ./data:/data/db
+      - ./data:/data/db
     ports:
-    - 27017-27019:27017-27019
+      - 27017-27019:27017-27019
 
   frontend:
     image: ${REPO}/exchange-frontend

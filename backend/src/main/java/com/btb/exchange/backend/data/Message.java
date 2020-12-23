@@ -15,6 +15,5 @@ public class Message {
     private String id;
     @Indexed
     private Date created;
-    private MessageType messageType;
     private String message;
 }

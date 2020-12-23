@@ -15,7 +15,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 
 @Service
@@ -27,30 +26,21 @@ public class DatabaseService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final NewTopic topic;
     private final ApplicationConfig config;
-    // for testing purposes, to subscribe that records are saved to the database
+    // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<Message> stored = PublishSubject.create();
-
-    @PostConstruct
-    void validate() {
-        if (config.isRecording() && config.isReplay()) {
-            throw new IllegalArgumentException("Recording AND replaying is not supported!");
-        }
-    }
 
     @Synchronized
     @KafkaListener(topics = "orderbook")
     void store(String orderBook) {
         if (config.isRecording()) {
             log.info("Store order book: {}", orderBook);
-            repository.save(Message.builder().messageType(MessageType.ORDERBOOK).created(new Date()).message(orderBook)
-                    .build()).subscribe(stored::onNext);
+            repository.save(Message.builder().created(new Date()).message(orderBook).build()).subscribe(stored::onNext);
         }
     }
 
-    public Observable<Message> stored () {
+    Observable<Message> subscribe() {
         return stored;
     }
-
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {

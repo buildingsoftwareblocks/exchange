@@ -11,5 +11,6 @@ import org.knowm.xchange.dto.marketdata.OrderBook;
 @Jacksonized @Builder
 public class ExchangeOrderBook {
     ExchangeEnum exchange;
+    String currencyPair;
     OrderBook orderBook;
 }

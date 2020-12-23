@@ -20,9 +20,9 @@ docker-compose -f docker-compose-dev.yml --env-file env.dev up -d
 - ~~1 Exchange, 1 Currency pair connected~~
 - ~~application dockerized~~
 - ~~build pipeline~~
-- store events in database
-- multiple exchanges
-- multiple Currency pairs
+- ~~store events in database~~
+- ~~multiple exchanges~~
+- ~~multiple Currency pairs~~
 - orderbook analysis module
 
 ## Related

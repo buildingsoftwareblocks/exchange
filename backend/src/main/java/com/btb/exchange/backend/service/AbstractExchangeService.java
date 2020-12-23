@@ -8,6 +8,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
+import io.reactivex.Observable;
+import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
@@ -15,7 +18,11 @@ import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.lang.NonNull;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import javax.annotation.PreDestroy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -27,15 +34,25 @@ public abstract class AbstractExchangeService {
 
     public static final List<CurrencyPair> CurrencyPairs = Arrays.asList(BTC_USDT, ETH_BTC, DASH_USDT);
 
+    private final StreamingExchange exchange;
+    private final  ExchangeEnum exchangeEnum;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
+
+    public static final String DEFAULT_VALUE = "";
+
+    /**
+     *  for testing purposes, to subscribe to the events that are broadcasted.
+     *  It's 'BehaviorSubject' so we can proces the events, even if  the service is already started via the 'Application Ready event'
+     */
+    private final Subject<String> messageSent = BehaviorSubject.createDefault(DEFAULT_VALUE);
 
     /**
      * Initialize the connection with the exchange
      */
     @EventListener(ApplicationReadyEvent.class)
-    public void init(StreamingExchange exchange, ExchangeEnum exchangeEnum) {
+    public void init() {
         // only realtime data if we are not replaying database content
         if (!config.isReplay()) {
             var subscription = CurrencyPairs.stream()
@@ -48,16 +65,40 @@ public abstract class AbstractExchangeService {
             exchange.connect(subscription).blockingAwait();
 
             // Subscribe order book data with the reference to the currency pair.
-            CurrencyPairs.forEach(cp -> subscribe(exchange, cp, exchangeEnum, TopicUtils.orderBook(cp)));
+            CurrencyPairs.forEach(cp -> subscribe(cp));
         }
     }
 
-    final void subscribe(StreamingExchange exchange, CurrencyPair currencyPair, ExchangeEnum exchangeEnum, String topic) {
-        exchange.getStreamingMarketDataService().getOrderBook(currencyPair).subscribe(orderBook -> process(orderBook, exchangeEnum, topic));
+    final private void subscribe(CurrencyPair currencyPair) {
+        exchange.getStreamingMarketDataService().getOrderBook(currencyPair).subscribe(orderBook -> process(orderBook, currencyPair));
     }
 
-    protected void process(OrderBook orderBook, ExchangeEnum exchange, String topic) throws JsonProcessingException {
-        log.info("Order book: {}", orderBook);
-        kafkaTemplate.send(topic, objectMapper.writeValueAsString(new ExchangeOrderBook(exchange, orderBook)));
+    final Observable<String> subscribe() {
+        return messageSent;
+    }
+
+    public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) throws JsonProcessingException {
+        log.debug("Order book: {}", orderBook);
+        var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
+                objectMapper.writeValueAsString(new ExchangeOrderBook(exchangeEnum, currencyPair.toString(), orderBook)));
+
+        future.addCallback(new ListenableFutureCallback<>() {
+
+            @Override
+            public void onSuccess(SendResult<String, String> result) {
+                messageSent.onNext(result.getRecordMetadata().topic());
+            }
+
+            @Override
+            public void onFailure(@NonNull Throwable e) {
+                log.error("Exception", e);
+            }
+        });
+    }
+
+    @PreDestroy
+    void teardown() {
+        // Disconnect from exchange (blocking again)
+        exchange.disconnect().blockingAwait();
     }
 }

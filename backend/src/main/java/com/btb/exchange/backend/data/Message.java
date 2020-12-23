@@ -15,5 +15,6 @@ public class Message {
     private String id;
     @Indexed
     private Date created;
+    private String cp;
     private String message;
 }

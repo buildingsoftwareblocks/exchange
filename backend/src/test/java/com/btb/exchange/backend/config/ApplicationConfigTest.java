@@ -7,10 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ApplicationConfigTest {
 
     @Test
-    void validateIllegalState() {
-        var config = new ApplicationConfig();
-        config.setRecording(true);
-        config.setReplay(true);
+    void validateIllegalValue() {
+        var config = new ApplicationConfig(true, true);
         assertThrows(IllegalArgumentException.class, config::validate);
+    }
+
+    @Test
+    void validate() {
+        new ApplicationConfig(true, false).validate();
+        new ApplicationConfig(false, false).validate();
+        new ApplicationConfig(false, true).validate();
+        // doesn't throw an exception
     }
 }

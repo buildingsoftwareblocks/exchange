@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -64,6 +65,7 @@ class DatabaseServiceTest {
 
     @Test
     void testStore() throws InterruptedException {
+        repository.deleteAll().blockingAwait();
         var latch = new CountDownLatch(1);
         composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
@@ -78,6 +80,7 @@ class DatabaseServiceTest {
 
     @Test
     void testStoreMessage() throws InterruptedException, JsonProcessingException {
+        repository.deleteAll().blockingAwait();
         var latch = new CountDownLatch(1);
         composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
@@ -91,6 +94,7 @@ class DatabaseServiceTest {
 
     @Test
     void testReplayMessage() throws InterruptedException {
+        repository.deleteAll().blockingAwait();
         // message is stored twice, direct and indirect via replay
         var latch = new CountDownLatch(2);
         composite.add(service.subscribeOnStore().subscribe(r -> {
@@ -98,11 +102,15 @@ class DatabaseServiceTest {
             latch.countDown();
         }));
 
-        var startCount = repository.count().blockingGet();
+        final var startCount = repository.count().blockingGet();
+        final var replayed = new AtomicBoolean();
         // make sure we subscribe to the event, before we act on it.
         composite.add(service.subscribeOnStore().subscribe(r -> {
-            log.info("start replay: '{}'", r);
-            service.replayEvents();
+            // replay only once
+            if (!replayed.getAndSet(true)) {
+                log.info("start replay: '{}'", r);
+                service.replayEvents();
+            }
         }));
         service.store("this is a message-2");
 

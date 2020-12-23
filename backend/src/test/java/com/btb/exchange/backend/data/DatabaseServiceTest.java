@@ -9,6 +9,7 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.mockito.Mockito;
@@ -58,6 +59,11 @@ class DatabaseServiceTest {
 
     private final CompositeDisposable composite = new CompositeDisposable();
 
+    @BeforeEach
+    void beforeEach() {
+        repository.deleteAll().blockingAwait();
+    }
+
     @AfterEach
     void afterEach() {
         composite.clear();
@@ -65,7 +71,6 @@ class DatabaseServiceTest {
 
     @Test
     void testStore() throws InterruptedException {
-        repository.deleteAll().blockingAwait();
         var latch = new CountDownLatch(1);
         composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
@@ -80,7 +85,6 @@ class DatabaseServiceTest {
 
     @Test
     void testStoreMessage() throws InterruptedException, JsonProcessingException {
-        repository.deleteAll().blockingAwait();
         var latch = new CountDownLatch(1);
         composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
@@ -94,13 +98,9 @@ class DatabaseServiceTest {
 
     @Test
     void testReplayMessage() throws InterruptedException {
-        repository.deleteAll().blockingAwait();
         // message is stored twice, direct and indirect via replay
         var latch = new CountDownLatch(2);
-        composite.add(service.subscribeOnStore().subscribe(r -> {
-            log.info("latch called for: '{}'", r);
-            latch.countDown();
-        }));
+        composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
         final var startCount = repository.count().blockingGet();
         final var replayed = new AtomicBoolean();

@@ -75,8 +75,7 @@ class DatabaseServiceTest {
         composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        var message = "this is a message-1";
-        service.store(message);
+        service.store("this is a message-1");
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
@@ -84,7 +83,7 @@ class DatabaseServiceTest {
     }
 
     @Test
-    void testStoreMessage() throws InterruptedException, JsonProcessingException {
+    void testKakfaListener() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
 
@@ -113,7 +112,6 @@ class DatabaseServiceTest {
             }
         }));
         service.store("this is a message-2");
-
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
@@ -127,8 +125,7 @@ class DatabaseServiceTest {
             TestPropertyValues.of(
                     String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),
                     String.format("spring.kafka.bootstrap-servers: %s", KAFKA_CONTAINER.getBootstrapServers()),
-                    "backend.recording: true", "backend.replay: false")
-                    .applyTo(configurableApplicationContext);
+                    "backend.recording: true", "backend.replay: false").applyTo(configurableApplicationContext);
         }
     }
 

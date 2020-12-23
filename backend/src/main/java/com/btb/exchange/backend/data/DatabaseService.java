@@ -38,7 +38,7 @@ public class DatabaseService {
         }
     }
 
-    Observable<Message> subscribeOnStore() {
+    Observable<Message> subscribe() {
         return stored;
     }
 

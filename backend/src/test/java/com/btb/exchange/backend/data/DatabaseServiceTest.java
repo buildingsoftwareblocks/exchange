@@ -72,7 +72,7 @@ class DatabaseServiceTest {
     @Test
     void testStore() throws InterruptedException {
         var latch = new CountDownLatch(1);
-        composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
+        composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
         service.store("this is a message-1");
@@ -85,7 +85,7 @@ class DatabaseServiceTest {
     @Test
     void testKakfaListener() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
-        composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
+        composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
         exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
@@ -99,12 +99,12 @@ class DatabaseServiceTest {
     void testReplayMessage() throws InterruptedException {
         // message is stored twice, direct and indirect via replay
         var latch = new CountDownLatch(2);
-        composite.add(service.subscribeOnStore().subscribe(r -> latch.countDown()));
+        composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         final var startCount = repository.count().blockingGet();
         final var replayed = new AtomicBoolean();
         // make sure we subscribe to the event, before we act on it.
-        composite.add(service.subscribeOnStore().subscribe(r -> {
+        composite.add(service.subscribe().subscribe(r -> {
             // replay only once
             if (!replayed.getAndSet(true)) {
                 log.info("start replay: '{}'", r);
@@ -125,7 +125,9 @@ class DatabaseServiceTest {
             TestPropertyValues.of(
                     String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),
                     String.format("spring.kafka.bootstrap-servers: %s", KAFKA_CONTAINER.getBootstrapServers()),
-                    "backend.recording: true", "backend.replay: false").applyTo(configurableApplicationContext);
+                    "backend.recording: true",
+                    "backend.replay: false"
+            ).applyTo(configurableApplicationContext);
         }
     }
 

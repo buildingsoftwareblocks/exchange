@@ -99,8 +99,13 @@ class DatabaseServiceTest {
         }));
 
         var startCount = repository.count().blockingGet();
+        // make sure we subscribe to the event, before we act on it.
+        composite.add(service.subscribeOnStore().subscribe(r -> {
+            log.info("start replay: '{}'", r);
+            service.replayEvents();
+        }));
         service.store("this is a message-2");
-        composite.add(service.subscribeOnStore().subscribe(r -> service.replayEvents()));
+
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);

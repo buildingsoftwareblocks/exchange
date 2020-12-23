@@ -27,6 +27,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.Collections;
@@ -39,13 +41,15 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
-@DirtiesContext
+@Testcontainers
 @ContextConfiguration(initializers = {DatabaseServiceTest.Initializer.class})
 @Slf4j
 class DatabaseServiceTest {
 
+    @Container
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
-    //private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+    @Container
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
 
     @Autowired
     DatabaseService service;
@@ -55,22 +59,6 @@ class DatabaseServiceTest {
     ExchangeService exchangeService;
 
     private final CompositeDisposable composite = new CompositeDisposable();
-
-    @BeforeAll
-    static void setUpAll() {
-        MONGO_DB_CONTAINER.start();
-        //KAFKA_CONTAINER.start();
-    }
-
-    @AfterAll
-    static void tearDownAll() {
-        if (!MONGO_DB_CONTAINER.isShouldBeReused()) {
-            MONGO_DB_CONTAINER.stop();
-        }
-//        if (!KAFKA_CONTAINER.isShouldBeReused()) {
-//            KAFKA_CONTAINER.stop();
-//        }
-    }
 
     @AfterEach
     void afterEach() {
@@ -130,7 +118,7 @@ class DatabaseServiceTest {
 
             TestPropertyValues.of(
                     String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),
-                    String.format("spring.kafka.bootstrap-servers: kafka:9092"),
+                    String.format("spring.kafka.bootstrap-servers: %s", KAFKA_CONTAINER.getBootstrapServers()),
                     "backend.recording: true", "backend.replay: false")
                     .applyTo(configurableApplicationContext);
         }

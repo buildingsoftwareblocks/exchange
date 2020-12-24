@@ -62,7 +62,7 @@ public class DatabaseService {
         repository.findAll(Sort.by(Sort.Direction.ASC, "created")).subscribe(m -> {
             var message = m.getMessage();
             log.info("Replay: {}", message);
-            kafkaTemplate.send(TopicUtils.orderBook(new CurrencyPair(m.getCurrencyPair())), message);
+            kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), message);
         });
     }
 }

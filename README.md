@@ -27,7 +27,10 @@ docker-compose -f docker-compose-dev.yml --env-file env.dev up -d
 - ~~store events in database~~
 - ~~multiple exchanges / multiple Currency pairs~~
 - orderbook analysis module
-- beter frontend GUI
+- better frontend GUI
+- logging via ELK stack  
+- Binary messages in Kafka
+- more robust error handling
 
 ## Related
 

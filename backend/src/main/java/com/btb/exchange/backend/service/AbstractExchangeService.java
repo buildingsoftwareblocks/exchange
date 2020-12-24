@@ -28,6 +28,9 @@ import java.util.List;
 
 import static org.knowm.xchange.currency.CurrencyPair.*;
 
+/**
+ * Generic behavior for all exchanges
+ */
 @RequiredArgsConstructor
 @Slf4j
 public abstract class AbstractExchangeService {
@@ -70,7 +73,8 @@ public abstract class AbstractExchangeService {
     }
 
     private void subscribe(CurrencyPair currencyPair) {
-        exchange.getStreamingMarketDataService().getOrderBook(currencyPair).subscribe(orderBook -> process(orderBook, currencyPair));
+        exchange.getStreamingMarketDataService().getOrderBook(currencyPair)
+                .subscribe(orderBook -> process(orderBook, currencyPair), throwable -> log.error("Error in trade subscription", throwable));
     }
 
     final Observable<String> subscribe() {

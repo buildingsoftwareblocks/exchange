@@ -6,10 +6,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
+import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+/**
+ * Handle Exchanges
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -19,10 +23,12 @@ public class ExchangeService {
     private final ObjectMapper objectMapper;
 
     @Synchronized
-    @KafkaListener(topics = "#{ T(com.btb.exchange.shared.utils.TopicUtils).orderBook( T(org.knowm.xchange.currency.CurrencyPair).BTC_USDT)}")
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
     void process(String orderBook) throws JsonProcessingException {
-        log.info("Order book: {}", orderBook);
-        var exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
-        template.convertAndSend("/topic/orderbook", exchangeOrderBook);
+        log.debug("Order book: {}", orderBook);
+        var message = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
+        if (message.getCurrencyPair().equals(CurrencyPair.BTC_USDT.toString())) {
+            template.convertAndSend("/topic/orderbook", message);
+        }
     }
 }

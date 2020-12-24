@@ -4,6 +4,9 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.knowm.xchange.currency.CurrencyPair;
 
+/**
+ * Utilities for Kafka topics
+ */
 @UtilityClass
 public class TopicUtils {
 

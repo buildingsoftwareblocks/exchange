@@ -14,7 +14,7 @@ import static com.btb.exchange.shared.dto.ExchangeEnum.BINANCE;
 @Slf4j
 public class BinanceExchangeService extends AbstractExchangeService {
 
-    public BinanceExchangeService(@Qualifier("binance")StreamingExchange exchange,
+    public BinanceExchangeService(@Qualifier("binance") StreamingExchange exchange,
                                   KafkaTemplate<String, String> kafkaTemplate,
                                   ObjectMapper objectMapper, ApplicationConfig config) {
         super(exchange, BINANCE, kafkaTemplate, objectMapper, config);

@@ -35,7 +35,7 @@ public abstract class AbstractExchangeService {
     public static final List<CurrencyPair> CurrencyPairs = Arrays.asList(BTC_USDT, ETH_BTC, DASH_USDT);
 
     private final StreamingExchange exchange;
-    private final  ExchangeEnum exchangeEnum;
+    private final ExchangeEnum exchangeEnum;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
@@ -43,8 +43,8 @@ public abstract class AbstractExchangeService {
     public static final String DEFAULT_VALUE = "";
 
     /**
-     *  for testing purposes, to subscribe to the events that are broadcasted.
-     *  It's 'BehaviorSubject' so we can proces the events, even if  the service is already started via the 'Application Ready event'
+     * for testing purposes, to subscribe to the events that are broadcasted.
+     * It's 'BehaviorSubject' so we can proces the events, even if  the service is already started via the 'Application Ready event'
      */
     private final Subject<String> messageSent = BehaviorSubject.createDefault(DEFAULT_VALUE);
 
@@ -59,17 +59,17 @@ public abstract class AbstractExchangeService {
                     .reduce(ProductSubscription.create(),
                             ProductSubscription.ProductSubscriptionBuilder::addOrderbook,
                             (psb1, psb2) -> {
-                        throw new UnsupportedOperationException();
-                    }).build();
+                                throw new UnsupportedOperationException();
+                            }).build();
 
             exchange.connect(subscription).blockingAwait();
 
             // Subscribe order book data with the reference to the currency pair.
-            CurrencyPairs.forEach(cp -> subscribe(cp));
+            CurrencyPairs.forEach(this::subscribe);
         }
     }
 
-    final private void subscribe(CurrencyPair currencyPair) {
+    private void subscribe(CurrencyPair currencyPair) {
         exchange.getStreamingMarketDataService().getOrderBook(currencyPair).subscribe(orderBook -> process(orderBook, currencyPair));
     }
 

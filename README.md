@@ -1,7 +1,9 @@
 # exchange
+
 A PoC to retrieve real-time Crypto Exchange data, as first step for a ordering bot!
 
 ## Run Application
+
 A docker compose script is provided. Start the application with:
 
 ``
@@ -16,20 +18,24 @@ created. Use it with:
 ``
 docker-compose -f docker-compose-dev.yml --env-file env.dev up -d
 ``
+
 ## TODO List
+
 - ~~1 Exchange, 1 Currency pair connected~~
-- ~~application dockerized~~
+- ~~multiple services connected via Kafka~~
 - ~~build pipeline~~
 - ~~store events in database~~
-- ~~multiple exchanges~~
-- ~~multiple Currency pairs~~
+- ~~multiple exchanges / multiple Currency pairs~~
 - orderbook analysis module
+- beter frontend GUI
 
 ## Related
+
 - [Sonarcloud](https://sonarcloud.io/dashboard?id=buildingsoftwareblocks_exchange)
 - [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks)
 
 ## Background Information
+
 - [Battle of the Bots: How Market Makers Fight It Out on Crypto Exchanges](https://medium.com/swlh/battle-of-the-bots-how-market-makers-fight-it-out-on-crypto-exchanges-2482eb937107)
 - [known / XChange](https://github.com/knowm/XChange)
 - [Using WebSocket to build an interactive web application](https://spring.io/guides/gs/messaging-stomp-websocket/)

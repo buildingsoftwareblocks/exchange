@@ -8,7 +8,8 @@ import org.knowm.xchange.dto.marketdata.OrderBook;
 
 @Value
 @AllArgsConstructor
-@Jacksonized @Builder
+@Jacksonized
+@Builder
 public class ExchangeOrderBook {
     ExchangeEnum exchange;
     String currencyPair;

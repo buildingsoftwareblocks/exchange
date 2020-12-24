@@ -42,7 +42,7 @@ public class DatabaseService {
             var exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
             repository.save(Message.builder()
                     .created(new Date())
-                    .cp(exchangeOrderBook.getCurrencyPair())
+                    .currencyPair(exchangeOrderBook.getCurrencyPair())
                     .message(orderBook).build()).subscribe(stored::onNext);
         }
     }
@@ -62,7 +62,7 @@ public class DatabaseService {
         repository.findAll(Sort.by(Sort.Direction.ASC, "created")).subscribe(m -> {
             var message = m.getMessage();
             log.info("Replay: {}", message);
-            kafkaTemplate.send(TopicUtils.orderBook(new CurrencyPair(m.getCp())), message);
+            kafkaTemplate.send(TopicUtils.orderBook(new CurrencyPair(m.getCurrencyPair())), message);
         });
     }
 }

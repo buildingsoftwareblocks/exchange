@@ -160,11 +160,10 @@ class DatabaseServiceTest {
             Mockito.when(exchangeMock.getStreamingMarketDataService()).thenReturn(smds);
 
             Arrays.stream(ExchangeEnum.values()).forEach(e ->
-                        ac.registerBean(e.name().toLowerCase(),
-                                StreamingExchange.class,
-                                () -> exchangeMock,
-                                bp -> bp.setPrimary(true))
-                    );
+                    ac.registerBean(e.name().toLowerCase(),
+                            StreamingExchange.class,
+                            () -> exchangeMock,
+                            bp -> bp.setPrimary(true)));
         }
     }
 }

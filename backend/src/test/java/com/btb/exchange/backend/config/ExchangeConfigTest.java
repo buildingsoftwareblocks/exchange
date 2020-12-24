@@ -24,7 +24,7 @@ class ExchangeConfigTest {
 
     @Test
     void exchangeBeans() {
-        Arrays.stream(ExchangeEnum.values()).forEach( e -> {
+        Arrays.stream(ExchangeEnum.values()).forEach(e -> {
             var bean = BeanFactoryAnnotationUtils.qualifiedBeanOfType(factory, StreamingExchange.class, e.name().toLowerCase());
             assertThat(String.format("Find bean with qualifier: %s", e), bean, is(notNullValue()));
         });

@@ -14,9 +14,9 @@ import static com.btb.exchange.shared.dto.ExchangeEnum.BITSTAMP;
 @Slf4j
 public class BitstampExchangeService extends AbstractExchangeService {
 
-    public BitstampExchangeService(@Qualifier("bitstamp")StreamingExchange exchange,
-                                  KafkaTemplate<String, String> kafkaTemplate,
-                                  ObjectMapper objectMapper, ApplicationConfig config) {
+    public BitstampExchangeService(@Qualifier("bitstamp") StreamingExchange exchange,
+                                   KafkaTemplate<String, String> kafkaTemplate,
+                                   ObjectMapper objectMapper, ApplicationConfig config) {
         super(exchange, BITSTAMP, kafkaTemplate, objectMapper, config);
     }
 }

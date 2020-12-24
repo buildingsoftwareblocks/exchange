@@ -12,7 +12,7 @@ import static com.btb.exchange.shared.dto.ExchangeEnum.KRAKEN;
 @Service
 public class KrakenExchangeService extends AbstractExchangeService {
 
-    public KrakenExchangeService(@Qualifier("kraken")StreamingExchange exchange,
+    public KrakenExchangeService(@Qualifier("kraken") StreamingExchange exchange,
                                  KafkaTemplate<String, String> kafkaTemplate,
                                  ObjectMapper objectMapper, ApplicationConfig config) {
         super(exchange, KRAKEN, kafkaTemplate, objectMapper, config);

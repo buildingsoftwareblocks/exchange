@@ -9,12 +9,16 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
+import java.time.Duration;
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Value("${frontend.websocket.buffersize:1MB}")
     private DataSize bufferSize;
+    @Value("${frontend.websocket.durastion:PT5s}")
+    private Duration duration;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -30,5 +34,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
         registration.setSendBufferSizeLimit((int) bufferSize.toBytes());
+        registration.setSendTimeLimit((int) duration.toMillis());
     }
 }

@@ -35,8 +35,8 @@ public class ExchangeService {
         var message = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
         if (message.getCurrencyPair().equals(CurrencyPair.BTC_USDT.toString())) {
             template.convertAndSend("/topic/orderbook", orderBook);
-            sent.onNext(orderBook);
         }
+        sent.onNext(orderBook);
     }
 
     Observable<String> subscribe() {

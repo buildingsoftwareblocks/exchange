@@ -68,7 +68,7 @@ class ExchangeServiceTest {
     }
 
     @Test
-    void process() throws InterruptedException, JsonProcessingException, ExecutionException {
+    void process() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
         var message = new ExchangeOrderBook(ExchangeEnum.BITSTAMP, BTC_USDT.toString(), new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));

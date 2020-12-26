@@ -1,25 +1,31 @@
 package com.btb.exchange.backend.service;
 
 import com.btb.exchange.backend.data.MessageRepository;
+import com.btb.exchange.shared.dto.ExchangeEnum;
+import info.bitrich.xchangestream.core.StreamingExchange;
+import info.bitrich.xchangestream.core.StreamingMarketDataService;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.lang.NonNull;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -74,5 +80,28 @@ class KrakenExchangeServiceTest {
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
         registry.add("backend.recording", () -> false);
         registry.add("backend.replay", () -> true);
+    }
+
+    @TestConfiguration
+    @RequiredArgsConstructor
+    static class ExchangeTestConfig {
+
+        private final GenericApplicationContext ac;
+
+        @PostConstruct
+        void init() {
+            // register all possible Exchanges and register then
+            var exchangeMock = Mockito.mock(StreamingExchange.class);
+            var smds = Mockito.mock(StreamingMarketDataService.class);
+            Mockito.when(smds.getOrderBook(Mockito.any())).thenReturn(Observable.empty());
+            Mockito.when(exchangeMock.connect(Mockito.any())).thenReturn(Completable.complete());
+            Mockito.when(exchangeMock.getStreamingMarketDataService()).thenReturn(smds);
+
+            Arrays.stream(ExchangeEnum.values()).forEach(e ->
+                    ac.registerBean(e.name().toLowerCase(),
+                            StreamingExchange.class,
+                            () -> exchangeMock,
+                            bp -> bp.setPrimary(true)));
+        }
     }
 }

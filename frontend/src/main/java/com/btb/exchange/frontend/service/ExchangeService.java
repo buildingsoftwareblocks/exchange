@@ -33,11 +33,12 @@ public class ExchangeService {
     @Synchronized
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
     void process(String message) throws JsonProcessingException {
-        log.info("Order book: {}", message);
+        log.info("Order book received: {}", message);
         var exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
         if (exchangeOrderBook.getExchange().equals(BINANCE) && (exchangeOrderBook.getCurrencyPair().equals(CurrencyPair.ETH_BTC.toString()))) {
-            template.convertAndSend("/topic/orderbook", exchangeOrderBook.getOrderBook());
+            template.convertAndSend("/topic/orderbook", objectMapper.writeValueAsString(exchangeOrderBook.getOrderBook()));
         }
+        sent.onNext(message);
     }
 
     Observable<String> subscribe() {

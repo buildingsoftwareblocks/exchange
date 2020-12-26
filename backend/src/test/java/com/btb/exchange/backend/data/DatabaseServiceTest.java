@@ -146,7 +146,7 @@ class DatabaseServiceTest {
 
         @PostConstruct
         void init() {
-            // register all posible Exchanges and register then
+            // register all possible Exchanges and register then
             var exchangeMock = Mockito.mock(StreamingExchange.class);
             var smds = Mockito.mock(StreamingMarketDataService.class);
             Mockito.when(smds.getOrderBook(Mockito.any())).thenReturn(Observable.empty());

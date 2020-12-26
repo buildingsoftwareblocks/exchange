@@ -1,6 +1,6 @@
 package com.btb.exchange.backend.config;
 
-import com.btb.exchange.backend.service.AbstractExchangeService;
+import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -21,7 +21,7 @@ public class KafkaConfig {
     @PostConstruct
     public void init() {
         // iterate over currency pairs and register new beans
-        AbstractExchangeService.CurrencyPairs.forEach(cp ->
+        CurrencyPairUtils.CurrencyPairs.forEach(cp ->
                 ac.registerBean(String.format("topic.%s", cp), NewTopic.class, () -> TopicBuilder.name(TopicUtils.orderBook(cp)).build()));
     }
 }

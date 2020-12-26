@@ -3,6 +3,7 @@ package com.btb.exchange.backend.service;
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,10 +24,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import javax.annotation.PreDestroy;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.knowm.xchange.currency.CurrencyPair.*;
 
 /**
  * Generic behavior for all exchanges
@@ -34,8 +31,6 @@ import static org.knowm.xchange.currency.CurrencyPair.*;
 @RequiredArgsConstructor
 @Slf4j
 public abstract class AbstractExchangeService {
-
-    public static final List<CurrencyPair> CurrencyPairs = Arrays.asList(BTC_USDT, ETH_BTC, DASH_USDT);
 
     private final StreamingExchange exchange;
     private final ExchangeEnum exchangeEnum;
@@ -58,7 +53,7 @@ public abstract class AbstractExchangeService {
     public void init() {
         // only realtime data if we are not replaying database content
         if (!config.isReplay()) {
-            var subscription = CurrencyPairs.stream()
+            var subscription = CurrencyPairUtils.CurrencyPairs.stream()
                     .reduce(ProductSubscription.create(),
                             ProductSubscription.ProductSubscriptionBuilder::addOrderbook,
                             (psb1, psb2) -> {
@@ -68,7 +63,7 @@ public abstract class AbstractExchangeService {
             exchange.connect(subscription).blockingAwait();
 
             // Subscribe order book data with the reference to the currency pair.
-            CurrencyPairs.forEach(this::subscribe);
+            CurrencyPairUtils.CurrencyPairs.forEach(this::subscribe);
         }
     }
 

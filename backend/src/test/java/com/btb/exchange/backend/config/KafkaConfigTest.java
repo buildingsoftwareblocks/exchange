@@ -1,6 +1,6 @@
 package com.btb.exchange.backend.config;
 
-import com.btb.exchange.backend.service.AbstractExchangeService;
+import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,7 +20,7 @@ class KafkaConfigTest {
 
     @Test
     void currencyPairTopis() {
-        AbstractExchangeService.CurrencyPairs.forEach(cp -> {
+        CurrencyPairUtils.CurrencyPairs.forEach(cp -> {
             var bean = context.getBean(String.format("topic.%s", cp));
             assertThat(bean, is(notNullValue()));
         });

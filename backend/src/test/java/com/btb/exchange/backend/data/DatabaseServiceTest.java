@@ -13,6 +13,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.knowm.xchange.dto.marketdata.OrderBook;
@@ -26,10 +27,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.PostConstruct;
@@ -47,15 +48,11 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USDT;
 import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @SpringBootTest
-@Testcontainers
-@ContextConfiguration(initializers = {DatabaseServiceTest.Initializer.class})
 @Slf4j
 class DatabaseServiceTest {
 
-    @Container
-    private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
-    @Container
-    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+    private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest").withReuse(true);
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest")).withReuse(true);
 
     @Autowired
     DatabaseService service;
@@ -67,6 +64,12 @@ class DatabaseServiceTest {
     ObjectMapper objectMapper;
 
     private final CompositeDisposable composite = new CompositeDisposable();
+
+    @BeforeAll
+    static void beforeAll() {
+        MONGO_DB_CONTAINER.start();
+        KAFKA_CONTAINER.start();
+    }
 
     @BeforeEach
     void beforeEach() {
@@ -132,16 +135,12 @@ class DatabaseServiceTest {
         assertThat("check #records are added", repository.count().blockingGet() - startCount, greaterThanOrEqualTo(2L));
     }
 
-    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(@NonNull ConfigurableApplicationContext configurableApplicationContext) {
-            TestPropertyValues.of(
-                    String.format("spring.data.mongodb.uri: %s", MONGO_DB_CONTAINER.getReplicaSetUrl()),
-                    String.format("spring.kafka.bootstrap-servers: %s", KAFKA_CONTAINER.getBootstrapServers()),
-                    "backend.recording: true",
-                    "backend.replay: false"
-            ).applyTo(configurableApplicationContext);
-        }
+    @DynamicPropertySource
+    static void datasourceConfig(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", MONGO_DB_CONTAINER::getReplicaSetUrl);
+        registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
+        registry.add("backend.recording", () -> true);
+        registry.add("backend.replay", () -> false);
     }
 
     @TestConfiguration

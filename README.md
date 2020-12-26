@@ -19,6 +19,11 @@ created. Use it with:
 docker-compose -f docker-compose-dev.yml --env-file env.dev up -d
 ``
 
+## Test Performance
+Using testcontainers can be slow during testing, because the used containers are removed after the test. The article 
+[Reuse Containers With Testcontainers for Fast Integration Tests](https://rieckpil.de/reuse-containers-with-testcontainers-for-fast-integration-tests/)
+tells how to make integration testing faster.
+
 ## TODO List
 
 - ~~1 Exchange, 1 Currency pair connected~~

@@ -38,15 +38,21 @@
             <groupId>org.knowm.xchange</groupId>
             <artifactId>xchange-stream-bitstamp</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.knowm.xchange</groupId>
             <artifactId>xchange-stream-kraken</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.knowm.xchange</groupId>
             <artifactId>xchange-stream-binance</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.knowm.xchange</groupId>
+            <artifactId>xchange-stream-bitfinex</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.knowm.xchange</groupId>
+            <artifactId>xchange-stream-coinbasepro</artifactId>
         </dependency>
 
         <dependency>

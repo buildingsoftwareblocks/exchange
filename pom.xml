@@ -42,6 +42,11 @@
 
             <dependency>
                 <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-core</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
                 <artifactId>xchange-stream-kraken</artifactId>
                 <version>${xchange.version}</version>
             </dependency>
@@ -57,7 +62,12 @@
             </dependency>
             <dependency>
                 <groupId>org.knowm.xchange</groupId>
-                <artifactId>xchange-core</artifactId>
+                <artifactId>xchange-stream-bitfinex</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-coinbasepro</artifactId>
                 <version>${xchange.version}</version>
             </dependency>
 
@@ -120,6 +130,7 @@
         <module>shared</module>
         <module>frontend</module>
         <module>backend</module>
+        <module>analysis</module>
     </modules>
 
     <build>
@@ -169,7 +180,6 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 

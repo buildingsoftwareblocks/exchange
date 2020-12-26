@@ -6,8 +6,6 @@ import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.reactivex.Completable;
-import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,14 +29,13 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.knowm.xchange.currency.CurrencyPair.*;
+import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @SpringBootTest
 @Slf4j

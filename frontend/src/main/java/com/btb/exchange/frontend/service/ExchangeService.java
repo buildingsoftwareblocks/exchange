@@ -14,6 +14,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import static com.btb.exchange.shared.dto.ExchangeEnum.BINANCE;
+
 /**
  * Handle Exchanges
  */
@@ -30,17 +32,15 @@ public class ExchangeService {
 
     @Synchronized
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
-    void process(String orderBook) throws JsonProcessingException {
-        log.debug("Order book: {}", orderBook);
-        var message = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
-        if (message.getCurrencyPair().equals(CurrencyPair.BTC_USDT.toString())) {
-            template.convertAndSend("/topic/orderbook", orderBook);
+    void process(String message) throws JsonProcessingException {
+        log.info("Order book: {}", message);
+        var exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
+        if (exchangeOrderBook.getExchange().equals(BINANCE) && (exchangeOrderBook.getCurrencyPair().equals(CurrencyPair.ETH_BTC.toString()))) {
+            template.convertAndSend("/topic/orderbook", exchangeOrderBook.getOrderBook());
         }
-        sent.onNext(orderBook);
     }
 
     Observable<String> subscribe() {
         return sent;
     }
-
 }

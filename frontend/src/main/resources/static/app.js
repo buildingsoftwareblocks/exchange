@@ -17,8 +17,8 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/orderbook', function (message) {
-            showOrderBook(JSON.parse(message.body));
+        stompClient.subscribe('/topic/orderbook', function (orderBook) {
+            showOrderBook(JSON.parse(orderBook.body));
         });
     });
 }
@@ -32,13 +32,9 @@ function disconnect() {
 }
 
 
-function showOrderBook(message) {
-    if (!(message.exchange === 'BINANCE')) {
-        return
-    }
-
+function showOrderBook(orderBook) {
     $("#asks").html("");
-    for (ask of message.orderBook.asks) {
+    for (ask of orderBook.asks) {
         $("#asks").append("<tr>");
         $("#asks").append("<td>" + ask.limitPrice + "</td>");
         $("#asks").append("<td>" + ask.originalAmount + "</td>");
@@ -46,7 +42,7 @@ function showOrderBook(message) {
     }
 
     $("#bids").html("");
-    for (bid of message.orderBook.bids) {
+    for (bid of orderBook.bids) {
         $("#bids").append("<tr>");
         $("#bids").append("<td>" + bid.limitPrice + "</td>");
         $("#bids").append("<td>" + bid.originalAmount + "</td>");

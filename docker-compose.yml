@@ -13,13 +13,16 @@ services:
     environment:
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${STORE}/data/kafka:/kafka
 
   mongodb:
     image: mongo
-    volumes:
-      - ./data:/data/db
     ports:
       - 27017-27019:27017-27019
+    volumes:
+      - ${STORE}/data/mongodb:/data/db
 
   frontend:
     image: ${REPO}/exchange-frontend

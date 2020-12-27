@@ -136,6 +136,7 @@ class DatabaseServiceTest {
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
         registry.add("backend.recording", () -> true);
         registry.add("backend.replay", () -> false);
+        registry.add("backend.testing", () -> true);
     }
 
     @TestConfiguration

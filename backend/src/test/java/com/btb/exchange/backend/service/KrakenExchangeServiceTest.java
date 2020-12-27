@@ -80,6 +80,7 @@ class KrakenExchangeServiceTest {
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
         registry.add("backend.recording", () -> false);
         registry.add("backend.replay", () -> true);
+        registry.add("backend.testing", () -> true);
     }
 
     @TestConfiguration

@@ -1,5 +1,6 @@
 package com.btb.exchange.backend.data;
 
+import com.btb.exchange.shared.dto.ExchangeEnum;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -17,6 +18,7 @@ public class Message {
     private String id;
     @Indexed
     private Date created;
+    private ExchangeEnum exchange;
     private String currencyPair;
     private String message;
 }

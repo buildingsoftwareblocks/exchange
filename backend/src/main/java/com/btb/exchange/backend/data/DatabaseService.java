@@ -6,6 +6,8 @@ import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
@@ -44,16 +46,20 @@ public class DatabaseService {
     // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<Message> stored = PublishSubject.create();
 
-    @Synchronized
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
     void store(String orderBook) throws JsonProcessingException {
         if (config.isRecording()) {
             log.info("Store order book: {}", orderBook);
             var exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
-            repository.save(Message.builder()
+            var saved = repository.save(Message.builder()
                     .created(new Date())
+                    .exchange(exchangeOrderBook.getExchange())
                     .currencyPair(exchangeOrderBook.getCurrencyPair())
-                    .message(orderBook).build()).subscribe(stored::onNext);
+                    .message(orderBook).build());
+            synchronized (stored) {
+                log.info("save ready");
+                saved.subscribeOn(Schedulers.io()).subscribe(stored::onNext);
+            }
         }
     }
 
@@ -96,7 +102,9 @@ public class DatabaseService {
         log.info("Start replay events");
         StopWatch replayWatch = new StopWatch("replayEvents");
         replayWatch.start();
-        repository.findAll(Sort.by(Sort.Direction.ASC, "created")).subscribe(m -> {
+        repository.findAll(Sort.by(Sort.Direction.ASC, "created"))
+                .subscribeOn(Schedulers.io())
+                .subscribe(m -> {
             var message = m.getMessage();
             log.debug("Replay: {}", message);
             kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), message);

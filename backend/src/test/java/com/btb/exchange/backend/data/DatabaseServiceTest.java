@@ -36,6 +36,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
@@ -82,7 +83,7 @@ class DatabaseServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, BTC_USDT.toString(),
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair().toString(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
@@ -97,7 +98,7 @@ class DatabaseServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USDT);
+        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), getFirstCurrencyPair());
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
@@ -120,7 +121,7 @@ class DatabaseServiceTest {
                 service.replayEvents();
             }
         }));
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, ETH_BTC.toString(),
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair().toString(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);

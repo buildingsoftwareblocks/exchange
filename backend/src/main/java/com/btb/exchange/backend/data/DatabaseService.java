@@ -6,12 +6,10 @@ import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -49,16 +47,19 @@ public class DatabaseService {
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
     void store(String orderBook) throws JsonProcessingException {
         if (config.isRecording()) {
-            log.info("Store order book: {}", orderBook);
+            log.debug("Store order book: {}", orderBook);
             var exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
             var saved = repository.save(Message.builder()
                     .created(new Date())
                     .exchange(exchangeOrderBook.getExchange())
                     .currencyPair(exchangeOrderBook.getCurrencyPair())
                     .message(orderBook).build());
-            synchronized (stored) {
-                log.info("save ready");
-                saved.subscribeOn(Schedulers.io()).subscribe(stored::onNext);
+                synchronized (stored) {
+                    saved.subscribeOn(Schedulers.io()).subscribe(m -> {
+                        if (config.isTesting()) {
+                            stored.onNext(m);
+                        }
+                    });
             }
         }
     }
@@ -84,10 +85,7 @@ public class DatabaseService {
         resolver.resolveIndexFor(entityClass).forEach(indexes::add);
 
         var latch = new CountDownLatch(indexes.size());
-        resolver.resolveIndexFor(entityClass).forEach(i -> {
-            indexOps.ensureIndex(i);
-            latch.countDown();
-        });
+        resolver.resolveIndexFor(entityClass).forEach(i -> indexOps.ensureIndex(i).subscribe(j -> latch.countDown()));
         latch.await();
     }
 
@@ -106,7 +104,7 @@ public class DatabaseService {
                 .subscribeOn(Schedulers.io())
                 .subscribe(m -> {
             var message = m.getMessage();
-            log.debug("Replay: {}", message);
+            log.debug("Replay : {}", message);
             kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), message);
         }, t -> log.error("Exception", t), () -> {
             replayWatch.stop();

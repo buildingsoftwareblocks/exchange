@@ -24,6 +24,17 @@ Using testcontainers can be slow during testing, because the used containers are
 [Reuse Containers With Testcontainers for Fast Integration Tests](https://rieckpil.de/reuse-containers-with-testcontainers-for-fast-integration-tests/)
 tells how to make integration testing faster.
 
+## MongoDB queries
+
+``
+db.message.aggregate(
+[
+{ $group:{_id: {exchange: "$exchange", currencypair:"$currencyPair"} , Total:{$sum:1}}},
+{ $sort: {exchange: 1, currencypair: 1}}
+]);
+``
+
+
 ## TODO List
 
 - ~~1 Exchange, 1 Currency pair connected~~

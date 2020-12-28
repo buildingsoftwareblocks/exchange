@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.BehaviorSubject;
 import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +69,6 @@ public abstract class AbstractExchangeService {
 
     private void subscribe(CurrencyPair currencyPair) {
         exchange.getStreamingMarketDataService().getOrderBook(currencyPair)
-                .subscribeOn(Schedulers.io())
                 .subscribe(orderBook -> process(orderBook, currencyPair), throwable -> log.error("Error in trade subscription", throwable));
     }
 

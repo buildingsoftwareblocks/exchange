@@ -26,35 +26,44 @@ tells how to make integration testing faster.
 
 ## MongoDB queries
 
-``
+Group per exchange/currency pair and show the number of messages:
+````
 db.message.aggregate(
-[
-{ $group:{_id: {exchange: "$exchange", currencypair:"$currencyPair"} , Total:{$sum:1}}},
-{ $sort: {exchange: 1, currencypair: 1}}
-]);
-``
+  [
+    { $group:{_id: {exchange: "$exchange", currencypair:"$currencyPair"} , Total:{$sum:1}}},
+    { $sort: {exchange: 1, currencypair: 1}}
+  ]
+)
+````
 
+min value: 
+````
+db.message.find().sort({"created":1}).limit(1)
+````
+
+max value: 
+````
+db.message.find().sort({"created":-1}).limit(1)
+````
 
 ## TODO List
 
-- ~~1 Exchange, 1 Currency pair connected~~
-- ~~multiple services connected via Kafka~~
-- ~~build pipeline~~
-- ~~store events in database~~
-- ~~multiple exchanges / multiple Currency pairs~~
-- orderbook analysis module
-- better frontend GUI
-- logging via ELK stack  
-- Binary messages in Kafka
-- more robust error handling
+- [x] 1 Exchange, 1 Currency pair connected
+- [x] multiple services connected via Kafka
+- [x] build pipeline
+- [x] store events in database
+- [x] multiple exchanges / multiple Currency pairs
+- [ ] orderbook analysis module
+- [ ] better frontend GUI
+- [ ] logging via ELK stack  
+- [ ] Binary messages in Kafka
+- [ ] more robust error handling
 
 ## Related
-
 - [Sonarcloud](https://sonarcloud.io/dashboard?id=buildingsoftwareblocks_exchange)
 - [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks)
 
 ## Background Information
-
 - [Battle of the Bots: How Market Makers Fight It Out on Crypto Exchanges](https://medium.com/swlh/battle-of-the-bots-how-market-makers-fight-it-out-on-crypto-exchanges-2482eb937107)
 - [known / XChange](https://github.com/knowm/XChange)
 - [Using WebSocket to build an interactive web application](https://spring.io/guides/gs/messaging-stomp-websocket/)

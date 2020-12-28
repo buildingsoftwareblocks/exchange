@@ -38,5 +38,5 @@ services:
     environment:
       - KAFKA_SERVER=kafka
       - MONGO_DB_SERVER=mongodb
-      - DB_RECORDING=false
-      - DB_REPLAY=true
+      - BACKEND_RECORDING=false
+      - BACKEND_REPLAY=true

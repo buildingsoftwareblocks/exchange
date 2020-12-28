@@ -26,6 +26,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.PostConstruct;
@@ -40,14 +42,15 @@ import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPa
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
-import static org.knowm.xchange.currency.CurrencyPair.BTC_USDT;
-import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @SpringBootTest
+@Testcontainers
 @Slf4j
 class DatabaseServiceTest {
 
+    @Container
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest").withReuse(true);
+    @Container
     private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest")).withReuse(true);
 
     @Autowired
@@ -60,12 +63,6 @@ class DatabaseServiceTest {
     ObjectMapper objectMapper;
 
     private final CompositeDisposable composite = new CompositeDisposable();
-
-    @BeforeAll
-    static void beforeAll() {
-        MONGO_DB_CONTAINER.start();
-        KAFKA_CONTAINER.start();
-    }
 
     @BeforeEach
     void beforeEach() {

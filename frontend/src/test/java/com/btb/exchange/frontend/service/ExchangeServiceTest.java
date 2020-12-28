@@ -37,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 import static com.btb.exchange.shared.utils.CurrencyPairUtils.getSecondCurrencyPair;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @SpringBootTest
 @Slf4j

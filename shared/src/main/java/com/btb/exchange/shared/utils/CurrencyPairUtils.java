@@ -11,11 +11,11 @@ import static org.knowm.xchange.currency.CurrencyPair.*;
 public class CurrencyPairUtils {
     public static final List<CurrencyPair> CurrencyPairs = List.of(BTC_USD, ETH_BTC, DASH_USDT);
 
-    public static final CurrencyPair getFirstCurrencyPair() {
+    public static CurrencyPair getFirstCurrencyPair() {
         return CurrencyPairs.get(0);
     }
 
-    public static final CurrencyPair getSecondCurrencyPair() {
+    public static CurrencyPair getSecondCurrencyPair() {
         return CurrencyPairs.get(1);
     }
 }

@@ -26,25 +26,76 @@ tells how to make integration testing faster.
 
 ## MongoDB queries
 
-Group per exchange/currency pair and show the number of messages:
-````
+
+Date values : 
+````mongodb
 db.message.aggregate(
-  [
-    { $group:{_id: {exchange: "$exchange", currencypair:"$currencyPair"} , Total:{$sum:1}}},
-    { $sort: {exchange: 1, currencypair: 1}}
-  ]
-)
+    [
+        {
+            $project: {
+                exchange: 1,
+                created: 1
+            }
+        },
+        {
+            $group:{
+                _id: {
+                    exchange: "$exchange"
+                },
+                "min date": {
+                    $min : "$created"
+                },
+                "max date" : {
+                    $max : "$created"
+                },
+                "#messages" : {
+                    $sum:1
+                }
+            }
+        }
+    ]
+    )
 ````
 
-min value: 
-````
-db.message.find().sort({"created":1}).limit(1)
+Message sizes:
+
+````mongodb
+db.message.aggregate(
+    [
+        {
+            $project: {
+                currencyPair: 1,
+                exchange: 1,
+                length: {
+                    $strLenCP: "$message"
+                }
+            }
+        },
+        {
+            $group:{
+                _id: {
+                    exchange: "$exchange",
+                    currencypair:"$currencyPair"
+                },
+                "avg message" : {
+                    $avg : "$length"
+                },
+                "max message" : {
+                    $max : "$length"
+                },
+                "min message" : {
+                    $min : "$length"
+                },
+                "#messages" : {
+                    $sum:1
+                }
+            }
+        }
+    ]
+    )
 ````
 
-max value: 
-````
-db.message.find().sort({"created":-1}).limit(1)
-````
+
 
 ## TODO List
 

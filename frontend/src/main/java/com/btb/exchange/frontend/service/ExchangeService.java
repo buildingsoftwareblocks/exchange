@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
+import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -42,17 +43,19 @@ public class ExchangeService {
     private final LinkedBlockingDeque<ExchangeOrderBook> events = new LinkedBlockingDeque<>();
     private ExchangeOrderBook lastMessage = null;
 
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
-    void process(String message) {
-        log.debug("Order book received: {}", message);
-        try {
-            ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
-            if (exchangeOrderBook.getExchange().equals(KRAKEN) && (exchangeOrderBook.getCurrencyPair().equals(getFirstCurrencyPair().toString()))) {
-                events.add(exchangeOrderBook);
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
+    void process(List<String> messages) {
+        messages.forEach(message -> {
+            log.debug("Order book received: {}", message);
+            try {
+                ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
+                if (exchangeOrderBook.getExchange().equals(KRAKEN) && (exchangeOrderBook.getCurrencyPair().equals(getFirstCurrencyPair().toString()))) {
+                    events.add(exchangeOrderBook);
+                }
+            } catch (JsonProcessingException e) {
+                log.error("Exception({}) with message: {}", e, message);
             }
-        } catch (JsonProcessingException e) {
-            log.error("Exception({}) with message: {}", e, message);
-        }
+        });
     }
 
     Observable<ExchangeOrderBook> subscribe() {
@@ -83,7 +86,7 @@ public class ExchangeService {
      */
     @SneakyThrows
     @EventListener
-    private void handleSessionConnected(SessionSubscribeEvent event) {
+    public void handleSessionConnected(SessionSubscribeEvent event) {
         log.info("Session connected: {}", event);
         if (lastMessage != null) {
             template.convertAndSend(WEBSOCKET_DESTINATION, objectMapper.writeValueAsString(lastMessage.getOrderBook()));

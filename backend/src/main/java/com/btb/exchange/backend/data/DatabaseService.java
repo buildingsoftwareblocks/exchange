@@ -3,7 +3,6 @@ package com.btb.exchange.backend.data;
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.utils.TopicUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
@@ -31,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,25 +46,32 @@ public class DatabaseService {
     // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<Message> stored = PublishSubject.create();
 
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
-    void store(String orderBook) throws JsonProcessingException {
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
+    void store(List<String> messages) {
         if (config.isRecording()) {
-            log.debug("Store order book: {}", orderBook);
-            var exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
-            var saved = repository.save(Message.builder()
-                    .created(new Date())
-                    .exchange(exchangeOrderBook.getExchange())
-                    .currencyPair(exchangeOrderBook.getCurrencyPair())
-                    .message(orderBook).build());
-                synchronized (stored) {
-                    saved.subscribeOn(Schedulers.io()).subscribe(m -> {
-                        if (config.isTesting()) {
-                            stored.onNext(m);
-                        }
-                    });
-            }
+            var records = messages.stream().map(this::createRecord).collect(Collectors.toList());
+            repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
+                if (config.isTesting()) {
+                    stored.onNext(r);
+                }
+            });
         }
     }
+
+    void store(String message) {
+        store(List.of(message));
+    }
+
+    @SneakyThrows
+    Message createRecord(String orderBook) {
+        ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
+        return Message.builder()
+                .created(new Date())
+                .exchange(exchangeOrderBook.getExchange())
+                .currencyPair(exchangeOrderBook.getCurrencyPair())
+                .message(orderBook).build();
+    }
+
 
     Observable<Message> subscribe() {
         return stored;
@@ -110,12 +117,12 @@ public class DatabaseService {
         repository.findAll(Sort.by(Sort.Direction.ASC, "created"))
                 .subscribeOn(Schedulers.io())
                 .subscribe(m -> {
-            var message = m.getMessage();
-            log.debug("Replay : {}", message);
-            kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), message);
-        }, t -> log.error("Exception", t), () -> {
-            replayWatch.stop();
-            log.info("End replay events, and took: {}", Duration.ofMillis(replayWatch.getTotalTimeMillis()));
-        });
+                    var message = m.getMessage();
+                    log.debug("Replay : {}", message);
+                    kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), message);
+                }, t -> log.error("Exception", t), () -> {
+                    replayWatch.stop();
+                    log.info("End replay events, and took: {}", Duration.ofMillis(replayWatch.getTotalTimeMillis()));
+                });
     }
 }

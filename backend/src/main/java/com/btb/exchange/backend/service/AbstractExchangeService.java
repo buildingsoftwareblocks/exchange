@@ -19,9 +19,7 @@ import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.lang.NonNull;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import javax.annotation.PreDestroy;
 
@@ -81,20 +79,11 @@ public abstract class AbstractExchangeService {
         var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
                 objectMapper.writeValueAsString(new ExchangeOrderBook(exchangeEnum, currencyPair.toString(), orderBook)));
 
-        future.addCallback(new ListenableFutureCallback<>() {
-
-            @Override
-            public void onSuccess(SendResult<String, String> result) {
-                if (config.isTesting()) {
-                    messageSent.onNext(result.getRecordMetadata().topic());
-                }
+        future.addCallback(result -> {
+            if (config.isTesting()) {
+                messageSent.onNext(result.getRecordMetadata().topic());
             }
-
-            @Override
-            public void onFailure(@NonNull Throwable e) {
-                log.error("Exception", e);
-            }
-        });
+        }, e -> log.error("Exception", e));
     }
 
     @PreDestroy

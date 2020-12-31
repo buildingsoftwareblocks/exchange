@@ -84,6 +84,9 @@ db.message.aggregate(
                 },
                 "#messages" : {
                     $sum:1
+                },
+                "volume" : {
+                    $sum : "$length"
                 }
             }
         }

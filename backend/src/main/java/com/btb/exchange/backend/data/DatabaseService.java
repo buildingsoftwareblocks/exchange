@@ -16,7 +16,6 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
-import org.springframework.data.mongodb.core.index.IndexDefinition;
 import org.springframework.data.mongodb.core.index.IndexResolver;
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -26,11 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -95,10 +94,8 @@ public class DatabaseService {
         var indexOps = mongoTemplate.indexOps(entityClass);
 
         // count number of indexes
-        final List<IndexDefinition> indexes = new ArrayList<>();
-        resolver.resolveIndexFor(entityClass).forEach(indexes::add);
-
-        var latch = new CountDownLatch(indexes.size());
+        int size = (int) StreamSupport.stream(resolver.resolveIndexFor(entityClass).spliterator(), false).count();
+        var latch = new CountDownLatch(size);
         resolver.resolveIndexFor(entityClass).forEach(i -> indexOps.ensureIndex(i).subscribe(j -> latch.countDown()));
         latch.await();
     }

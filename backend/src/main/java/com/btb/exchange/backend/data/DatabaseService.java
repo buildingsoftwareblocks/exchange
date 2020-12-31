@@ -10,6 +10,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -19,6 +20,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.index.IndexDefinition;
 import org.springframework.data.mongodb.core.index.IndexResolver;
 import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexResolver;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -69,15 +71,20 @@ public class DatabaseService {
     }
 
     @EventListener(ContextRefreshedEvent.class)
-    public void initIndicesAfterStartup() throws InterruptedException {
+    public void initIndicesAfterStartup() {
         log.info("Start create indexes");
         var mappingContext = mongoTemplate.getConverter().getMappingContext();
         var resolver = new MongoPersistentEntityIndexResolver(mappingContext);
-        createIndexForEntity(Message.class, resolver);
+
+        // consider only entities that are annotated with @Document
+        mappingContext.getPersistentEntities().stream()
+                .filter(it -> it.isAnnotationPresent(Document.class))
+                .forEach(it -> createIndexForEntity(it.getType(), resolver));
         log.info("End create indexes");
     }
 
-    private void createIndexForEntity(Class<?> entityClass, IndexResolver resolver) throws InterruptedException {
+    @SneakyThrows
+    private void createIndexForEntity(Class<?> entityClass, IndexResolver resolver) {
         var indexOps = mongoTemplate.indexOps(entityClass);
 
         // count number of indexes

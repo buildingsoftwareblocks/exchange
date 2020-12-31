@@ -25,18 +25,14 @@ Using testcontainers can be slow during testing, because the used containers are
 tells how to make integration testing faster.
 
 ## MongoDB queries
-
-
+Number of records:
+````mongodb
+db.message.count()
+````
 Date values : 
 ````mongodb
 db.message.aggregate(
     [
-        {
-            $project: {
-                exchange: 1,
-                created: 1
-            }
-        },
         {
             $group:{
                 _id: {
@@ -59,7 +55,7 @@ db.message.aggregate(
 
 Message sizes:
 
-````mongodb
+````
 db.message.aggregate(
     [
         {
@@ -94,8 +90,6 @@ db.message.aggregate(
     ]
     )
 ````
-
-
 
 ## TODO List
 

@@ -17,7 +17,7 @@
     <description>PoC Data of Crypto Exchange</description>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>15</java.version>
         <xchange.version>5.0.4</xchange.version>
 
         <testcontainers.version>1.15.1</testcontainers.version>

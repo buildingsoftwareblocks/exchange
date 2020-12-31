@@ -8,13 +8,14 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
-import lombok.Synchronized;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -30,29 +31,31 @@ import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPa
 @RequiredArgsConstructor
 public class ExchangeService {
 
+    private static final String WEBSOCKET_DESTINATION = "/topic/orderbook";
+
     private final SimpMessagingTemplate template;
     private final ObjectMapper objectMapper;
 
     // for testing purposes, to subscribe to the event that send to the websocket
-    private final Subject<String> sent = PublishSubject.create();
+    private final Subject<ExchangeOrderBook> sent = PublishSubject.create();
 
-    private final LinkedBlockingDeque<String> events = new LinkedBlockingDeque<>();
+    private final LinkedBlockingDeque<ExchangeOrderBook> events = new LinkedBlockingDeque<>();
+    private ExchangeOrderBook lastMessage = null;
 
-    @Synchronized
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
     void process(String message) {
         log.debug("Order book received: {}", message);
         try {
             ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
             if (exchangeOrderBook.getExchange().equals(KRAKEN) && (exchangeOrderBook.getCurrencyPair().equals(getFirstCurrencyPair().toString()))) {
-                events.add(message);
+                events.add(exchangeOrderBook);
             }
         } catch (JsonProcessingException e) {
             log.error("Exception({}) with message: {}", e, message);
         }
     }
 
-    Observable<String> subscribe() {
+    Observable<ExchangeOrderBook> subscribe() {
         return sent;
     }
 
@@ -68,11 +71,22 @@ public class ExchangeService {
                             log.info("data removed: {}", events.size());
                         }
                         events.clear();
-                        var exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
-                        template.convertAndSend("/topic/orderbook", objectMapper.writeValueAsString(exchangeOrderBook.getOrderBook()));
+                        lastMessage = message;
+                        template.convertAndSend(WEBSOCKET_DESTINATION, objectMapper.writeValueAsString(lastMessage.getOrderBook()));
                         sent.onNext(message);
                     }
                 });
     }
 
+    /**
+     * Show something even the replay of events is over.
+     */
+    @SneakyThrows
+    @EventListener
+    private void handleSessionConnected(SessionSubscribeEvent event) {
+        log.info("Session connected: {}", event);
+        if (lastMessage != null) {
+            template.convertAndSend(WEBSOCKET_DESTINATION, objectMapper.writeValueAsString(lastMessage.getOrderBook()));
+        }
+    }
 }

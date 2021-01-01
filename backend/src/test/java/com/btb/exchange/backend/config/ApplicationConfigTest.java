@@ -8,15 +8,15 @@ class ApplicationConfigTest {
 
     @Test
     void validateIllegalValue() {
-        var config = new ApplicationConfig(true, true);
+        var config = new ApplicationConfig(true, true, false);
         assertThrows(IllegalArgumentException.class, config::validate);
     }
 
     @Test
     void validate() {
-        new ApplicationConfig(true, false).validate();
-        new ApplicationConfig(false, false).validate();
-        new ApplicationConfig(false, true).validate();
+        new ApplicationConfig(true, false, false).validate();
+        new ApplicationConfig(false, false, false).validate();
+        new ApplicationConfig(false, true, false).validate();
         // doesn't throw an exception
     }
 }

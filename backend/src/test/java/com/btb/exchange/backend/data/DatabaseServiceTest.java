@@ -13,7 +13,6 @@ import io.reactivex.disposables.CompositeDisposable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.knowm.xchange.dto.marketdata.OrderBook;
@@ -26,6 +25,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.PostConstruct;
@@ -36,17 +37,19 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
-import static org.knowm.xchange.currency.CurrencyPair.BTC_USDT;
-import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @SpringBootTest
+@Testcontainers
 @Slf4j
 class DatabaseServiceTest {
 
+    @Container
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest").withReuse(true);
+    @Container
     private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest")).withReuse(true);
 
     @Autowired
@@ -59,12 +62,6 @@ class DatabaseServiceTest {
     ObjectMapper objectMapper;
 
     private final CompositeDisposable composite = new CompositeDisposable();
-
-    @BeforeAll
-    static void beforeAll() {
-        MONGO_DB_CONTAINER.start();
-        KAFKA_CONTAINER.start();
-    }
 
     @BeforeEach
     void beforeEach() {
@@ -82,7 +79,7 @@ class DatabaseServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, BTC_USDT.toString(),
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair().toString(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
@@ -97,7 +94,7 @@ class DatabaseServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USDT);
+        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), getFirstCurrencyPair());
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
@@ -120,7 +117,7 @@ class DatabaseServiceTest {
                 service.replayEvents();
             }
         }));
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, ETH_BTC.toString(),
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair().toString(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
@@ -136,6 +133,7 @@ class DatabaseServiceTest {
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
         registry.add("backend.recording", () -> true);
         registry.add("backend.replay", () -> false);
+        registry.add("backend.testing", () -> true);
     }
 
     @TestConfiguration

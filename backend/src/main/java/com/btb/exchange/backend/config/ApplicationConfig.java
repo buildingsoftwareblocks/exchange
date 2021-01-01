@@ -17,6 +17,7 @@ public class ApplicationConfig {
 
     private boolean recording;
     private boolean replay;
+    private boolean testing;
 
     @PostConstruct
     void validate() {

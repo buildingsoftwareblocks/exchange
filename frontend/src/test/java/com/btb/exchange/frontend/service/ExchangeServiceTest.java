@@ -34,8 +34,9 @@ import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
+import static com.btb.exchange.shared.utils.CurrencyPairUtils.getSecondCurrencyPair;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @SpringBootTest
 @Slf4j
@@ -69,7 +70,7 @@ class ExchangeServiceTest {
     void process() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var message = new ExchangeOrderBook(ExchangeEnum.BINANCE, ETH_BTC.toString(),
+        var message = new ExchangeOrderBook(ExchangeEnum.KRAKEN, getFirstCurrencyPair().toString(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
@@ -83,13 +84,13 @@ class ExchangeServiceTest {
     void processNonMatching() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var message = new ExchangeOrderBook(ExchangeEnum.BITSTAMP, ETH_BTC.toString(),
+        var message = new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getSecondCurrencyPair().toString(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
-        var waitResult = latch.await(10, TimeUnit.SECONDS);
+        var waitResult = latch.await(2, TimeUnit.SECONDS);
 
-        assertThat("result before timeout", waitResult);
+        assertThat("result before timeout", !waitResult);
         Mockito.verify(websocketMock, Mockito.never()).convertAndSend(Mockito.anyString(), Mockito.anyString());
     }
 

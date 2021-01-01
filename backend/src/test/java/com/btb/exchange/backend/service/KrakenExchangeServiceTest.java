@@ -9,7 +9,6 @@ import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,6 +20,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.PostConstruct;
@@ -34,10 +35,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
+@Testcontainers
 @Slf4j
 class KrakenExchangeServiceTest {
 
+    @Container
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest").withReuse(true);
+    @Container
     private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest")).withReuse(true);
 
     @Autowired
@@ -46,12 +50,6 @@ class KrakenExchangeServiceTest {
     KrakenExchangeService service;
 
     private final CompositeDisposable composite = new CompositeDisposable();
-
-    @BeforeAll
-    static void beforeAll() {
-        MONGO_DB_CONTAINER.start();
-        KAFKA_CONTAINER.start();
-    }
 
     @BeforeEach
     void beforeEach() {
@@ -80,6 +78,7 @@ class KrakenExchangeServiceTest {
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
         registry.add("backend.recording", () -> false);
         registry.add("backend.replay", () -> true);
+        registry.add("backend.testing", () -> true);
     }
 
     @TestConfiguration

@@ -39,5 +39,5 @@ services:
       - KAFKA_SERVER=kafka
       - MONGO_DB_SERVER=mongodb
       - BACKEND_RECORDING=false
-      - BACKEND_REPLAY=true
+      - BACKEND_REPLAY=false
       - JAVA_OPTS=-XX:MaxDirectMemorySize=128m

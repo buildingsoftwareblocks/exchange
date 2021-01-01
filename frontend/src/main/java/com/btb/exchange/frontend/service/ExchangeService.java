@@ -1,5 +1,6 @@
 package com.btb.exchange.frontend.service;
 
+import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +9,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,6 +42,9 @@ public class ExchangeService {
     @Value("${frontend.refresh:500}")
     private int refreshRate;
 
+    @Setter
+    private ExchangeEnum exchange = KRAKEN;
+
     // for testing purposes, to subscribe to the event that send to the websocket
     private final Subject<ExchangeOrderBook> sent = PublishSubject.create();
 
@@ -51,7 +56,7 @@ public class ExchangeService {
             log.debug("Order book received: {}", message);
             try {
                 ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
-                if (exchangeOrderBook.getExchange().equals(KRAKEN) && (exchangeOrderBook.getCurrencyPair().equals(getFirstCurrencyPair().toString()))) {
+                if (exchangeOrderBook.getExchange().equals(exchange) && (exchangeOrderBook.getCurrencyPair().equals(getFirstCurrencyPair().toString()))) {
                     events.add(exchangeOrderBook);
                 }
             } catch (JsonProcessingException e) {
@@ -76,7 +81,7 @@ public class ExchangeService {
                         }
                         events.clear();
                         lastMessage = message;
-                        template.convertAndSend(WEBSOCKET_DESTINATION, objectMapper.writeValueAsString(lastMessage.getOrderBook()));
+                        template.convertAndSend(WEBSOCKET_DESTINATION, objectMapper.writeValueAsString(lastMessage));
                         sent.onNext(message);
                     }
                 });

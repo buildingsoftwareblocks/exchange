@@ -15,7 +15,13 @@
     Javascript and reload this page!</h2></noscript>
 <div id="main-content" class="container">
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-sm-4">
+            <table class="table">
+                <tr><th scope="row">Exchange</th><td id="exchange"></td></tr>
+                <tr><th scope="row">Currency Pair</th><td id="cp"></td></tr>
+            </table>
+        </div>
+        <div class="col-sm-6">
             <form class="form-inline">
                 <div class="form-group">
                     <label for="connect">WebSocket connection:</label>
@@ -27,7 +33,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-sm-4">
             <table class="table table-striped">
                 <thead>
                 <tr>
@@ -39,7 +45,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-md-3">
+        <div class="col-sm-4">
             <table class="table table-striped">
                 <thead>
                 <tr>

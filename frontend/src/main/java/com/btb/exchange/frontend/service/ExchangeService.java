@@ -17,7 +17,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
-import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -68,7 +67,7 @@ public class ExchangeService {
                         // pick the last message and remove older messages from the queue
                         var message = events.peekLast();
                         log.debug("Tick : {}", message);
-                        if (events.size() > 0) {
+                        if (!events.isEmpty()) {
                             log.info("data removed: {}", events.size());
                         }
                         events.clear();

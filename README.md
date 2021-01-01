@@ -108,7 +108,7 @@ db.message.aggregate(
 - [ ] more robust error handling
 
 ## Related
-- [Sonarcloud](https://sonarcloud.io/dashboard?id=buildingsoftwareblocks_exchange)
+- [Sonar cloud](https://sonarcloud.io/dashboard?id=buildingsoftwareblocks_exchange)
 - [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks)
 
 ## Background Information

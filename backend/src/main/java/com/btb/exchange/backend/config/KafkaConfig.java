@@ -19,7 +19,7 @@ import javax.annotation.PostConstruct;
 public class KafkaConfig {
 
     private final GenericApplicationContext ac;
-    private final ConsumerFactory consumerFactory;
+    private final ConsumerFactory<String,String> consumerFactory;
 
     @PostConstruct
     public void init() {
@@ -30,10 +30,9 @@ public class KafkaConfig {
 
     @Bean
     public KafkaListenerContainerFactory<?> batchFactory() {
-        ConcurrentKafkaListenerContainerFactory<Integer, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         return factory;
     }
-
 }

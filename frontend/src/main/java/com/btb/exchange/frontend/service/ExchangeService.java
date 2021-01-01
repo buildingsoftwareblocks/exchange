@@ -43,9 +43,8 @@ public class ExchangeService {
     private final LinkedBlockingDeque<ExchangeOrderBook> events = new LinkedBlockingDeque<>();
     private ExchangeOrderBook lastMessage = null;
 
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
-    void process(List<String> messages) {
-        messages.forEach(message -> {
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
+    void process(String message) {
             log.debug("Order book received: {}", message);
             try {
                 ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
@@ -55,7 +54,6 @@ public class ExchangeService {
             } catch (JsonProcessingException e) {
                 log.error("Exception({}) with message: {}", e, message);
             }
-        });
     }
 
     Observable<ExchangeOrderBook> subscribe() {

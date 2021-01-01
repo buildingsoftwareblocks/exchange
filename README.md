@@ -1,6 +1,6 @@
-# exchange
+# Exchange Data PoC
 
-A PoC to retrieve real-time Crypto Exchange data, as first step for a ordering bot!
+A PoC to retrieve real-time Crypto Exchange data, as first step for an ordering bot!
 
 ## Run Application
 
@@ -25,6 +25,8 @@ Using testcontainers can be slow during testing, because the used containers are
 tells how to make integration testing faster.
 
 ## MongoDB queries
+The following queries show some useful information:
+
 Number of records:
 ````mongodb
 db.message.count()
@@ -54,8 +56,7 @@ db.message.aggregate(
 ````
 
 Message sizes:
-
-````
+````mongodb
 db.message.aggregate(
     [
         {

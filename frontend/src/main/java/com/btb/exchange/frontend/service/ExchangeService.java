@@ -10,6 +10,7 @@ import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -36,6 +37,9 @@ public class ExchangeService {
     private final SimpMessagingTemplate template;
     private final ObjectMapper objectMapper;
 
+    @Value("${frontend.refresh:500}")
+    private int refreshRate;
+
     // for testing purposes, to subscribe to the event that send to the websocket
     private final Subject<ExchangeOrderBook> sent = PublishSubject.create();
 
@@ -61,7 +65,7 @@ public class ExchangeService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void sentData() {
-        Observable.interval(500, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
+        Observable.interval(refreshRate, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
                 .subscribe(e -> {
                     if (!events.isEmpty()) {
                         // pick the last message and remove older messages from the queue

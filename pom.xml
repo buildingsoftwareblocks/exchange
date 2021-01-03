@@ -42,7 +42,7 @@
 
             <dependency>
                 <groupId>org.knowm.xchange</groupId>
-                <artifactId>xchange-core</artifactId>
+                <artifactId>xchange-stream-core</artifactId>
                 <version>${xchange.version}</version>
             </dependency>
             <dependency>

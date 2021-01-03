@@ -12,7 +12,7 @@ import java.util.Currency;
 public class Opportunity {
     ExchangeEnum from;
     ExchangeEnum to;
-    String currencyPair;
+    CurrencyPair currencyPair;
     BigDecimal ask;
     BigDecimal bid;
 }

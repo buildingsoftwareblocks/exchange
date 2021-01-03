@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import static com.btb.exchange.shared.dto.ExchangeEnum.BITSTAMP;
 import static com.btb.exchange.shared.dto.ExchangeEnum.COINBASE;
 
 @Service

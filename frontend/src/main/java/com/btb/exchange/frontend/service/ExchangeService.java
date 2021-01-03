@@ -39,7 +39,7 @@ public class ExchangeService {
     private final SimpMessagingTemplate template;
     private final ObjectMapper objectMapper;
 
-    @Value("${frontend.refresh:500}")
+    @Value("${frontend.refreshrate:500}")
     private int refreshRate;
 
     @Setter
@@ -56,7 +56,7 @@ public class ExchangeService {
             log.debug("Order book received: {}", message);
             try {
                 ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(message, ExchangeOrderBook.class);
-                if (exchangeOrderBook.getExchange().equals(exchange) && (exchangeOrderBook.getCurrencyPair().equals(getFirstCurrencyPair().toString()))) {
+                if (exchangeOrderBook.getExchange().equals(exchange) && (exchangeOrderBook.getCurrencyPair().equals(getFirstCurrencyPair()))) {
                     events.add(exchangeOrderBook);
                 }
             } catch (JsonProcessingException e) {

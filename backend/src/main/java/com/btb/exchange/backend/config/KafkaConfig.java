@@ -19,7 +19,7 @@ import javax.annotation.PostConstruct;
 public class KafkaConfig {
 
     private final GenericApplicationContext ac;
-    private final ConsumerFactory<String,String> consumerFactory;
+    private final ConsumerFactory<String, String> consumerFactory;
 
     @PostConstruct
     public void init() {

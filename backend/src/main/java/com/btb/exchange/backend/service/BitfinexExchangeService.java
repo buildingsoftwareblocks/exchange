@@ -9,7 +9,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import static com.btb.exchange.shared.dto.ExchangeEnum.BITFINEX;
-import static com.btb.exchange.shared.dto.ExchangeEnum.BITSTAMP;
 
 @Service
 @Slf4j

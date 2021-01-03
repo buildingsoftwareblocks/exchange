@@ -17,7 +17,9 @@ public class MessageHandler {
     private final ObjectMapper objectMapper;
     private final SimpleExchangeArbitrage simpleExchangeArbitrage;
 
-    @Synchronized
+    /**
+     *
+     */
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_FULL_PREFIX}.*")
     void process(String message) throws JsonProcessingException {
         log.debug("Order book received: {}", message);

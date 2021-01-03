@@ -119,3 +119,4 @@ db.message.aggregate(
 - [Spring Websocket](https://docs.spring.io/spring-framework/docs/current/reference/html/web.html#websocket-stomp-handle-send)
 - [Spring for Apache Kafka](https://docs.spring.io/spring-kafka/docs/current/reference/html/#even-quicker-with-spring-boot)
 - [Spring Boot Reference Documentation](https://docs.spring.io/spring-boot/docs/current/maven-plugin/reference/htmlsingle/#build-image)
+- [The Easy Cryptocurrency Arbitrage Trading Strategies](https://blog.shrimpy.io/blog/cryptocurrency-arbitrage-a-lucrative-trading-strategy)

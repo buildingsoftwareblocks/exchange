@@ -25,7 +25,7 @@ public class KafkaConfig {
     public void init() {
         // iterate over currency pairs and register new beans
         CurrencyPairUtils.CurrencyPairs.forEach(cp ->
-                ac.registerBean(String.format("topic.%s", cp), NewTopic.class, () -> TopicBuilder.name(TopicUtils.orderBook(cp)).build()));
+                ac.registerBean(String.format("topic.%s", cp), NewTopic.class, () -> TopicBuilder.name(TopicUtils.orderBookFull(cp)).build()));
     }
 
     @Bean

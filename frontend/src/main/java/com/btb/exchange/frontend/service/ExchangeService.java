@@ -51,7 +51,7 @@ public class ExchangeService {
     private final LinkedBlockingDeque<ExchangeOrderBook> events = new LinkedBlockingDeque<>();
     private ExchangeOrderBook lastMessage = null;
 
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_FULL_PREFIX}.*")
     void process(String message) {
             log.debug("Order book received: {}", message);
             try {

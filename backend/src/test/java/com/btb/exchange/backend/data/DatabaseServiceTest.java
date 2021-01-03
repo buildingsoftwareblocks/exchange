@@ -79,7 +79,7 @@ class DatabaseServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair().toString(),
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
@@ -117,7 +117,7 @@ class DatabaseServiceTest {
                 service.replayEvents();
             }
         }));
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair().toString(),
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);

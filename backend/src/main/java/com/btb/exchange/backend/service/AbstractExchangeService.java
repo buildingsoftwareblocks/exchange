@@ -76,8 +76,8 @@ public abstract class AbstractExchangeService {
 
     public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) throws JsonProcessingException {
         log.debug("Order book: {}", orderBook);
-        var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
-                objectMapper.writeValueAsString(new ExchangeOrderBook(exchangeEnum, currencyPair.toString(), orderBook)));
+        var future = kafkaTemplate.send(TopicUtils.orderBookFull(currencyPair),
+                objectMapper.writeValueAsString(new ExchangeOrderBook(exchangeEnum, currencyPair, orderBook)));
 
         future.addCallback(result -> {
             if (config.isTesting()) {

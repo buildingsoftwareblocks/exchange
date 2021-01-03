@@ -10,13 +10,15 @@ import org.knowm.xchange.currency.CurrencyPair;
 @UtilityClass
 public class TopicUtils {
 
-    public static final String ORDERBOOK_INPUT_PREFIX = "orderbook.input";
+    public static final String ORDERBOOK_INPUT_FULL_PREFIX = "orderbook.input.full";
+    public static final String OPPORTUNITIES = "order.opportunities";
 
-    public static String orderBook(@NonNull String currencyPair) {
-        return orderBook(new CurrencyPair(currencyPair));
+    public static String orderBookFull(@NonNull String currencyPair) {
+        return orderBookFull(new CurrencyPair(currencyPair));
     }
 
-    public static String orderBook(@NonNull CurrencyPair currencyPair) {
-        return String.format("%s.%s_%s", ORDERBOOK_INPUT_PREFIX, currencyPair.base, currencyPair.counter);
+    public static String orderBookFull(@NonNull CurrencyPair currencyPair) {
+        return String.format("%s.%s_%s", ORDERBOOK_INPUT_FULL_PREFIX, currencyPair.base, currencyPair.counter);
     }
+
 }

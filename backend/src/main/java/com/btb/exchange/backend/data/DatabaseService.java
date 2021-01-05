@@ -45,7 +45,7 @@ public class DatabaseService {
     // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<Message> stored = PublishSubject.create();
 
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_FULL_PREFIX}.*", containerFactory = "batchFactory")
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
     void store(List<String> messages) {
         if (config.isRecording()) {
             var records = messages.stream().map(this::createRecord).collect(Collectors.toList());
@@ -116,7 +116,7 @@ public class DatabaseService {
                 .subscribe(m -> {
                     var message = m.getMessage();
                     log.debug("Replay : {}", message);
-                    kafkaTemplate.send(TopicUtils.orderBookFull(m.getCurrencyPair()), message);
+                    kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), message);
                 }, t -> log.error("Exception", t), () -> {
                     replayWatch.stop();
                     log.info("End replay events, and took: {}", Duration.ofMillis(replayWatch.getTotalTimeMillis()));

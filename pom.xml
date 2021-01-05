@@ -21,6 +21,10 @@
         <xchange.version>5.0.4</xchange.version>
 
         <testcontainers.version>1.15.1</testcontainers.version>
+        <sockjs-client.version>1.1.2</sockjs-client.version>
+        <stomp-websocket.version>2.3.3-1</stomp-websocket.version>
+        <bootstrap.version>4.5.3</bootstrap.version>
+        <jquery.version>3.5.1</jquery.version>
 
         <!-- plugins -->
         <sonar.version>3.7.0.1746</sonar.version>
@@ -30,6 +34,7 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
 
         <docker.repo>local</docker.repo>
+        <disruptor.version>3.4.2</disruptor.version>
     </properties>
 
     <dependencyManagement>
@@ -38,6 +43,23 @@
                 <groupId>com.btb</groupId>
                 <artifactId>shared</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <!-- Exclude Spring Boot's Default Logging -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.lmax</groupId>
+                <artifactId>disruptor</artifactId>
+                <version>${disruptor.version}</version>
             </dependency>
 
             <dependency>
@@ -81,22 +103,22 @@
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>sockjs-client</artifactId>
-                <version>1.0.2</version>
+                <version>${sockjs-client.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>stomp-websocket</artifactId>
-                <version>2.3.3</version>
+                <version>${stomp-websocket.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>bootstrap</artifactId>
-                <version>3.3.7</version>
+                <version>${bootstrap.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.webjars</groupId>
                 <artifactId>jquery</artifactId>
-                <version>3.1.1-1</version>
+                <version>${jquery.version}</version>
             </dependency>
 
             <dependency>
@@ -125,6 +147,17 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+
+        <!-- Add Log4j2 Dependency -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.lmax</groupId>
+            <artifactId>disruptor</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

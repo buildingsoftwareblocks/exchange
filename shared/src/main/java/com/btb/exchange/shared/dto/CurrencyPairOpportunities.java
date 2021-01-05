@@ -6,12 +6,15 @@ import lombok.Singular;
 import lombok.extern.jackson.Jacksonized;
 import org.knowm.xchange.currency.CurrencyPair;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
 @Builder
 @Jacksonized
-public class Opportunities {
+public class CurrencyPairOpportunities {
+    CurrencyPair currencyPair;
+    Date created;
     @Singular
-    List<CurrencyPairOpportunities> values;
+    List<Opportunity> opportunities;
 }

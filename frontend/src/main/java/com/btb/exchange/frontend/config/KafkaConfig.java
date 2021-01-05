@@ -1,4 +1,4 @@
-package com.btb.exchange.backend.config;
+package com.btb.exchange.frontend.config;
 
 import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
@@ -18,15 +18,7 @@ import javax.annotation.PostConstruct;
 @RequiredArgsConstructor
 public class KafkaConfig {
 
-    private final GenericApplicationContext ac;
     private final ConsumerFactory<String, String> consumerFactory;
-
-    @PostConstruct
-    public void init() {
-        // iterate over currency pairs and register new beans
-        CurrencyPairUtils.CurrencyPairs.forEach(cp ->
-                ac.registerBean(String.format("topic.%s", cp), NewTopic.class, () -> TopicBuilder.name(TopicUtils.orderBook(cp)).build()));
-    }
 
     @Bean
     public KafkaListenerContainerFactory<?> batchFactory() {

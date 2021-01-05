@@ -72,7 +72,7 @@ class ExchangeServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
         var message = new ExchangeOrderBook(ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
-        kafkaTemplate.send(TopicUtils.orderBookFull(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
+        kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
@@ -86,7 +86,7 @@ class ExchangeServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
         var message = new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getSecondCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
-        kafkaTemplate.send(TopicUtils.orderBookFull(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
+        kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(2, TimeUnit.SECONDS);
 
@@ -110,7 +110,7 @@ class ExchangeServiceTest {
         public void init() {
             // iterate over currency pairs and register new beans
             CurrencyPairUtils.CurrencyPairs.forEach(cp ->
-                    ac.registerBean(String.format("topic.%s", cp), NewTopic.class, () -> TopicBuilder.name(TopicUtils.orderBookFull(cp)).build()));
+                    ac.registerBean(String.format("topic.%s", cp), NewTopic.class, () -> TopicBuilder.name(TopicUtils.orderBook(cp)).build()));
         }
     }
 }

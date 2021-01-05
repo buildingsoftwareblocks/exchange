@@ -6,6 +6,8 @@ target/
 
 data
 /env.dev
+/logs/
+*.log
 
 ### STS ###
 .apt_generated

@@ -11,21 +11,21 @@ class TopicUtilsTest {
 
     @Test
     void orderBookString() {
-        assertThat(TopicUtils.orderBookFull(CurrencyPair.BTC_USD.toString()), equalTo("orderbook.input.BTC_USD"));
+        assertThat(TopicUtils.orderBook(CurrencyPair.BTC_USD.toString()), equalTo("orderbook.input.BTC_USD"));
     }
 
     @Test
     void orderBookStringNull() {
-        assertThrows(NullPointerException.class, ()-> TopicUtils.orderBookFull((String)null));
+        assertThrows(NullPointerException.class, ()-> TopicUtils.orderBook((String)null));
     }
 
     @Test
     void orderBook() {
-        assertThat(TopicUtils.orderBookFull(CurrencyPair.BTC_USD), equalTo("orderbook.input.BTC_USD"));
+        assertThat(TopicUtils.orderBook(CurrencyPair.BTC_USD), equalTo("orderbook.input.BTC_USD"));
     }
 
     @Test
     void orderBookNull() {
-        assertThrows(NullPointerException.class, ()-> TopicUtils.orderBookFull((CurrencyPair) null));
+        assertThrows(NullPointerException.class, ()-> TopicUtils.orderBook((CurrencyPair) null));
     }
 }

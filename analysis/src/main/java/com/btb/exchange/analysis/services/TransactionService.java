@@ -11,13 +11,13 @@ public class TransactionService {
 
     // TODO differentiate for exchange / currency pai
     public BigDecimal transactionBuyFees(BigDecimal amount, ExchangeEnum exchange, CurrencyPair currencyPair) {
-        // 0.2%
-        return amount.multiply(BigDecimal.valueOf(0.002));
+        // 0.15%
+        return amount.multiply(BigDecimal.valueOf(0.0015));
     }
 
     // TODO differentiate for exchange / currency pai
     public BigDecimal transactionSellFees(BigDecimal amount, ExchangeEnum exchange, CurrencyPair currencyPair) {
-        // 0.2%
-        return amount.multiply(BigDecimal.valueOf(0.002));
+        // 0.15%
+        return amount.multiply(BigDecimal.valueOf(0.0015));
     }
 }

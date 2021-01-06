@@ -1,9 +1,6 @@
 package com.btb.exchange.frontend.service;
 
-import com.btb.exchange.shared.dto.CurrencyPairOpportunities;
-import com.btb.exchange.shared.dto.ExchangeEnum;
-import com.btb.exchange.shared.dto.ExchangeOrderBook;
-import com.btb.exchange.shared.dto.Opportunities;
+import com.btb.exchange.shared.dto.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Observable;
@@ -24,12 +21,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
+import static com.btb.exchange.shared.dto.ExchangeEnum.COINBASE;
 import static com.btb.exchange.shared.dto.ExchangeEnum.KRAKEN;
 import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 
@@ -43,11 +42,12 @@ public class ExchangeService {
 
     private static final String WEBSOCKET_ORDERBOOK = "/topic/orderbook";
     private static final String WEBSOCKET_OPPORTUNITIES = "/topic/opportunities";
+    private static final int OPPORTUNITIES_SIZE = 10;
 
     private final SimpMessagingTemplate template;
     private final ObjectMapper objectMapper;
 
-    @Value("${frontend.refreshrate:500}")
+    @Value("${frontend.refreshrate:1000}")
     private int refreshRate;
 
     @Setter
@@ -57,7 +57,7 @@ public class ExchangeService {
     private final Subject<ExchangeOrderBook> sent = PublishSubject.create();
 
     private final LinkedBlockingDeque<ExchangeOrderBook> orderBooks = new LinkedBlockingDeque<>();
-    private final Map<CurrencyPair, CurrencyPairOpportunities> opportunitiesMap = new HashMap<>();
+    private final LinkedBlockingDeque<Opportunity> opportunities = new LinkedBlockingDeque<>();
     private ExchangeOrderBook lastMessage = null;
 
     @Async
@@ -81,14 +81,16 @@ public class ExchangeService {
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).OPPORTUNITIES}", containerFactory = "batchFactory")
     void processOpportunities(List<String> messages) {
         messages.forEach(message -> {
-            log.info("Opportunities received: {}", message);
+            log.debug("Opportunities received: {}", message);
             try {
-            var cpo = objectMapper.readValue(message, CurrencyPairOpportunities.class);
-                opportunitiesMap.put(cpo.getCurrencyPair(), cpo);
-                var builder = Opportunities.builder();
-                opportunitiesMap.forEach((k,v) -> builder.value(v));
-                var result = builder.build();
-                template.convertAndSend(WEBSOCKET_OPPORTUNITIES, objectMapper.writeValueAsString(result));
+                var values = objectMapper.readValue(message, Opportunities.class);
+                values.getValues().forEach(o -> {
+                        opportunities.add(o);
+                        if (opportunities.size() > OPPORTUNITIES_SIZE) {
+                            // remove oldest element
+                            opportunities.remove();
+                        }
+                });
             } catch (JsonProcessingException e) {
                 log.error("Exception({}) with message: {}", e, message);
             }
@@ -101,6 +103,7 @@ public class ExchangeService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void sentData() {
+        // send orderbooks
         Observable.interval(refreshRate, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
                 .subscribe(e -> {
                     if (!orderBooks.isEmpty()) {
@@ -115,6 +118,24 @@ public class ExchangeService {
                         template.convertAndSend(WEBSOCKET_ORDERBOOK, objectMapper.writeValueAsString(lastMessage));
                         sent.onNext(message);
                     }
+                });
+
+        // clean opportunities after 1 minute
+        Observable.interval(5, TimeUnit.SECONDS).observeOn(Schedulers.io())
+                .subscribe(e -> {
+                    LocalTime reference = LocalTime.now().minusSeconds(10);
+                    opportunities.forEach(o -> {
+                        if (o.getCreated().isBefore(reference)) {
+                            log.info("remove: {}", o);
+                            opportunities.remove(o);
+                        }
+                    });
+                });
+
+        // send opportunities
+        Observable.interval(refreshRate * 2, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
+                .subscribe(e -> {
+                        template.convertAndSend(WEBSOCKET_OPPORTUNITIES, objectMapper.writeValueAsString(opportunities));
                 });
     }
 

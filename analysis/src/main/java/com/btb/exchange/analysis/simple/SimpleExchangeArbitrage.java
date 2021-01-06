@@ -1,6 +1,6 @@
 package com.btb.exchange.analysis.simple;
 
-import com.btb.exchange.shared.dto.CurrencyPairOpportunities;
+import com.btb.exchange.analysis.data.CurrencyPairOpportunities;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunity;
@@ -13,6 +13,7 @@ import org.knowm.xchange.dto.trade.LimitOrder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +37,7 @@ public class SimpleExchangeArbitrage {
     }
 
     private CurrencyPairOpportunities findOportunities(ExchangeOrderBook orderbook) {
-        var opportunityBuilder = CurrencyPairOpportunities.builder().created(new Date());
+        var opportunityBuilder = CurrencyPairOpportunities.builder();
         BigDecimal bid = orderbook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
         CurrencyPair currencyPair = orderbook.getCurrencyPair();
         opportunityBuilder.currencyPair(currencyPair);
@@ -47,7 +48,7 @@ public class SimpleExchangeArbitrage {
             if (k.currencyPair.equals(currencyPair)) {
                 var profit = bid.subtract(ask);
                 if (profit.compareTo(BigDecimal.ZERO) == 1) {
-                    opportunityBuilder.opportunity(new Opportunity(k.exchange, orderbook.getExchange(), currencyPair, ask, bid));
+                    opportunityBuilder.opportunity(new Opportunity(k.exchange, orderbook.getExchange(), currencyPair, ask, bid, LocalTime.now()));
                 }
             }
         }

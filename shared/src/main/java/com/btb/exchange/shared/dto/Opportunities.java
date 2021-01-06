@@ -13,5 +13,5 @@ import java.util.List;
 @Jacksonized
 public class Opportunities {
     @Singular
-    List<CurrencyPairOpportunities> values;
+    List<Opportunity> values;
 }

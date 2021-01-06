@@ -7,13 +7,14 @@
     <script src="/webjars/jquery/jquery.min.js"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/accounting.min.js"></script>
     <script src="/app.js"></script>
 </head>
 <body>
 <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
     enabled. Please enable
     Javascript and reload this page!</h2></noscript>
-<div id="main-content" class="container">
+<div class="container-fluid">
     <div class="row">
         <div class="col-sm-4">
             <table class="table">
@@ -32,43 +33,44 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-3">
+        <div class="col-2">
             <table class="table table-striped">
                 <thead>
+                <tr><th>Orderbook</th></tr>
                 <tr>
                     <th>Asking</th>
                     <th>Amount</th>
                 </tr>
                 </thead>
-                <tbody id="asks">
-                </tbody>
+                <tbody id="asks"></tbody>
             </table>
         </div>
-        <div class="col-3">
+        <div class="col-2">
             <table class="table table-striped">
                 <thead>
+                <tr><th>Orderbook</th></tr>
                 <tr>
                     <th>Bidding</th>
                     <th>Amount</th>
                 </tr>
                 </thead>
-                <tbody id="bids">
-                </tbody>
+                <tbody id="bids"></tbody>
             </table>
         </div>
         <div class="col-sm-6">
             <table class="table table-striped">
                 <thead>
+                <tr><th>Opportunities</th></tr>
                 <tr>
-                    <th>Currency</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Ask</th>
-                    <th>Bid</th>
+                    <th style="width: 20%">Currency</th>
+                    <th style="width: 20%">From</th>
+                    <th style="width: 20%">To</th>
+                    <th style="width: 20%">Ask</th>
+                    <th style="width: 20%">Bid</th>
+                    <th style="width: 20%">Date</th>
                 </tr>
                 </thead>
-                <tbody id="currencyPairOpportunities">
-                </tbody>
+                <tbody id="opportunities"></tbody>
             </table>
         </div>
     </div>

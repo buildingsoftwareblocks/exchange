@@ -21,6 +21,7 @@ import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexRes
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
@@ -45,9 +46,11 @@ public class DatabaseService {
     // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<Message> stored = PublishSubject.create();
 
+    @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
     void store(List<String> messages) {
         if (config.isRecording()) {
+            log.debug("save {} records", messages.size());
             var records = messages.stream().map(this::createRecord).collect(Collectors.toList());
             repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
                 if (config.isTesting()) {

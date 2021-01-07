@@ -23,31 +23,34 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class SimpleExchangeArbitrage {
 
-    private final Map<Key, BigDecimal> bids = new ConcurrentHashMap<>();
+    private static final int MAX_FRESHNESS_SEC = 5;
+
     private final Map<Key, BigDecimal> asks = new ConcurrentHashMap<>();
+    // to prevent working with old data
+    private final Map<Key, LocalTime> updated = new ConcurrentHashMap<>();
 
-    public CurrencyPairOpportunities process(ExchangeOrderBook orderbook)  {
-        Optional<BigDecimal> askPrice = orderbook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice);
-        Optional<BigDecimal> bidPrice = orderbook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice);
-
-        asks.put(new Key(orderbook.getExchange(), orderbook.getCurrencyPair()), askPrice.orElse(BigDecimal.ZERO));
-        bids.put(new Key(orderbook.getExchange(), orderbook.getCurrencyPair()), bidPrice.orElse(BigDecimal.ZERO));
-        return findOportunities(orderbook);
+    public CurrencyPairOpportunities process(ExchangeOrderBook orderBook)  {
+        Optional<BigDecimal> askPrice = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice);
+        var key = new Key(orderBook.getExchange(), orderBook.getCurrencyPair());
+        asks.put(key, askPrice.orElse(BigDecimal.ZERO));
+        updated.put(key, LocalTime.now());
+        return findOpportunities(orderBook);
     }
 
-    private CurrencyPairOpportunities findOportunities(ExchangeOrderBook orderbook) {
+    private CurrencyPairOpportunities findOpportunities(ExchangeOrderBook orderBook) {
         var opportunityBuilder = CurrencyPairOpportunities.builder();
-        BigDecimal bid = orderbook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
-        CurrencyPair currencyPair = orderbook.getCurrencyPair();
+        BigDecimal bid = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
+        CurrencyPair currencyPair = orderBook.getCurrencyPair();
         opportunityBuilder.currencyPair(currencyPair);
 
+        LocalTime watermark = LocalTime.now().minusSeconds(MAX_FRESHNESS_SEC);
         for (Map.Entry<Key, BigDecimal> entry : asks.entrySet()) {
             Key k = entry.getKey();
             BigDecimal ask = entry.getValue();
-            if (k.currencyPair.equals(currencyPair)) {
+            if (k.currencyPair.equals(currencyPair) && watermark.isBefore(updated.get(k))) {
                 var profit = bid.subtract(ask);
                 if (profit.compareTo(BigDecimal.ZERO) > 0) {
-                    opportunityBuilder.opportunity(new Opportunity(k.exchange, orderbook.getExchange(), currencyPair, ask, bid, LocalTime.now()));
+                    opportunityBuilder.opportunity(new Opportunity(k.exchange, orderBook.getExchange(), currencyPair, ask, bid, LocalTime.now()));
                 }
             }
         }

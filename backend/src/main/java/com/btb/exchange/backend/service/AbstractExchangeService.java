@@ -39,8 +39,8 @@ public abstract class AbstractExchangeService {
     public static final String DEFAULT_VALUE = "";
 
     /**
-     * for testing purposes, to subscribe to the events that are broadcasted.
-     * It's 'BehaviorSubject' so we can proces the events, even if  the service is already started via the 'Application Ready event'
+     * for testing purposes, to subscribe to broadcast events.
+     * It's 'BehaviorSubject' so we can process the events, even if  the service is already started via the 'Application Ready event'
      */
     private final Subject<String> messageSent = BehaviorSubject.createDefault(DEFAULT_VALUE);
 

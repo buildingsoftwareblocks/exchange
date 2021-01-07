@@ -18,7 +18,7 @@ public class MongodbConfig {
      */
     @Bean
     MongoCustomConversions mongoCustomConversions() {
-        final List<Converter> list = List.of(CurrencyPairToStringConverter.INSTANCE, StringToCurrencyPairConverter.INSTANCE);
+        var list = List.of(CurrencyPairToStringConverter.INSTANCE, StringToCurrencyPairConverter.INSTANCE);
         return new MongoCustomConversions(list);
     }
 
@@ -26,7 +26,7 @@ public class MongodbConfig {
     enum CurrencyPairToStringConverter implements Converter<CurrencyPair, String> {
         INSTANCE;
 
-        private CurrencyPairToStringConverter() {
+        CurrencyPairToStringConverter() {
         }
 
         public String convert(CurrencyPair source) {
@@ -38,7 +38,7 @@ public class MongodbConfig {
     enum StringToCurrencyPairConverter implements Converter<String, CurrencyPair> {
         INSTANCE;
 
-        private StringToCurrencyPairConverter() {
+        StringToCurrencyPairConverter() {
         }
 
         public CurrencyPair convert(String source) {

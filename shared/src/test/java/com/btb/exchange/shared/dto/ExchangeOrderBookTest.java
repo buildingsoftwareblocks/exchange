@@ -15,7 +15,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 class ExchangeOrderBookTest {
 
-    static ObjectMapper objectMapper = new ObjectMapper();
+    static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void serializeTopJson() throws JsonProcessingException {

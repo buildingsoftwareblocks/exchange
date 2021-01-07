@@ -49,6 +49,9 @@ public class ExchangeService {
     @Value("${frontend.refreshrate:1000}")
     private int refreshRate;
 
+    @Value("${frontend.opportunities:true}")
+    private boolean showOpportunities;
+
     @Setter
     private ExchangeEnum exchange = KRAKEN;
 
@@ -119,21 +122,22 @@ public class ExchangeService {
                     }
                 });
 
-        // clean opportunities after 1 minute
-        Observable.interval(5, TimeUnit.SECONDS).observeOn(Schedulers.io())
-                .subscribe(e -> {
-                    LocalTime reference = LocalTime.now().minusSeconds(10);
-                    opportunities.forEach(o -> {
-                        if (o.getCreated().isBefore(reference)) {
-                            log.info("remove: {}", o);
-                            opportunities.remove(o);
-                        }
+        if (showOpportunities) {
+            // clean opportunities after 1 minute
+            Observable.interval(5, TimeUnit.SECONDS).observeOn(Schedulers.io())
+                    .subscribe(e -> {
+                        LocalTime reference = LocalTime.now().minusSeconds(10);
+                        opportunities.forEach(o -> {
+                            if (o.getCreated().isBefore(reference)) {
+                                log.info("remove: {}", o);
+                                opportunities.remove(o);
+                            }
+                        });
                     });
-                });
-
-        // send opportunities
-        Observable.interval(refreshRate * 2L, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
-                .subscribe(e -> template.convertAndSend(WEBSOCKET_OPPORTUNITIES, objectMapper.writeValueAsString(opportunities)));
+            // send opportunities
+            Observable.interval(refreshRate * 2L, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
+                    .subscribe(e -> template.convertAndSend(WEBSOCKET_OPPORTUNITIES, objectMapper.writeValueAsString(opportunities)));
+        }
     }
 
     /**

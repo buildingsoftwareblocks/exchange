@@ -98,6 +98,7 @@ class ExchangeServiceTest {
     @DynamicPropertySource
     static void datasourceConfig(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
+        registry.add("frontend.opportunities", () -> false);
     }
 
     @TestConfiguration

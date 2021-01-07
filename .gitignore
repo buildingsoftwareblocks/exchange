@@ -6,7 +6,7 @@ target/
 
 data
 /env.dev
-/logs/
+/**/logs/**/
 *.log
 
 ### STS ###
@@ -36,3 +36,4 @@ build/
 
 ### VS Code ###
 .vscode/
+

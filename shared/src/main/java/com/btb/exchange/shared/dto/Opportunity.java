@@ -1,13 +1,13 @@
 package com.btb.exchange.shared.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Value;
 import org.knowm.xchange.currency.CurrencyPair;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.util.Currency;
-import java.util.Date;
 
 @Value
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)

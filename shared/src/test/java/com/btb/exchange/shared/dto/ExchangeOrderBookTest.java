@@ -1,6 +1,5 @@
 package com.btb.exchange.shared.dto;
 
-import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -11,9 +10,8 @@ import java.util.Date;
 
 import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 class ExchangeOrderBookTest {
 

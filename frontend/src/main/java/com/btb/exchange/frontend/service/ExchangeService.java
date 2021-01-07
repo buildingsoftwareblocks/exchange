@@ -1,6 +1,9 @@
 package com.btb.exchange.frontend.service;
 
-import com.btb.exchange.shared.dto.*;
+import com.btb.exchange.shared.dto.ExchangeEnum;
+import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.Opportunities;
+import com.btb.exchange.shared.dto.Opportunity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.Observable;
@@ -11,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -22,13 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
-import static com.btb.exchange.shared.dto.ExchangeEnum.COINBASE;
 import static com.btb.exchange.shared.dto.ExchangeEnum.KRAKEN;
 import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 
@@ -133,10 +132,8 @@ public class ExchangeService {
                 });
 
         // send opportunities
-        Observable.interval(refreshRate * 2, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
-                .subscribe(e -> {
-                        template.convertAndSend(WEBSOCKET_OPPORTUNITIES, objectMapper.writeValueAsString(opportunities));
-                });
+        Observable.interval(refreshRate * 2L, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
+                .subscribe(e -> template.convertAndSend(WEBSOCKET_OPPORTUNITIES, objectMapper.writeValueAsString(opportunities)));
     }
 
     /**

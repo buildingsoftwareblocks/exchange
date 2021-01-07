@@ -48,16 +48,17 @@ public class OrderService {
             var profit = opportunity.getBid().multiply(factor)
                     .subtract(opportunity.getAsk().multiply(factor))
                     .subtract(transactionService.transactionBuyFees(amount, opportunity.getFrom(), opportunity.getCurrencyPair()))
+                    .subtract(transactionService.transportationFees(amount, opportunity.getFrom(), opportunity.getTo(), opportunity.getCurrencyPair()))
                     .subtract(transactionService.transactionSellFees(amount, opportunity.getTo(),  opportunity.getCurrencyPair()));
             // if profit
-            if (profit.compareTo(BigDecimal.ZERO) == 1) {
+            if (profit.compareTo(BigDecimal.ZERO) > 0) {
                 validOpportunitiesBuilder.value(opportunity);
             }
         });
         opportunitiesMap.put(cpo.getCurrencyPair(), validOpportunitiesBuilder.build());
 
         var builder = Opportunities.builder();
-        opportunitiesMap.forEach((k,v) -> v.getValues().forEach(o -> builder.value(o)));
+        opportunitiesMap.forEach((k,v) -> v.getValues().forEach(builder::value));
         var result = builder.build();
 
         try {

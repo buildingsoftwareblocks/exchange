@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +46,7 @@ public class SimpleExchangeArbitrage {
             BigDecimal ask = entry.getValue();
             if (k.currencyPair.equals(currencyPair)) {
                 var profit = bid.subtract(ask);
-                if (profit.compareTo(BigDecimal.ZERO) == 1) {
+                if (profit.compareTo(BigDecimal.ZERO) > 0) {
                     opportunityBuilder.opportunity(new Opportunity(k.exchange, orderbook.getExchange(), currencyPair, ask, bid, LocalTime.now()));
                 }
             }

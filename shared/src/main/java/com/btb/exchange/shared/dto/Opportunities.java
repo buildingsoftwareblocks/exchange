@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
 import lombok.extern.jackson.Jacksonized;
-import org.knowm.xchange.currency.CurrencyPair;
 
 import java.util.List;
 

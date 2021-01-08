@@ -18,14 +18,14 @@ class ExchangeOrderBookTest {
     static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void serializeTopJson() throws JsonProcessingException {
+    void serializeToJson() throws JsonProcessingException {
         var orderBook =  new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair(), new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
         var serialized = objectMapper.writeValueAsString(orderBook);
         assertThat("smoke test", serialized, is(notNullValue()));
     }
 
     @Test
-    void deserializeTopJson() throws JsonProcessingException {
+    void deserializeToJson() throws JsonProcessingException {
         var orderBook1 =  new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair(), new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
         var serialized1 = objectMapper.writeValueAsString(orderBook1);
         var orderBook2 = objectMapper.readValue(serialized1, ExchangeOrderBook.class);

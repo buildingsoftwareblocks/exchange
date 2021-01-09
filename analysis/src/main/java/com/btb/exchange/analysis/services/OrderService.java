@@ -24,7 +24,7 @@ public class OrderService {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
-    private final TransactionService transactionService;
+    private final ExchangeService exchangeService;
 
     private final Map<CurrencyPair, Opportunities> opportunitiesMap = new HashMap<>();
 
@@ -43,15 +43,18 @@ public class OrderService {
         var validOpportunitiesBuilder = Opportunities.builder();
 
         cpo.getOpportunities().forEach(opportunity -> {
-            var factor = amount.divide(opportunity.getBid(), MathContext.DECIMAL64);
+            // TODO we assume that all these assets are available in the ask order!
+            var factor = amount.divide(opportunity.getAsk(), MathContext.DECIMAL64);
 
             var profit = opportunity.getBid().multiply(factor)
                     .subtract(opportunity.getAsk().multiply(factor))
-                    .subtract(transactionService.transactionBuyFees(amount, opportunity.getFrom(), opportunity.getCurrencyPair()))
-                    .subtract(transactionService.transportationFees(amount, opportunity.getFrom(), opportunity.getTo(), opportunity.getCurrencyPair()))
-                    .subtract(transactionService.transactionSellFees(amount, opportunity.getTo(),  opportunity.getCurrencyPair()));
+                    .subtract(exchangeService.transactionBuyFees(amount, opportunity.getFrom(), opportunity.getCurrencyPair()))
+                    .subtract(exchangeService.transportationFees(amount, opportunity.getFrom(), opportunity.getTo(), opportunity.getCurrencyPair()))
+                    .subtract(exchangeService.transactionSellFees(amount, opportunity.getTo(),  opportunity.getCurrencyPair()));
             // if profit
             if (profit.compareTo(BigDecimal.ZERO) > 0) {
+                opportunity.setAmount(factor);
+                opportunity.setProfit(profit);
                 validOpportunitiesBuilder.value(opportunity);
             }
         });
@@ -62,7 +65,7 @@ public class OrderService {
         var result = builder.build();
 
         try {
-            log.info("profit action: {}", result);
+            log.debug("profit action: {}", result);
             kafkaTemplate.send(OPPORTUNITIES, objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             log.error("Exception", e);

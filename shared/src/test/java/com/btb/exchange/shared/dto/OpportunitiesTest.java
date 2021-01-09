@@ -24,8 +24,8 @@ class OpportunitiesTest {
 
     @Test
     void serializeToJson() throws JsonProcessingException {
-        var opportunity1 = new Opportunity(ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.BTC_AUD, BigDecimal.valueOf(100), BigDecimal.valueOf(110), LocalTime.now());
-        var opportunity2 = new Opportunity(ExchangeEnum.BITSTAMP, ExchangeEnum.COINBASE, CurrencyPair.ETH_BTC, BigDecimal.valueOf(200), BigDecimal.valueOf(210), LocalTime.now());
+        var opportunity1 = new Opportunity(CurrencyPair.BTC_AUD, BigDecimal.valueOf(10), ExchangeEnum.KRAKEN, BigDecimal.valueOf(100), ExchangeEnum.BINANCE, BigDecimal.valueOf(110));
+        var opportunity2 = new Opportunity(CurrencyPair.ETH_BTC, BigDecimal.valueOf(9), ExchangeEnum.BITSTAMP, BigDecimal.valueOf(200), ExchangeEnum.COINBASE, BigDecimal.valueOf(210));
         var opportunities = Opportunities.builder().value(opportunity1).value(opportunity2).build();
         var serialized = objectMapper.writeValueAsString(opportunities);
         assertThat("smoke test", serialized, is(notNullValue()));
@@ -35,8 +35,8 @@ class OpportunitiesTest {
     void deserializeToJson() throws JsonProcessingException {
         LocalTime now = LocalTime.of(19,20,40,123000000);
         var opportunities1 = Opportunities.builder()
-                .value(new Opportunity(ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.BTC_AUD, BigDecimal.valueOf(100), BigDecimal.valueOf(110), now))
-                .value( new Opportunity(ExchangeEnum.BITSTAMP, ExchangeEnum.COINBASE, CurrencyPair.ETH_BTC, BigDecimal.valueOf(200), BigDecimal.valueOf(210), now))
+                .value(new Opportunity(CurrencyPair.BTC_AUD, BigDecimal.ONE, BigDecimal.valueOf(10), ExchangeEnum.KRAKEN, BigDecimal.valueOf(100), ExchangeEnum.BINANCE, BigDecimal.valueOf(110), now))
+                .value(new Opportunity(CurrencyPair.ETH_BTC, BigDecimal.ONE, BigDecimal.valueOf(9), ExchangeEnum.BITSTAMP, BigDecimal.valueOf(200), ExchangeEnum.COINBASE, BigDecimal.valueOf(210), now))
                 .build();
         var serialized1 = objectMapper.writeValueAsString(opportunities1);
         var opportunities2 = objectMapper.readValue(serialized1, Opportunities.class);

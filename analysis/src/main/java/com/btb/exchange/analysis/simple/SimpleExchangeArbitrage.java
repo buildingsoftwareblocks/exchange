@@ -1,6 +1,7 @@
 package com.btb.exchange.analysis.simple;
 
 import com.btb.exchange.analysis.data.CurrencyPairOpportunities;
+import com.btb.exchange.analysis.services.ExchangeService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunity;
@@ -23,37 +24,61 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class SimpleExchangeArbitrage {
 
-    private static final int MAX_FRESHNESS_SEC = 5;
+    private final ExchangeService exchangeService;
 
+    private final Map<Key, BigDecimal> bids = new ConcurrentHashMap<>();
     private final Map<Key, BigDecimal> asks = new ConcurrentHashMap<>();
     // to prevent working with old data
     private final Map<Key, LocalTime> updated = new ConcurrentHashMap<>();
 
     public CurrencyPairOpportunities process(ExchangeOrderBook orderBook)  {
         Optional<BigDecimal> askPrice = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice);
+        Optional<BigDecimal> bidPrice = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice);
+
         var key = new Key(orderBook.getExchange(), orderBook.getCurrencyPair());
-        asks.put(key, askPrice.orElse(BigDecimal.ZERO));
+        bids.put(key, askPrice.orElse(BigDecimal.ZERO));
+        asks.put(key, bidPrice.orElse(BigDecimal.ZERO));
         updated.put(key, LocalTime.now());
         return findOpportunities(orderBook);
     }
 
     private CurrencyPairOpportunities findOpportunities(ExchangeOrderBook orderBook) {
         var opportunityBuilder = CurrencyPairOpportunities.builder();
-        BigDecimal bid = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
-        CurrencyPair currencyPair = orderBook.getCurrencyPair();
+        final BigDecimal ask = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
+        final BigDecimal bid = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
+        final CurrencyPair currencyPair = orderBook.getCurrencyPair();
         opportunityBuilder.currencyPair(currencyPair);
 
-        LocalTime watermark = LocalTime.now().minusSeconds(MAX_FRESHNESS_SEC);
         for (Map.Entry<Key, BigDecimal> entry : asks.entrySet()) {
             Key k = entry.getKey();
-            BigDecimal ask = entry.getValue();
-            if (k.currencyPair.equals(currencyPair) && watermark.isBefore(updated.get(k))) {
-                var profit = bid.subtract(ask);
-                if (profit.compareTo(BigDecimal.ZERO) > 0) {
-                    opportunityBuilder.opportunity(new Opportunity(k.exchange, orderBook.getExchange(), currencyPair, ask, bid, LocalTime.now()));
+            BigDecimal a = entry.getValue();
+            if (k.currencyPair.equals(currencyPair)) {
+                if (exchangeService.validData(k.exchange, k.currencyPair, updated.get(k))) {
+                    var profit = bid.subtract(a);
+                    if (profit.compareTo(BigDecimal.ZERO) > 0) {
+                        opportunityBuilder.opportunity(new Opportunity(currencyPair, profit, k.exchange, a, orderBook.getExchange(), bid));
+                    }
+                } else {
+                    log.warn("Stale data from {}:{} : {}", k.exchange, k.currencyPair, updated.get(k));
                 }
             }
         }
+
+        for (Map.Entry<Key, BigDecimal> entry : bids.entrySet()) {
+            Key k = entry.getKey();
+            BigDecimal b = entry.getValue();
+            if (k.currencyPair.equals(currencyPair)) {
+                if (exchangeService.validData(k.exchange, k.currencyPair, updated.get(k))) {
+                    var profit = b.subtract(ask);
+                    if (profit.compareTo(BigDecimal.ZERO) > 0) {
+                        opportunityBuilder.opportunity(new Opportunity(currencyPair, profit, k.exchange, ask, orderBook.getExchange(), b));
+                    }
+                } else {
+                    log.warn("Stale data from {}:{} : {}", k.exchange, k.currencyPair, updated.get(k));
+                }
+            }
+        }
+
        return opportunityBuilder.build();
     }
 

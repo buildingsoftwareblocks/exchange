@@ -60,11 +60,12 @@ function showOpportunities(message) {
     for (opportunity of message) {
         $("#opportunities").append("<tr>");
         $("#opportunities").append("<td>" + opportunity.currencyPair + "</td>");
+        $("#opportunities").append("<td>" + accounting.formatMoney(opportunity.profit) + "</td>");
         $("#opportunities").append("<td>" + opportunity.from + "</td>");
         $("#opportunities").append("<td>" + opportunity.to + "</td>");
         $("#opportunities").append("<td>" + accounting.formatMoney(opportunity.ask) + "</td>");
         $("#opportunities").append("<td>" + accounting.formatMoney(opportunity.bid) + "</td>");
-        $("#opportunities").append("<td>" + opportunity.created.slice(0,12) + "</td>");
+        $("#opportunities").append("<td>" + opportunity.created + "</td>");
         $("#opportunities").append("</tr>");
     }
 }

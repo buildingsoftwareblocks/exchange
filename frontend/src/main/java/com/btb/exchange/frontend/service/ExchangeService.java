@@ -41,7 +41,6 @@ public class ExchangeService {
 
     private static final String WEBSOCKET_ORDERBOOK = "/topic/orderbook";
     private static final String WEBSOCKET_OPPORTUNITIES = "/topic/opportunities";
-    private static final int OPPORTUNITIES_SIZE = 10;
 
     private final SimpMessagingTemplate template;
     private final ObjectMapper objectMapper;
@@ -85,14 +84,9 @@ public class ExchangeService {
         messages.forEach(message -> {
             log.debug("Opportunities received: {}", message);
             try {
-                var values = objectMapper.readValue(message, Opportunities.class);
-                values.getValues().forEach(o -> {
-                        opportunities.add(o);
-                        if (opportunities.size() > OPPORTUNITIES_SIZE) {
-                            // remove oldest element
-                            opportunities.remove();
-                        }
-                });
+                var records = objectMapper.readValue(message, Opportunities.class);
+                opportunities.clear();
+                opportunities.addAll(records.getValues());
             } catch (JsonProcessingException e) {
                 log.error("Exception({}) with message: {}", e, message);
             }

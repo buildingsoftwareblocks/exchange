@@ -17,18 +17,16 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class ExchangeService {
 
-    private final ApplicationConfig applicationConfig;
+    private final ApplicationConfig config;
 
     // TODO differentiate on exchange / currency pair
     public BigDecimal transactionBuyFees(BigDecimal amount, ExchangeEnum exchange, CurrencyPair currencyPair) {
-        // 0.15%
-       return amount.multiply(BigDecimal.valueOf(0.0015));
+       return amount.multiply(BigDecimal.valueOf(config.getBuyfee()));
     }
 
     // TODO differentiate on exchange / currency pair
     public BigDecimal transactionSellFees(BigDecimal amount, ExchangeEnum exchange, CurrencyPair currencyPair) {
-        // 0.15%
-        return amount.multiply(BigDecimal.valueOf(0.0015));
+        return amount.multiply(BigDecimal.valueOf(config.getSellfee()));
     }
 
     public BigDecimal transportationFees(BigDecimal amount, ExchangeEnum from, ExchangeEnum to, CurrencyPair currencyPair) {
@@ -49,7 +47,7 @@ public class ExchangeService {
      */
     // TODO differentiate on exchange / currency pair
     public boolean validData( @NonNull ExchangeEnum exchange,  @NonNull CurrencyPair currencyPair, @NonNull LocalTime now,  @NonNull LocalTime time) {
-        if (applicationConfig.isReplay()) {
+        if (config.isReplay()) {
             return true;
         } else {
             return now.minus(5000, ChronoUnit.MILLIS).isBefore(time);

@@ -20,18 +20,23 @@ docker-compose -f docker-compose-dev.yml --env-file env.dev up -d
 ``
 
 ## Test Performance
-Using testcontainers can be slow during testing, because the used containers are removed after the test. The article 
+
+Using testcontainers can be slow during testing, because the used containers are removed after the test. The article
 [Reuse Containers With Testcontainers for Fast Integration Tests](https://rieckpil.de/reuse-containers-with-testcontainers-for-fast-integration-tests/)
 tells how to make integration testing faster.
 
 ## MongoDB queries
+
 The following queries show some useful information:
 
 Number of records:
+
 ````mongodb
 db.message.count()
 ````
-Date values : 
+
+Date values :
+
 ````mongodb
 db.message.aggregate(
     [
@@ -56,6 +61,7 @@ db.message.aggregate(
 ````
 
 Message sizes:
+
 ````mongodb
 db.message.aggregate(
     [
@@ -104,15 +110,17 @@ db.message.aggregate(
 - [x] multiple exchanges / multiple Currency pairs
 - [ ] orderbook analysis module
 - [ ] better frontend GUI
-- [ ] logging via ELK stack  
+- [ ] logging via ELK stack
 - [ ] Binary messages in Kafka
 - [ ] more robust error handling
 
 ## Related
+
 - [Sonar cloud](https://sonarcloud.io/dashboard?id=buildingsoftwareblocks_exchange)
 - [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks)
 
 ## Background Information
+
 - [Battle of the Bots: How Market Makers Fight It Out on Crypto Exchanges](https://medium.com/swlh/battle-of-the-bots-how-market-makers-fight-it-out-on-crypto-exchanges-2482eb937107)
 - [known / XChange](https://github.com/knowm/XChange)
 - [Using WebSocket to build an interactive web application](https://spring.io/guides/gs/messaging-stomp-websocket/)

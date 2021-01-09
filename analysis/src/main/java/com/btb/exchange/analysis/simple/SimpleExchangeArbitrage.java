@@ -1,9 +1,9 @@
 package com.btb.exchange.analysis.simple;
 
-import com.btb.exchange.analysis.data.CurrencyPairOpportunities;
 import com.btb.exchange.analysis.services.ExchangeService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.dto.Opportunity;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class SimpleExchangeArbitrage {
     // to prevent working with old data
     private final Map<Key, LocalTime> updated = new ConcurrentHashMap<>();
 
-    public CurrencyPairOpportunities process(ExchangeOrderBook orderBook)  {
+    public Opportunities process(ExchangeOrderBook orderBook) {
         Optional<BigDecimal> askPrice = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice);
         Optional<BigDecimal> bidPrice = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice);
 
@@ -42,12 +42,11 @@ public class SimpleExchangeArbitrage {
         return findOpportunities(orderBook);
     }
 
-    private CurrencyPairOpportunities findOpportunities(ExchangeOrderBook orderBook) {
-        var opportunityBuilder = CurrencyPairOpportunities.builder();
+    private Opportunities findOpportunities(ExchangeOrderBook orderBook) {
+        var opportunitiesBuilder = Opportunities.builder();
         final BigDecimal ask = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
         final BigDecimal bid = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
         final CurrencyPair currencyPair = orderBook.getCurrencyPair();
-        opportunityBuilder.currencyPair(currencyPair);
 
         for (Map.Entry<Key, BigDecimal> entry : asks.entrySet()) {
             Key k = entry.getKey();
@@ -56,7 +55,7 @@ public class SimpleExchangeArbitrage {
                 if (exchangeService.validData(k.exchange, k.currencyPair, updated.get(k))) {
                     var profit = bid.subtract(a);
                     if (profit.compareTo(BigDecimal.ZERO) > 0) {
-                        opportunityBuilder.opportunity(new Opportunity(currencyPair, profit, k.exchange, a, orderBook.getExchange(), bid));
+                        opportunitiesBuilder.value(new Opportunity(currencyPair, profit, k.exchange, a, orderBook.getExchange(), bid));
                     }
                 } else {
                     log.warn("Stale data from {}:{} : {}", k.exchange, k.currencyPair, updated.get(k));
@@ -71,7 +70,7 @@ public class SimpleExchangeArbitrage {
                 if (exchangeService.validData(k.exchange, k.currencyPair, updated.get(k))) {
                     var profit = b.subtract(ask);
                     if (profit.compareTo(BigDecimal.ZERO) > 0) {
-                        opportunityBuilder.opportunity(new Opportunity(currencyPair, profit, k.exchange, ask, orderBook.getExchange(), b));
+                        opportunitiesBuilder.value(new Opportunity(currencyPair, profit, k.exchange, ask, orderBook.getExchange(), b));
                     }
                 } else {
                     log.warn("Stale data from {}:{} : {}", k.exchange, k.currencyPair, updated.get(k));
@@ -79,7 +78,7 @@ public class SimpleExchangeArbitrage {
             }
         }
 
-       return opportunityBuilder.build();
+        return opportunitiesBuilder.build();
     }
 
     @Value

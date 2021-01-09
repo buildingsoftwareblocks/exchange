@@ -19,7 +19,7 @@ class ExchangeServiceTest {
 
     @Test
     void transactionBuyFees() {
-        var service = new ExchangeService(new ApplicationConfig(false, 0, 0));
+        var service = new ExchangeService(new ApplicationConfig());
         assertThat(service.transactionBuyFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, CurrencyPair.BTC_USD),
                 is(closeTo(BigDecimal.valueOf(150), ERROR)));
     }
@@ -34,19 +34,19 @@ class ExchangeServiceTest {
     @Test
     void transportationFees() {
         var service = new ExchangeService(new ApplicationConfig());
-        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE,  CurrencyPair.BTC_USD),
+        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.BTC_USD),
                 is(closeTo(BigDecimal.valueOf(5), ERROR)));
-        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE,  CurrencyPair.ETH_BTC),
+        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.ETH_BTC),
                 is(closeTo(BigDecimal.valueOf(4), ERROR)));
-        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE,  CurrencyPair.DASH_BTC),
+        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.DASH_BTC),
                 is(closeTo(BigDecimal.valueOf(1), ERROR)));
     }
 
     @Test
     void validData() {
-        var service = new ExchangeService(new ApplicationConfig(false, 0, 0));
-        LocalTime now = LocalTime.of(19,20,40,123000000);
-        LocalTime time = LocalTime.of(19,20,41,122000000);
+        var service = new ExchangeService(new ApplicationConfig(false, 0, 0, 0));
+        LocalTime now = LocalTime.of(19, 20, 40, 123000000);
+        LocalTime time = LocalTime.of(19, 20, 41, 122000000);
         var result = service.validData(ExchangeEnum.KRAKEN, CurrencyPair.BTC_AUD, now, time);
         assertThat(result, is(true));
     }

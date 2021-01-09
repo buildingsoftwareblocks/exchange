@@ -21,24 +21,24 @@ public class ExchangeService {
 
     // TODO differentiate on exchange / currency pair
     public BigDecimal transactionBuyFees(BigDecimal amount, ExchangeEnum exchange, CurrencyPair currencyPair) {
-       return amount.multiply(BigDecimal.valueOf(config.getBuyfee()));
+        return amount.multiply(BigDecimal.valueOf(config.getBuyfees()));
     }
 
     // TODO differentiate on exchange / currency pair
     public BigDecimal transactionSellFees(BigDecimal amount, ExchangeEnum exchange, CurrencyPair currencyPair) {
-        return amount.multiply(BigDecimal.valueOf(config.getSellfee()));
+        return amount.multiply(BigDecimal.valueOf(config.getSellfees()));
     }
 
     public BigDecimal transportationFees(BigDecimal amount, ExchangeEnum from, ExchangeEnum to, CurrencyPair currencyPair) {
         // just a fixed number to start with
         return switch (currencyPair.base.getCurrencyCode()) {
-            case "BTC" -> BigDecimal.valueOf(5);
-            case "ETH" -> BigDecimal.valueOf(4);
-            default -> BigDecimal.valueOf(1);
+            case "BTC" -> BigDecimal.valueOf(config.getTransportfees() * 5);
+            case "ETH" -> BigDecimal.valueOf(config.getTransportfees() * 4);
+            default -> BigDecimal.valueOf(config.getTransportfees());
         };
     }
 
-    public boolean validData( @NonNull ExchangeEnum exchange,  @NonNull CurrencyPair currencyPair,  @NonNull LocalTime time) {
+    public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, @NonNull LocalTime time) {
         return validData(exchange, currencyPair, LocalTime.now(), time);
     }
 
@@ -46,11 +46,11 @@ public class ExchangeService {
      * max acceptable delay in ms of received data
      */
     // TODO differentiate on exchange / currency pair
-    public boolean validData( @NonNull ExchangeEnum exchange,  @NonNull CurrencyPair currencyPair, @NonNull LocalTime now,  @NonNull LocalTime time) {
+    public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, @NonNull LocalTime now, @NonNull LocalTime time) {
         if (config.isReplay()) {
             return true;
         } else {
-            return now.minus(5000, ChronoUnit.MILLIS).isBefore(time);
+            return now.minus(2000, ChronoUnit.MILLIS).isBefore(time);
         }
     }
 }

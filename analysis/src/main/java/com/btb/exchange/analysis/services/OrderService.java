@@ -1,19 +1,15 @@
 package com.btb.exchange.analysis.services;
 
-import com.btb.exchange.analysis.data.CurrencyPairOpportunities;
 import com.btb.exchange.shared.dto.Opportunities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 
@@ -26,12 +22,10 @@ public class OrderService {
     private final ObjectMapper objectMapper;
     private final ExchangeService exchangeService;
 
-    private final Map<CurrencyPair, Opportunities> opportunitiesMap = new HashMap<>();
-
     /**
      *
      */
-    public void processSimpleExchangeArbitrage(CurrencyPairOpportunities currencyPairOpportunities) {
+    public void processSimpleExchangeArbitrage(Opportunities currencyPairOpportunities) {
         // TODO better asset management
         processSimpleExchangeArbitrage(BigDecimal.valueOf(100000), currencyPairOpportunities);
     }
@@ -39,10 +33,10 @@ public class OrderService {
     /**
      *
      */
-    void processSimpleExchangeArbitrage(BigDecimal amount, CurrencyPairOpportunities cpo) {
-        var validOpportunitiesBuilder = Opportunities.builder();
+    void processSimpleExchangeArbitrage(BigDecimal amount, Opportunities opportunities) {
+        var opportunitiesBuilder = Opportunities.builder();
 
-        cpo.getOpportunities().forEach(opportunity -> {
+        opportunities.getValues().forEach(opportunity -> {
             // TODO we assume that all these assets are available in the ask order!
             var factor = amount.divide(opportunity.getAsk(), MathContext.DECIMAL64);
 
@@ -50,23 +44,17 @@ public class OrderService {
                     .subtract(opportunity.getAsk().multiply(factor))
                     .subtract(exchangeService.transactionBuyFees(amount, opportunity.getFrom(), opportunity.getCurrencyPair()))
                     .subtract(exchangeService.transportationFees(amount, opportunity.getFrom(), opportunity.getTo(), opportunity.getCurrencyPair()))
-                    .subtract(exchangeService.transactionSellFees(amount, opportunity.getTo(),  opportunity.getCurrencyPair()));
+                    .subtract(exchangeService.transactionSellFees(amount, opportunity.getTo(), opportunity.getCurrencyPair()));
             // if profit
             if (profit.compareTo(BigDecimal.ZERO) > 0) {
                 opportunity.setAmount(factor);
                 opportunity.setProfit(profit);
-                validOpportunitiesBuilder.value(opportunity);
+                opportunitiesBuilder.value(opportunity);
             }
         });
-        opportunitiesMap.put(cpo.getCurrencyPair(), validOpportunitiesBuilder.build());
-
-        var builder = Opportunities.builder();
-        opportunitiesMap.forEach((k,v) -> v.getValues().forEach(builder::value));
-        var result = builder.build();
 
         try {
-            log.debug("profit action: {}", result);
-            kafkaTemplate.send(OPPORTUNITIES, objectMapper.writeValueAsString(result));
+            kafkaTemplate.send(OPPORTUNITIES, objectMapper.writeValueAsString(opportunitiesBuilder.build()));
         } catch (JsonProcessingException e) {
             log.error("Exception", e);
         }

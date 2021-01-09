@@ -42,7 +42,7 @@ function showOrderBook(message) {
     for (ask of message.orderBook.asks) {
         $("#asks").append("<tr>");
         $("#asks").append("<td>" + accounting.formatMoney(ask.limitPrice) + "</td>");
-        $("#asks").append("<td>" + accounting.formatNumber(ask.originalAmount,5) + "</td>");
+        $("#asks").append("<td>" + accounting.formatNumber(ask.originalAmount, 5) + "</td>");
         $("#asks").append("</tr>");
     }
 
@@ -50,7 +50,7 @@ function showOrderBook(message) {
     for (bid of message.orderBook.bids) {
         $("#bids").append("<tr>");
         $("#bids").append("<td>" + accounting.formatMoney(bid.limitPrice) + "</td>");
-        $("#bids").append("<td>" + accounting.formatNumber(bid.originalAmount,5) + "</td>");
+        $("#bids").append("<td>" + accounting.formatNumber(bid.originalAmount, 5) + "</td>");
         $("#bids").append("</tr>");
     }
 }

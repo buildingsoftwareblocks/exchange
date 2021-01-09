@@ -16,7 +16,7 @@ class TopicUtilsTest {
 
     @Test
     void orderBookStringNull() {
-        assertThrows(NullPointerException.class, ()-> TopicUtils.orderBook((String)null));
+        assertThrows(NullPointerException.class, () -> TopicUtils.orderBook((String) null));
     }
 
     @Test
@@ -26,6 +26,6 @@ class TopicUtilsTest {
 
     @Test
     void orderBookNull() {
-        assertThrows(NullPointerException.class, ()-> TopicUtils.orderBook((CurrencyPair) null));
+        assertThrows(NullPointerException.class, () -> TopicUtils.orderBook((CurrencyPair) null));
     }
 }

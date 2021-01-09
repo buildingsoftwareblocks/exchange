@@ -33,7 +33,7 @@ class OpportunitiesTest {
 
     @Test
     void deserializeToJson() throws JsonProcessingException {
-        LocalTime now = LocalTime.of(19,20,40,123000000);
+        LocalTime now = LocalTime.of(19, 20, 40, 123000000);
         var opportunities1 = Opportunities.builder()
                 .value(new Opportunity(CurrencyPair.BTC_AUD, BigDecimal.ONE, BigDecimal.valueOf(10), ExchangeEnum.KRAKEN, BigDecimal.valueOf(100), ExchangeEnum.BINANCE, BigDecimal.valueOf(110), now))
                 .value(new Opportunity(CurrencyPair.ETH_BTC, BigDecimal.ONE, BigDecimal.valueOf(9), ExchangeEnum.BITSTAMP, BigDecimal.valueOf(200), ExchangeEnum.COINBASE, BigDecimal.valueOf(210), now))

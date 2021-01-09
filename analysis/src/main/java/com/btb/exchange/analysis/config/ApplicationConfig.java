@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationConfig {
 
     private boolean replay;
-    private float buyfee;
-    private float sellfee;
+    private float buyfees;
+    private float sellfees;
+    private float transportfees;
 }

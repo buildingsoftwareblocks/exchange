@@ -108,9 +108,11 @@ db.message.aggregate(
 - [x] build pipeline
 - [x] store events in database
 - [x] multiple exchanges / multiple Currency pairs
-- [ ] orderbook analysis module
+- [x] orderbook analysis module
+- [x] simple arbitrage
+- [ ] better logging
+- [ ] Triangular Arbitrage
 - [ ] better frontend GUI
-- [ ] logging via ELK stack
 - [ ] Binary messages in Kafka
 - [ ] more robust error handling
 

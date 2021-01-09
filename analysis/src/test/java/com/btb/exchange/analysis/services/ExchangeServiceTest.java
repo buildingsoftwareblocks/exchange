@@ -16,7 +16,6 @@ class ExchangeServiceTest {
 
     private static final BigDecimal ERROR = BigDecimal.valueOf(0.0005);
 
-
     @Test
     void transactionBuyFees() {
         var config = ApplicationConfig.builder().buyfees(0.0015).build();

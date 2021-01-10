@@ -18,6 +18,7 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,41 +43,28 @@ public class SimpleExchangeArbitrage {
         return findOpportunities(orderBook);
     }
 
+    /**
+     * Find opportunities
+     *
+     * TODO amount of opportunity should contain amount of incoming order.
+     */
     private Opportunities findOpportunities(ExchangeOrderBook orderBook) {
         var opportunitiesBuilder = Opportunities.builder();
         final BigDecimal ask = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
         final BigDecimal bid = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
         final CurrencyPair currencyPair = orderBook.getCurrencyPair();
 
-        for (Map.Entry<Key, BigDecimal> entry : asks.entrySet()) {
-            Key k = entry.getKey();
-            BigDecimal a = entry.getValue();
-            if (k.currencyPair.equals(currencyPair)) {
-                if (exchangeService.validData(k.exchange, k.currencyPair, updated.get(k))) {
-                    var profit = bid.subtract(a);
-                    if (profit.compareTo(BigDecimal.ZERO) > 0) {
-                        opportunitiesBuilder.value(new Opportunity(currencyPair, profit, k.exchange, a, orderBook.getExchange(), bid));
-                    }
-                } else {
-                    log.warn("Stale data from {}:{} : {}", k.exchange, k.currencyPair, updated.get(k));
-                }
-            }
-        }
+        asks.entrySet().stream()
+                .filter(e -> e.getKey().currencyPair.equals(currencyPair))
+                .filter(e -> exchangeService.validData(e.getKey().exchange, e.getKey().currencyPair, updated.get(e.getKey())))
+                .filter(e -> bid.subtract(e.getValue()).compareTo(BigDecimal.ZERO) > 0)
+                .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, e.getKey().exchange, e.getValue(), orderBook.getExchange(), bid)));
 
-        for (Map.Entry<Key, BigDecimal> entry : bids.entrySet()) {
-            Key k = entry.getKey();
-            BigDecimal b = entry.getValue();
-            if (k.currencyPair.equals(currencyPair)) {
-                if (exchangeService.validData(k.exchange, k.currencyPair, updated.get(k))) {
-                    var profit = b.subtract(ask);
-                    if (profit.compareTo(BigDecimal.ZERO) > 0) {
-                        opportunitiesBuilder.value(new Opportunity(currencyPair, profit, k.exchange, ask, orderBook.getExchange(), b));
-                    }
-                } else {
-                    log.warn("Stale data from {}:{} : {}", k.exchange, k.currencyPair, updated.get(k));
-                }
-            }
-        }
+        bids.entrySet().stream()
+                .filter(e -> e.getKey().currencyPair.equals(currencyPair))
+                .filter(e -> exchangeService.validData(e.getKey().exchange, e.getKey().currencyPair, updated.get(e.getKey())))
+                .filter(e -> e.getValue().subtract(ask).compareTo(BigDecimal.ZERO) > 0)
+                .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, orderBook.getExchange(), ask, e.getKey().getExchange(), e.getValue())));
 
         return opportunitiesBuilder.build();
     }

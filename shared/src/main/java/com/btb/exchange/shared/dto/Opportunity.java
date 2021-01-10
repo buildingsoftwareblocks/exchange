@@ -24,7 +24,7 @@ public class Opportunity {
     @JsonFormat(pattern = "HH:mm:ss.SSS")
     private LocalTime created;
 
-    public Opportunity(CurrencyPair currencyPair, BigDecimal profit, ExchangeEnum from, BigDecimal ask, ExchangeEnum to, BigDecimal bid) {
-        this(currencyPair, BigDecimal.ONE, profit, from, ask, to, bid, LocalTime.now());
+    public Opportunity(CurrencyPair currencyPair, ExchangeEnum from, BigDecimal ask, ExchangeEnum to, BigDecimal bid) {
+        this(currencyPair, BigDecimal.ZERO, BigDecimal.ZERO, from, ask, to, bid, LocalTime.now());
     }
 }

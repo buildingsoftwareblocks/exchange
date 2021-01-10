@@ -24,8 +24,8 @@ class OpportunitiesTest {
 
     @Test
     void serializeToJson() throws JsonProcessingException {
-        var opportunity1 = new Opportunity(CurrencyPair.BTC_AUD, BigDecimal.valueOf(10), ExchangeEnum.KRAKEN, BigDecimal.valueOf(100), ExchangeEnum.BINANCE, BigDecimal.valueOf(110));
-        var opportunity2 = new Opportunity(CurrencyPair.ETH_BTC, BigDecimal.valueOf(9), ExchangeEnum.BITSTAMP, BigDecimal.valueOf(200), ExchangeEnum.COINBASE, BigDecimal.valueOf(210));
+        var opportunity1 = new Opportunity(CurrencyPair.BTC_AUD, ExchangeEnum.KRAKEN, BigDecimal.valueOf(100), ExchangeEnum.BINANCE, BigDecimal.valueOf(110));
+        var opportunity2 = new Opportunity(CurrencyPair.ETH_BTC, ExchangeEnum.BITSTAMP, BigDecimal.valueOf(200), ExchangeEnum.COINBASE, BigDecimal.valueOf(210));
         var opportunities = Opportunities.builder().value(opportunity1).value(opportunity2).build();
         var serialized = objectMapper.writeValueAsString(opportunities);
         assertThat("smoke test", serialized, is(notNullValue()));

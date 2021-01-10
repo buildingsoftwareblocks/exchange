@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.ConsumerFactory;
 
@@ -29,7 +28,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaListenerContainerFactory<?> batchFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, String> batchFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);

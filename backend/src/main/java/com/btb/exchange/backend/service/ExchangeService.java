@@ -72,17 +72,18 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         leaderSelector.close();
     }
 
-    public boolean hasLeadership() {
+    boolean hasLeadership() {
         return leaderSelector.hasLeadership();
     }
 
     @Override
     public void takeLeadership(CuratorFramework client) {
         try {
+            log.info("Take leadership - {}", exchangeEnum);
             init();
             mutex.acquireUninterruptibly();
         } finally {
-            log.info("relinquishing leadership - {}", exchangeEnum);
+            log.info("Relinquishing leadership - {}", exchangeEnum);
             teardown();
             mutex.release();
             leaderService.acquire(this);
@@ -112,7 +113,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     }
 
 
-    void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) throws JsonProcessingException {
+    public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) throws JsonProcessingException {
         log.debug("Order book: {}", orderBook);
         var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
                 objectMapper.writeValueAsString(new ExchangeOrderBook(exchangeEnum, currencyPair, orderBook)));

@@ -25,6 +25,8 @@
         <stomp-websocket.version>2.3.3-1</stomp-websocket.version>
         <bootstrap.version>4.5.3</bootstrap.version>
         <jquery.version>3.5.1</jquery.version>
+        <disruptor.version>3.4.2</disruptor.version>
+        <curator.version>5.1.0</curator.version>
 
         <!-- plugins -->
         <sonar.version>3.7.0.1746</sonar.version>
@@ -34,7 +36,6 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
 
         <docker.repo>local</docker.repo>
-        <disruptor.version>3.4.2</disruptor.version>
     </properties>
 
     <dependencyManagement>
@@ -119,6 +120,17 @@
                 <groupId>org.webjars</groupId>
                 <artifactId>jquery</artifactId>
                 <version>${jquery.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-x-async</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>${curator.version}</version>
             </dependency>
 
             <dependency>

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-public class ZooKeeperConfig {
+public class ZookeeperConfig {
 
     @Value("${backend.zookeeper:localhost:2182}")
     private String zookeeperHost;

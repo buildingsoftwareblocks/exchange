@@ -9,7 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
-import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.Observable;
+import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -36,13 +37,11 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
 
-    public static final String DEFAULT_VALUE = "";
-
     /**
      * for testing purposes, to subscribe to broadcast events.
      * It's 'BehaviorSubject' so we can process the events, even if  the service is already started via the 'Application Ready event'
      */
-    private final Subject<String> messageSent = BehaviorSubject.createDefault(DEFAULT_VALUE);
+    private final Subject<String> messageSent = PublishSubject.create();
 
     /**
      *
@@ -112,17 +111,27 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                 .subscribe(orderBook -> process(orderBook, currencyPair), throwable -> log.error("Error in trade subscription", throwable));
     }
 
+    /**
+     * for testing purposes
+     */
+    final Observable<String> subscribe() {
+        return messageSent;
+    }
 
-    public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) throws JsonProcessingException {
+    public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) {
         log.debug("Order book: {}", orderBook);
-        var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
-                objectMapper.writeValueAsString(new ExchangeOrderBook(exchangeEnum, currencyPair, orderBook)));
+        try {
+            var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
+                    objectMapper.writeValueAsString(new ExchangeOrderBook(exchangeEnum, currencyPair, orderBook)));
 
-        future.addCallback(result -> {
-            if (config.isTesting()) {
-                messageSent.onNext(result.getRecordMetadata().topic());
-            }
-        }, e -> log.error("Exception", e));
+            future.addCallback(result -> {
+                if (config.isTesting()) {
+                    messageSent.onNext(result.getRecordMetadata().topic());
+                }
+            }, e -> log.error("Exception-1", e));
+        } catch (JsonProcessingException e) {
+            log.error("Exception-2", e);
+        }
     }
 
     void teardown() {

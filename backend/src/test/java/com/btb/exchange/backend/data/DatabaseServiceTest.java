@@ -8,14 +8,9 @@ import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchange;
-import info.bitrich.xchangestream.core.StreamingMarketDataService;
-import io.reactivex.Completable;
-import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,19 +18,17 @@ import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import javax.annotation.PostConstruct;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
@@ -54,9 +47,11 @@ import static org.hamcrest.Matchers.is;
 class DatabaseServiceTest {
 
     @Container
-    private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest").withReuse(true);
+    private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
     @Container
-    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest")).withReuse(true);
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+    @Container
+    private static final GenericContainer ZOOKEEPER = new GenericContainer("zookeeper:latest").withExposedPorts(2181);
 
     @Autowired
     DatabaseService service;
@@ -66,7 +61,8 @@ class DatabaseServiceTest {
     ObjectMapper objectMapper;
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
-
+    @MockBean
+    LeaderService leaderService;
 
     private final CompositeDisposable composite = new CompositeDisposable();
 
@@ -82,7 +78,7 @@ class DatabaseServiceTest {
 
     ExchangeService createExchangeService() {
         ApplicationConfig config = new ApplicationConfig(true, false, true);
-        ExchangeService exchangeService = new ExchangeService(Mockito.mock(CuratorFramework.class), Mockito.mock(LeaderService.class), Mockito.mock(StreamingExchange.class),
+        ExchangeService exchangeService = new ExchangeService(Mockito.mock(CuratorFramework.class), leaderService, Mockito.mock(StreamingExchange.class),
                 kafkaTemplate, objectMapper, config, ExchangeEnum.KRAKEN, "/", Mockito.mock(Semaphore.class));
         return exchangeService;
     }
@@ -149,5 +145,6 @@ class DatabaseServiceTest {
         registry.add("backend.recording", () -> true);
         registry.add("backend.replay", () -> false);
         registry.add("backend.testing", () -> true);
+        registry.add("backend.zookeeper", () -> "localhost:" + ZOOKEEPER.getFirstMappedPort());
     }
 }

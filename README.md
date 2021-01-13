@@ -110,6 +110,9 @@ db.message.aggregate(
 - [x] multiple exchanges / multiple Currency pairs
 - [x] orderbook analysis module
 - [x] simple arbitrage
+- [x] scalable backend module
+- [ ] scalable frontend module
+- [ ] scalable analysis module
 - [ ] better logging
 - [ ] Triangular Arbitrage
 - [ ] better frontend GUI

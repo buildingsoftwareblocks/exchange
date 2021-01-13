@@ -110,7 +110,6 @@ public class LeaderService {
     public void predestroy() {
         clients.values().forEach(ExchangeService::close);
         groupMember.close();
-        client.close();
     }
 
     StreamingExchange exchangeFactory(ExchangeEnum exchange) {

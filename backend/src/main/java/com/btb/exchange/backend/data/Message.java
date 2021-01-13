@@ -27,5 +27,5 @@ public class Message {
     private ExchangeEnum exchange;
     private @Field(targetType = STRING)
     CurrencyPair currencyPair;
-    private String message;
+    private String data;
 }

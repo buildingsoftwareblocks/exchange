@@ -71,7 +71,7 @@ public class DatabaseService {
                 .created(new Date())
                 .exchange(exchangeOrderBook.getExchange())
                 .currencyPair(exchangeOrderBook.getCurrencyPair())
-                .message(orderBook).build();
+                .data(orderBook).build();
     }
 
 
@@ -117,9 +117,9 @@ public class DatabaseService {
         repository.findAll(Sort.by(Sort.Direction.ASC, "created"))
                 .subscribeOn(Schedulers.io())
                 .subscribe(m -> {
-                    var message = m.getMessage();
-                    log.debug("Replay : {}", message);
-                    kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), message);
+                    var data = m.getData();
+                    log.debug("Replay : {}", data);
+                    kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), data);
                 }, t -> log.error("Exception", t), () -> {
                     replayWatch.stop();
                     log.info("End replay events, and took: {}", Duration.ofMillis(replayWatch.getTotalTimeMillis()));

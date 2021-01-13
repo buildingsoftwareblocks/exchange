@@ -43,7 +43,7 @@ public class LeaderService {
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
 
-    private final String base = "/backend/exchange";
+    private static final String base = "/backend/exchange";
     private final GroupMember groupMember;
 
     private final ConcurrentHashMap<ExchangeEnum, ExchangeService> clients = new ConcurrentHashMap<>();

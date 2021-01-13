@@ -48,7 +48,7 @@ public class DatabaseService {
 
     @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
-    void store(List<String> messages) {
+    public void store(List<String> messages) {
         if (config.isRecording()) {
             log.debug("save {} records", messages.size());
             var records = messages.stream().map(this::createRecord).collect(Collectors.toList());

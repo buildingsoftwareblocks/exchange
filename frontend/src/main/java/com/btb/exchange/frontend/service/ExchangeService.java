@@ -78,6 +78,8 @@ public class ExchangeService {
         opportunityRef = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_OPPORTUNITIES);
         opportunityCounter = hazelcastInstance.getCPSubsystem().getAtomicLong(HAZELCAST_OPPORTUNITIES);
         opportunitySemaphore = hazelcastInstance.getCPSubsystem().getSemaphore(HAZELCAST_OPPORTUNITIES);
+        orderBookRef.clear();
+        opportunityRef.clear();
         orderBookCounter.set(-1);
         opportunityCounter.set(-1);
     }

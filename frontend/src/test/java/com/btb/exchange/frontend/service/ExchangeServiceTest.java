@@ -63,6 +63,7 @@ class ExchangeServiceTest {
 
     @AfterEach
     void afterEach() {
+        service.init();
         composite.clear();
     }
 

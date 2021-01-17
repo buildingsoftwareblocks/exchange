@@ -11,6 +11,7 @@ import org.knowm.xchange.dto.marketdata.OrderBook;
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class ExchangeOrderBook {
+    long order;
     ExchangeEnum exchange;
     CurrencyPair currencyPair;
     OrderBook orderBook;

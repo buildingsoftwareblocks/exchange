@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;
+import org.apache.curator.utils.CloseableUtils;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -23,19 +24,21 @@ import org.springframework.lang.NonNull;
 
 import java.io.Closeable;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 public class ExchangeService extends LeaderSelectorListenerAdapter implements Closeable {
-
-    private final LeaderSelector leaderSelector;
-    private final Semaphore mutex;
-    private final LeaderService leaderService;
 
     private final StreamingExchange exchange;
     private final ExchangeEnum exchangeEnum;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
+
+    private final LeaderSelector leaderSelector;
+    private final Semaphore mutex;
+    private final LeaderService leaderService;
+    private final AtomicLong counter = new AtomicLong(0);
 
     /**
      * for testing purposes, to subscribe to broadcast events.
@@ -68,7 +71,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     @Override
     public void close() {
-        leaderSelector.close();
+        CloseableUtils.closeQuietly(leaderSelector);
     }
 
     boolean hasLeadership() {
@@ -122,7 +125,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         log.debug("Order book: {}", orderBook);
         try {
             var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
-                    objectMapper.writeValueAsString(new ExchangeOrderBook(exchangeEnum, currencyPair, orderBook)));
+                    objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(), exchangeEnum, currencyPair, orderBook)));
 
             future.addCallback(result -> {
                 if (config.isTesting()) {

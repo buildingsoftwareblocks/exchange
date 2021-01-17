@@ -70,7 +70,7 @@ class ExchangeServiceTest {
     void process() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var message = new ExchangeOrderBook(ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
+        var message = new ExchangeOrderBook(100, ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
@@ -84,7 +84,7 @@ class ExchangeServiceTest {
     void processNonMatching() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var message = new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getSecondCurrencyPair(),
+        var message = new ExchangeOrderBook(100, ExchangeEnum.BITSTAMP, getSecondCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 

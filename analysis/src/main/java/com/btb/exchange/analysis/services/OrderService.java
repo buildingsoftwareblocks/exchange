@@ -54,7 +54,9 @@ public class OrderService {
         });
 
         try {
-            kafkaTemplate.send(OPPORTUNITIES, objectMapper.writeValueAsString(opportunitiesBuilder.build()));
+            var message = opportunitiesBuilder.build();
+            log.debug("Send opportunities: {}", message);
+            kafkaTemplate.send(OPPORTUNITIES, objectMapper.writeValueAsString(message));
         } catch (JsonProcessingException e) {
             log.error("Exception", e);
         }

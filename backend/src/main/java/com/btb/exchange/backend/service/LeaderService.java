@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.nodes.GroupMember;
 import org.apache.curator.framework.recipes.watch.PersistentWatcher;
+import org.apache.curator.utils.CloseableUtils;
 import org.apache.zookeeper.WatchedEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -98,6 +99,9 @@ public class LeaderService {
         }
     }
 
+    /**
+     * Integer version of A / B ceiling function.
+     */
     int ceiling(int a, int b) {
         return a / b + ((a % b == 0) ? 0 : 1);
     }
@@ -109,7 +113,7 @@ public class LeaderService {
     @PreDestroy
     public void predestroy() {
         clients.values().forEach(ExchangeService::close);
-        groupMember.close();
+        CloseableUtils.closeQuietly(groupMember);
     }
 
     StreamingExchange exchangeFactory(ExchangeEnum exchange) {

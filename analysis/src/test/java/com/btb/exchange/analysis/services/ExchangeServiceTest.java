@@ -18,7 +18,8 @@ class ExchangeServiceTest {
 
     @Test
     void transactionBuyFees() {
-        var config = ApplicationConfig.builder().buyfees(0.0015).build();
+        var config = new ApplicationConfig();
+        config.setBuyfees(0.0015);
         var service = new ExchangeService(config);
         assertThat(service.transactionBuyFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, CurrencyPair.BTC_USD),
                 is(closeTo(BigDecimal.valueOf(150), ERROR)));
@@ -26,7 +27,8 @@ class ExchangeServiceTest {
 
     @Test
     void transactionSellFees() {
-        var config = ApplicationConfig.builder().sellfees(0.0015).build();
+        var config = new ApplicationConfig();
+        config.setSellfees(0.0015);
         var service = new ExchangeService(config);
         assertThat(service.transactionSellFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, CurrencyPair.BTC_USD),
                 is(closeTo(BigDecimal.valueOf(150), ERROR)));
@@ -34,7 +36,8 @@ class ExchangeServiceTest {
 
     @Test
     void transportationFees() {
-        var config = ApplicationConfig.builder().transportfees(1).build();
+        var config = new ApplicationConfig();
+        config.setTransportfees(1);
         var service = new ExchangeService(config);
         assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.BTC_USD),
                 is(closeTo(BigDecimal.valueOf(5), ERROR)));
@@ -46,7 +49,7 @@ class ExchangeServiceTest {
 
     @Test
     void validData() {
-        var config = ApplicationConfig.builder().replay(false).build();
+        var config = new ApplicationConfig();
         var service = new ExchangeService(config);
         LocalTime now = LocalTime.of(19, 20, 40, 123000000);
         LocalTime time = LocalTime.of(19, 20, 41, 122000000);

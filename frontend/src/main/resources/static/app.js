@@ -57,7 +57,7 @@ function showOrderBook(message) {
 
 function showOpportunities(message) {
     $("#opportunities").html("");
-    for (opportunity of message) {
+    for (opportunity of message.values) {
         $("#opportunities").append("<tr>");
         $("#opportunities").append("<td>" + opportunity.currencyPair + "</td>");
         $("#opportunities").append("<td>" + accounting.formatMoney(opportunity.profit) + "</td>");

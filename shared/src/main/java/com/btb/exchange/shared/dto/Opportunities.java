@@ -11,6 +11,7 @@ import java.util.List;
 @Builder
 @Jacksonized
 public class Opportunities {
+    long order;
     @Singular
     List<Opportunity> values;
 }

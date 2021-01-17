@@ -78,9 +78,8 @@ class DatabaseServiceTest {
 
     ExchangeService createExchangeService() {
         ApplicationConfig config = new ApplicationConfig(true, false, true);
-        ExchangeService exchangeService = new ExchangeService(Mockito.mock(CuratorFramework.class), leaderService, Mockito.mock(StreamingExchange.class),
+        return new ExchangeService(Mockito.mock(CuratorFramework.class), leaderService, Mockito.mock(StreamingExchange.class),
                 kafkaTemplate, objectMapper, config, ExchangeEnum.KRAKEN, "/", Mockito.mock(Semaphore.class));
-        return exchangeService;
     }
 
     @Test
@@ -89,7 +88,7 @@ class DatabaseServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair(),
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, ExchangeEnum.BITSTAMP, getFirstCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
@@ -99,7 +98,7 @@ class DatabaseServiceTest {
     }
 
     @Test
-    void testKakfaListener() throws InterruptedException, JsonProcessingException {
+    void testKakfaListener() throws InterruptedException {
         ExchangeService exchangeService = createExchangeService();
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
@@ -128,7 +127,7 @@ class DatabaseServiceTest {
                 service.replayEvents();
             }
         }));
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(ExchangeEnum.BITSTAMP, getFirstCurrencyPair(),
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, ExchangeEnum.BITSTAMP, getFirstCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);

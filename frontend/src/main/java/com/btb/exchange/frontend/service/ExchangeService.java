@@ -148,7 +148,7 @@ public class ExchangeService {
         if (!orderBookRef.ref.isNull()) {
             template.convertAndSend(WEBSOCKET_ORDERBOOK, orderBookRef.ref.get());
         }
-        if (!opportunityRef.ref.isNull()) {
+        if (showOpportunities && !opportunityRef.ref.isNull()) {
             template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
         }
     }
@@ -172,6 +172,7 @@ public class ExchangeService {
             ref = hazelcastInstance.getCPSubsystem().getAtomicReference(name);
             counter = hazelcastInstance.getCPSubsystem().getAtomicLong(name);
             semaphore = hazelcastInstance.getCPSubsystem().getSemaphore(name);
+            init();
         }
 
         void init() {

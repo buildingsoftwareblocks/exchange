@@ -38,7 +38,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     private final LeaderSelector leaderSelector;
     private final Semaphore mutex;
     private final LeaderService leaderService;
-    private final AtomicLong counter = new AtomicLong(0);
+    private final AtomicLong counter = new AtomicLong();
 
     /**
      * for testing purposes, to subscribe to broadcast events.
@@ -95,6 +95,8 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     void init() {
         // only realtime data if we are not replaying database content
         if (!config.isReplay()) {
+            // set counter to initial value to let the readers know that the counter is reset as well
+            counter.set(0);
             var subscription = CurrencyPairUtils.CurrencyPairs.stream()
                     .reduce(ProductSubscription.create(),
                             ProductSubscription.ProductSubscriptionBuilder::addOrderbook,

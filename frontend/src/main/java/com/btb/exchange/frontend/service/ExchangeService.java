@@ -1,10 +1,9 @@
 package com.btb.exchange.frontend.service;
 
+import com.btb.exchange.shared.dto.DTOUtils;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
 import com.hazelcast.cp.IAtomicReference;
@@ -14,8 +13,6 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -48,7 +45,6 @@ public class ExchangeService {
     public static final String HAZELCAST_OPPORTUNITIES = "opportunities";
 
     private final SimpMessagingTemplate template;
-    private final ObjectMapper objectMapper;
     private final HazelcastInstance hazelcastInstance;
 
     @Value("${frontend.refreshrate:1000}")
@@ -57,31 +53,18 @@ public class ExchangeService {
     @Value("${frontend.opportunities:true}")
     private boolean showOpportunities;
 
-    @Setter
     private ExchangeEnum exchange = KRAKEN;
 
     // for testing purposes, to subscribe to the event that send to the websocket
     private final Subject<String> sent = PublishSubject.create();
 
-    private IAtomicReference<String> orderBookRef;
-    private IAtomicLong orderBookCounter;
-    private ISemaphore orderBookSemaphore;
-    private IAtomicReference<String> opportunityRef;
-    private IAtomicLong opportunityCounter;
-    private ISemaphore opportunitySemaphore;
+    private ReferenceData orderBookRef;
+    private ReferenceData opportunityRef;
 
     @PostConstruct
     void init() {
-        orderBookRef = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_ORDERBOOKS);
-        orderBookCounter = hazelcastInstance.getCPSubsystem().getAtomicLong(HAZELCAST_ORDERBOOKS);
-        orderBookSemaphore = hazelcastInstance.getCPSubsystem().getSemaphore(HAZELCAST_ORDERBOOKS);
-        opportunityRef = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_OPPORTUNITIES);
-        opportunityCounter = hazelcastInstance.getCPSubsystem().getAtomicLong(HAZELCAST_OPPORTUNITIES);
-        opportunitySemaphore = hazelcastInstance.getCPSubsystem().getSemaphore(HAZELCAST_OPPORTUNITIES);
-        orderBookRef.clear();
-        opportunityRef.clear();
-        orderBookCounter.set(-1);
-        opportunityCounter.set(-1);
+        orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
+        opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
     }
 
     @Async
@@ -89,46 +72,11 @@ public class ExchangeService {
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
         messages.stream()
-                .map(this::transformOrderBook)
+                .map(o -> DTOUtils.fromDTO(o, ExchangeOrderBook.class))
                 .filter(o -> o.getExchange().equals(exchange) && (o.getCurrencyPair().equals(getFirstCurrencyPair())))
+                // pick the last element
                 .reduce((a, b) -> b)
-                .ifPresent(this::update);
-    }
-
-    ExchangeOrderBook transformOrderBook(String message) {
-        try {
-            return objectMapper.readValue(message, ExchangeOrderBook.class);
-        } catch (JsonProcessingException e) {
-            log.error("Exception", e);
-        }
-        return null;
-    }
-
-    String transform(ExchangeOrderBook orderBook) {
-        try {
-            return objectMapper.writeValueAsString(orderBook);
-        } catch (JsonProcessingException e) {
-            log.error("Exception", e);
-        }
-        return null;
-    }
-
-    Opportunities transformOpportunities(String message) {
-        try {
-            return objectMapper.readValue(message, Opportunities.class);
-        } catch (JsonProcessingException e) {
-            log.error("Exception", e);
-        }
-        return null;
-    }
-
-    String transform(Opportunities opportunities) {
-        try {
-            return objectMapper.writeValueAsString(opportunities);
-        } catch (JsonProcessingException e) {
-            log.error("Exception", e);
-        }
-        return null;
+                .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), DTOUtils.toDTO(orderBook)));
     }
 
     @Async
@@ -136,55 +84,43 @@ public class ExchangeService {
     void processOpportunities(List<String> messages) {
         // only get the last value and add it to the reference
         messages.stream()
-                .map(this::transformOpportunities)
+                .map(o -> DTOUtils.fromDTO(o, Opportunities.class))
+                // pick the last element
                 .reduce((a, b) -> b)
                 .filter(opportunities -> !opportunities.getValues().isEmpty())
-                .ifPresent(this::update);
+                .ifPresent(opportunities -> update(opportunityRef, opportunities.getOrder(), DTOUtils.toDTO(opportunities)));
     }
 
     Observable<String> subscribe() {
         return sent;
     }
 
-    void update(Opportunities opportunities) {
+    /**
+     * Update reference data in a atomic way
+     */
+    void update(ReferenceData data, long orderNr, String message) {
         try {
-            opportunitySemaphore.acquire();
-            if (opportunities.getOrder() == 0 || opportunityCounter.get() < opportunities.getOrder()) {
-                opportunityRef.set(transform(opportunities));
-                opportunityCounter.set(opportunities.getOrder());
+            data.semaphore.acquire();
+            if ((orderNr == 0) || (data.counter.get() < orderNr)) {
+                data.ref.set(message);
+                data.counter.set(orderNr);
             } else {
-                log.info("out of sync: {}", opportunities.getOrder());
+                log.info("out of sync: {}", orderNr);
             }
         } catch (InterruptedException e) {
             log.info("Exception", e);
         } finally {
-            opportunitySemaphore.release();
-        }
-    }
-
-    void update(ExchangeOrderBook orderBook) {
-        try {
-            orderBookSemaphore.acquire();
-            if (orderBook.getOrder() == 0 || orderBookCounter.get() < orderBook.getOrder()) {
-                orderBookRef.set(transform(orderBook));
-                orderBookCounter.set(orderBook.getOrder());
-            } else {
-                log.info("out of sync: {}", orderBook.getOrder());
-            }
-        } catch (InterruptedException e) {
-            log.info("Exception", e);
-        } finally {
-            orderBookSemaphore.release();
+            data.semaphore.release();
         }
     }
 
     @EventListener(ApplicationReadyEvent.class)
     public void applicationReady() {
-        // send order books
+        // send order books if there is data
         Observable.interval(refreshRate, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
                 .subscribe(e -> {
-                    if (!orderBookRef.isNull()) {
-                        var message = orderBookRef.get();
+                    if (!orderBookRef.ref.isNull()) {
+                        var message = orderBookRef.ref.get();
                         log.debug("Tick : {}", message);
                         template.convertAndSend(WEBSOCKET_ORDERBOOK, message);
                         sent.onNext(message);
@@ -192,12 +128,12 @@ public class ExchangeService {
                 });
 
         if (showOpportunities) {
-            // send opportunities
+            // send opportunities if there is data
             Observable.interval(refreshRate * 2L, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
                     .subscribe(e -> {
-                        if (!opportunityRef.isNull()) {
-                            log.debug("Send opportunities: {}", opportunityRef.get());
-                            template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.get());
+                        if (!opportunityRef.ref.isNull()) {
+                            log.debug("Send opportunities: {}", opportunityRef.ref.get());
+                            template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
                         }
                     });
         }
@@ -206,12 +142,41 @@ public class ExchangeService {
     /**
      * Show something even the replay of events is over.
      */
-    @SneakyThrows
     @EventListener
     public void handleSessionConnected(SessionSubscribeEvent event) {
         log.info("Session connected: {}", event);
-        if (!orderBookRef.isNull()) {
-            template.convertAndSend(WEBSOCKET_ORDERBOOK, orderBookRef.get());
+        if (!orderBookRef.ref.isNull()) {
+            template.convertAndSend(WEBSOCKET_ORDERBOOK, orderBookRef.ref.get());
+        }
+        if (!opportunityRef.ref.isNull()) {
+            template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
+        }
+    }
+
+    /**
+     * Change to given exchange to show on the GUI
+     */
+    public void changeExchange(ExchangeEnum exchangeEnum) {
+        exchange = exchangeEnum;
+        // make sure we receive the data due to ordering numbering of a different exchange
+        orderBookRef.init();
+    }
+
+    @lombok.Value
+    static class ReferenceData {
+        IAtomicReference<String> ref;
+        IAtomicLong counter;
+        ISemaphore semaphore;
+
+        ReferenceData(HazelcastInstance hazelcastInstance, String name) {
+            ref = hazelcastInstance.getCPSubsystem().getAtomicReference(name);
+            counter = hazelcastInstance.getCPSubsystem().getAtomicLong(name);
+            semaphore = hazelcastInstance.getCPSubsystem().getSemaphore(name);
+        }
+
+        void init() {
+            ref.clear();
+            counter.set(-1);
         }
     }
 }

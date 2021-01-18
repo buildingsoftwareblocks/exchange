@@ -27,6 +27,6 @@ public class ExchangeController {
     @GetMapping("/{exchange}")
     public void setExchange(@PathVariable ExchangeEnum exchange) {
         log.info("setExchange() : {}", exchange);
-        exchangeService.setExchange(exchange);
+        exchangeService.changeExchange(exchange);
     }
 }

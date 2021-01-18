@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 
@@ -21,6 +22,7 @@ public class OrderService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ExchangeService exchangeService;
+    private final AtomicLong counter = new AtomicLong(0);
 
     /**
      *
@@ -54,6 +56,7 @@ public class OrderService {
         });
 
         try {
+            opportunitiesBuilder.order(counter.getAndIncrement());
             var message = opportunitiesBuilder.build();
             log.debug("Send opportunities: {}", message);
             kafkaTemplate.send(OPPORTUNITIES, objectMapper.writeValueAsString(message));

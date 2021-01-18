@@ -121,6 +121,7 @@ mvn versions:display-property-updates | check if latest versions of libraries ar
 - [x] simple arbitrage
 - [x] scalable backend module
 - [x] scalable frontend module
+- [ ] scalable docker frontend
 - [ ] scalable analysis module
 - [ ] better logging
 - [ ] Triangular Arbitrage

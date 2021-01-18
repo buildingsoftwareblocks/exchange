@@ -158,7 +158,7 @@ public class ExchangeService {
      */
     public void changeExchange(ExchangeEnum exchangeEnum) {
         exchange = exchangeEnum;
-        // make sure we receive the data due to ordering numbering of a different exchange
+        // make sure we receive the data due to order numbering of a different exchange
         orderBookRef.init();
     }
 

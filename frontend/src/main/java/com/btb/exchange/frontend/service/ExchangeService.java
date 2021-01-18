@@ -4,6 +4,7 @@ import com.btb.exchange.shared.dto.DTOUtils;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
 import com.hazelcast.cp.IAtomicReference;
@@ -12,7 +13,6 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -35,7 +35,6 @@ import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPa
  */
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class ExchangeService {
 
     private static final String WEBSOCKET_ORDERBOOK = "/topic/orderbook";
@@ -46,6 +45,7 @@ public class ExchangeService {
 
     private final SimpMessagingTemplate template;
     private final HazelcastInstance hazelcastInstance;
+    private final DTOUtils dtoUtils;
 
     @Value("${frontend.refreshrate:1000}")
     private int refreshRate;
@@ -61,6 +61,12 @@ public class ExchangeService {
     private ReferenceData orderBookRef;
     private ReferenceData opportunityRef;
 
+    public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance, ObjectMapper objectMapper) {
+        this.template = template;
+        this.hazelcastInstance = hazelcastInstance;
+        this.dtoUtils = new DTOUtils(objectMapper);
+    }
+
     @PostConstruct
     void init() {
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
@@ -72,11 +78,11 @@ public class ExchangeService {
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
         messages.stream()
-                .map(o -> DTOUtils.fromDTO(o, ExchangeOrderBook.class))
+                .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
                 .filter(o -> o.getExchange().equals(exchange) && (o.getCurrencyPair().equals(getFirstCurrencyPair())))
                 // pick the last element
                 .reduce((a, b) -> b)
-                .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), DTOUtils.toDTO(orderBook)));
+                .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), dtoUtils.toDTO(orderBook)));
     }
 
     @Async
@@ -84,11 +90,11 @@ public class ExchangeService {
     void processOpportunities(List<String> messages) {
         // only get the last value and add it to the reference
         messages.stream()
-                .map(o -> DTOUtils.fromDTO(o, Opportunities.class))
+                .map(o -> dtoUtils.fromDTO(o, Opportunities.class))
                 // pick the last element
                 .reduce((a, b) -> b)
                 .filter(opportunities -> !opportunities.getValues().isEmpty())
-                .ifPresent(opportunities -> update(opportunityRef, opportunities.getOrder(), DTOUtils.toDTO(opportunities)));
+                .ifPresent(opportunities -> update(opportunityRef, opportunities.getOrder(), dtoUtils.toDTO(opportunities)));
     }
 
     Observable<String> subscribe() {
@@ -105,7 +111,7 @@ public class ExchangeService {
                 data.ref.set(message);
                 data.counter.set(orderNr);
             } else {
-                log.info("out of sync: {}", orderNr);
+                log.info("out of sync ({}): {} vs {}", data.name, data.counter.get(), orderNr);
             }
         } catch (InterruptedException e) {
             log.info("Exception", e);
@@ -167,11 +173,13 @@ public class ExchangeService {
         IAtomicReference<String> ref;
         IAtomicLong counter;
         ISemaphore semaphore;
+        String name;
 
         ReferenceData(HazelcastInstance hazelcastInstance, String name) {
             ref = hazelcastInstance.getCPSubsystem().getAtomicReference(name);
             counter = hazelcastInstance.getCPSubsystem().getAtomicLong(name);
             semaphore = hazelcastInstance.getCPSubsystem().getSemaphore(name);
+            this.name = name;
             init();
         }
 

@@ -10,11 +10,13 @@ import org.springframework.context.annotation.Configuration;
 public class HazelcastConfig {
 
     @Bean
-    public Config hazelCastConfig() {
+    Config hazelCastConfig() {
         Config config = new Config().setInstanceName("frontend-hz");
         config.getCPSubsystemConfig()
                 .addSemaphoreConfig(new SemaphoreConfig(ExchangeService.HAZELCAST_ORDERBOOKS, true, 1))
                 .addSemaphoreConfig(new SemaphoreConfig(ExchangeService.HAZELCAST_OPPORTUNITIES, true, 1));
+        config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+        config.getNetworkConfig().getJoin().getTcpIpConfig().addMember("localhost").setEnabled(true);
         return config;
     }
 }

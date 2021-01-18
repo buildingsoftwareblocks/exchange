@@ -44,7 +44,6 @@ public class ExchangeService {
     public static final String HAZELCAST_OPPORTUNITIES = "opportunities";
 
     private final SimpMessagingTemplate template;
-    private final HazelcastInstance hazelcastInstance;
     private final DTOUtils dtoUtils;
 
     @Value("${frontend.refreshrate:1000}")
@@ -58,19 +57,19 @@ public class ExchangeService {
     // for testing purposes, to subscribe to the event that send to the websocket
     private final Subject<String> sent = PublishSubject.create();
 
-    private ReferenceData orderBookRef;
-    private ReferenceData opportunityRef;
+    private final ReferenceData orderBookRef;
+    private final ReferenceData opportunityRef;
 
     public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance, ObjectMapper objectMapper) {
         this.template = template;
-        this.hazelcastInstance = hazelcastInstance;
         this.dtoUtils = new DTOUtils(objectMapper);
-    }
-
-    @PostConstruct
-    void init() {
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
+    }
+
+    void init() {
+        orderBookRef.init();
+        opportunityRef.init();
     }
 
     @Async

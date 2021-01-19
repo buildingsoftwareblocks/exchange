@@ -9,22 +9,12 @@
         <Property name="LOG_PATTERN">%d %5p %15.15t %-40.40c{1.} : %m%n</Property>
         <Property name="APP">frontend</Property>
     </Properties>
+
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
             <ThresholdFilter level="INFO"/>
             <PatternLayout pattern="${LOG_PATTERN}"/>
         </Console>
-
-        <RollingRandomAccessFile name="FileAppender" fileName="${sys:logPath:-.}/${APP}.log"
-                                 filePattern="${sys:logPath:-.}/logs/$${date:yyyy-MM}/${APP}-%d{MM-dd-yyyy}-%i.log">
-            <PatternLayout pattern="${LOG_PATTERN}"/>
-            <Policies>
-                <OnStartupTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="50 MB"/>
-                <TimeBasedTriggeringPolicy/>
-            </Policies>
-            <DefaultRolloverStrategy max="10"/>
-        </RollingRandomAccessFile>
     </Appenders>
 
     <Loggers>
@@ -32,7 +22,6 @@
 
         <Root level="info">
             <AppenderRef ref="ConsoleAppender"/>
-            <AppenderRef ref="FileAppender"/>
         </Root>
     </Loggers>
 </Configuration>

@@ -48,8 +48,8 @@ public class ExchangeService {
     @Value("${frontend.refreshrate:1000}")
     private int refreshRate;
 
-    @Value("${frontend.message.diff:50}")
-    private long messageDiff;
+    @Value("${frontend.message.diff.max:50}")
+    private long maxMessageDiff;
 
     @Value("${frontend.opportunities:true}")
     private boolean showOpportunities;
@@ -81,7 +81,6 @@ public class ExchangeService {
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
                 .filter(o -> o.getExchange().equals(exchange) && (o.getCurrencyPair().equals(getFirstCurrencyPair())))
-                .peek((o -> log.debug("ordernr:{}", o.getOrder())))
                 // pick the last element
                 .reduce((a, b) -> b)
                 .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), dtoUtils.toDTO(orderBook)));
@@ -104,7 +103,7 @@ public class ExchangeService {
     }
 
     /**
-     * Update reference data in a atomic way
+     * Update reference data in an atomic way
      */
     void update(ReferenceData data, long orderNr, String message) {
         try {
@@ -122,10 +121,12 @@ public class ExchangeService {
         }
     }
 
+    /**
+     * Is diff in orderNumber acceptable
+     */
     boolean diffAccepted(long current, long update) {
-        return current < update || (current - update > messageDiff);
+        return current < update || (current - update > maxMessageDiff);
     }
-
 
     @EventListener(ApplicationReadyEvent.class)
     public void applicationReady() {

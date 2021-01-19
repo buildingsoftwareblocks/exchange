@@ -9,6 +9,7 @@
         <Property name="LOG_PATTERN">%d %5p %15.15t %-40.40c{1.} : %m%n</Property>
         <Property name="APP">backend</Property>
     </Properties>
+
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
             <ThresholdFilter level="INFO"/>

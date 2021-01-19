@@ -44,9 +44,9 @@ public class OrderService {
 
             var profit = opportunity.getBid().multiply(factor)
                     .subtract(opportunity.getAsk().multiply(factor))
-                    .subtract(exchangeService.transactionBuyFees(amount, opportunity.getFrom(), opportunity.getCurrencyPair()))
+                    .subtract(exchangeService.transactionBuyFees(amount))
                     .subtract(exchangeService.transportationFees(amount, opportunity.getFrom(), opportunity.getTo(), opportunity.getCurrencyPair()))
-                    .subtract(exchangeService.transactionSellFees(amount, opportunity.getTo(), opportunity.getCurrencyPair()));
+                    .subtract(exchangeService.transactionSellFees(amount));
             // if profit
             if (profit.compareTo(BigDecimal.ZERO) > 0) {
                 opportunity.setAmount(factor);

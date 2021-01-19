@@ -20,12 +20,12 @@ public class ExchangeService {
     private final ApplicationConfig config;
 
     // TODO differentiate on exchange / currency pair
-    public BigDecimal transactionBuyFees(BigDecimal amount, ExchangeEnum exchange, CurrencyPair currencyPair) {
+    public BigDecimal transactionBuyFees(BigDecimal amount) {
         return amount.multiply(BigDecimal.valueOf(config.getBuyfees()));
     }
 
     // TODO differentiate on exchange / currency pair
-    public BigDecimal transactionSellFees(BigDecimal amount, ExchangeEnum exchange, CurrencyPair currencyPair) {
+    public BigDecimal transactionSellFees(BigDecimal amount) {
         return amount.multiply(BigDecimal.valueOf(config.getSellfees()));
     }
 
@@ -39,14 +39,14 @@ public class ExchangeService {
     }
 
     public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, @NonNull LocalTime time) {
-        return validData(exchange, currencyPair, LocalTime.now(), time);
+        return validData(LocalTime.now(), time);
     }
 
     /**
      * max acceptable delay in ms of received data
      */
     // TODO differentiate on exchange / currency pair
-    public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, @NonNull LocalTime now, @NonNull LocalTime time) {
+    public boolean validData(@NonNull LocalTime now, @NonNull LocalTime time) {
         if (config.isReplay()) {
             return true;
         } else {

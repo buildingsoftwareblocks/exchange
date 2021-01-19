@@ -21,8 +21,7 @@ class ExchangeServiceTest {
         var config = new ApplicationConfig();
         config.setBuyfees(0.0015);
         var service = new ExchangeService(config);
-        assertThat(service.transactionBuyFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, CurrencyPair.BTC_USD),
-                is(closeTo(BigDecimal.valueOf(150), ERROR)));
+        assertThat(service.transactionBuyFees(BigDecimal.valueOf(100000)), is(closeTo(BigDecimal.valueOf(150), ERROR)));
     }
 
     @Test
@@ -30,8 +29,7 @@ class ExchangeServiceTest {
         var config = new ApplicationConfig();
         config.setSellfees(0.0015);
         var service = new ExchangeService(config);
-        assertThat(service.transactionSellFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, CurrencyPair.BTC_USD),
-                is(closeTo(BigDecimal.valueOf(150), ERROR)));
+        assertThat(service.transactionSellFees(BigDecimal.valueOf(100000)), is(closeTo(BigDecimal.valueOf(150), ERROR)));
     }
 
     @Test
@@ -53,7 +51,7 @@ class ExchangeServiceTest {
         var service = new ExchangeService(config);
         LocalTime now = LocalTime.of(19, 20, 40, 123000000);
         LocalTime time = LocalTime.of(19, 20, 41, 122000000);
-        var result = service.validData(ExchangeEnum.KRAKEN, CurrencyPair.BTC_AUD, now, time);
+        var result = service.validData(now, time);
         assertThat(result, is(true));
     }
 }

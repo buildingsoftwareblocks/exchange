@@ -44,7 +44,7 @@ public class LeaderService {
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
 
-    private static final String base = "/backend/exchange";
+    private static final String BASE = "/backend/exchange";
     private final GroupMember groupMember;
 
     private final ConcurrentHashMap<ExchangeEnum, ExchangeService> clients = new ConcurrentHashMap<>();
@@ -63,12 +63,12 @@ public class LeaderService {
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() {
-        PersistentWatcher watcher = new PersistentWatcher(client, base, true);
+        PersistentWatcher watcher = new PersistentWatcher(client, BASE, true);
         watcher.getListenable().addListener(this::process);
         watcher.start();
 
         Arrays.stream(ExchangeEnum.values()).forEach(e -> {
-            String path = base + "/" + e.toString();
+            String path = BASE + "/" + e.toString();
             Semaphore semaphore = new Semaphore(1, true);
             semaphore.acquireUninterruptibly();
             ExchangeService exchangeService = new ExchangeService(client, this, exchangeFactory(e),

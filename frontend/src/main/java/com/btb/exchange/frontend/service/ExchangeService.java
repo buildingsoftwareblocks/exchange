@@ -13,6 +13,7 @@ import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -105,6 +106,7 @@ public class ExchangeService {
     /**
      * Update reference data in an atomic way
      */
+    @SneakyThrows
     void update(ReferenceData data, long orderNr, String message) {
         try {
             data.semaphore.acquire();
@@ -114,8 +116,6 @@ public class ExchangeService {
             } else {
                 log.info("out of sync ({}): {} vs {}", data.name, data.counter.get(), orderNr);
             }
-        } catch (InterruptedException e) {
-            log.info("Exception", e);
         } finally {
             data.semaphore.release();
         }
@@ -170,15 +170,14 @@ public class ExchangeService {
     /**
      * Change to given exchange to show on the GUI
      */
+    @SneakyThrows
     public void changeExchange(ExchangeEnum exchangeEnum) {
         exchange = exchangeEnum;
-        // make sure we receive the data due to order numbering of a different exchange
 
+        // make sure we receive the data due to order numbering of a different exchange
         try {
             orderBookRef.semaphore.acquire();
             orderBookRef.init();
-        } catch (InterruptedException e) {
-            log.info("Exception", e);
         } finally {
             orderBookRef.semaphore.release();
         }

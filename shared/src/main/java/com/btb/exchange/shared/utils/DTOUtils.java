@@ -1,4 +1,4 @@
-package com.btb.exchange.shared.dto;
+package com.btb.exchange.shared.utils;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;

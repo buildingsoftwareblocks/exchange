@@ -1,6 +1,6 @@
 package com.btb.exchange.frontend.service;
 
-import com.btb.exchange.shared.dto.DTOUtils;
+import com.btb.exchange.shared.utils.DTOUtils;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;

@@ -17,17 +17,17 @@ public class DTOUtils {
         try {
             return objectMapper.readValue(content, valueType);
         } catch (JsonProcessingException e) {
-           log.error("Exception", e);
-           throw new IllegalArgumentException(e.getMessage());
+            log.error("Exception", e);
+            throw new RuntimeException(e.getCause());
         }
     }
 
-    public  String toDTO(Object value) {
+    public String toDTO(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             log.error("Exception", e);
-            throw new IllegalArgumentException(e.getMessage());
+            throw new RuntimeException(e.getCause());
         }
     }
 }

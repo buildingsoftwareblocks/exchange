@@ -22,7 +22,7 @@ public class OrderService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ExchangeService exchangeService;
-    private final AtomicLong counter = new AtomicLong(0);
+    private final AtomicLong counter = new AtomicLong(1);
 
     /**
      *

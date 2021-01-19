@@ -96,7 +96,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         // only realtime data if we are not replaying database content
         if (!config.isReplay()) {
             // set counter to initial value to let the readers know that the counter is reset as well
-            counter.set(0);
+            counter.set(1);
             var subscription = CurrencyPairUtils.CurrencyPairs.stream()
                     .reduce(ProductSubscription.create(),
                             ProductSubscription.ProductSubscriptionBuilder::addOrderbook,
@@ -141,7 +141,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     void teardown() {
         if (!config.isReplay()) {
-            // Disconnect from exchange (blocking again)
+            // Disconnect from exchange (blocking to wait for it)
             exchange.disconnect().blockingAwait();
         }
     }

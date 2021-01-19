@@ -23,7 +23,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -48,6 +47,9 @@ public class ExchangeService {
 
     @Value("${frontend.refreshrate:1000}")
     private int refreshRate;
+
+    @Value("${frontend.message.diff:50}")
+    private long messageDiff;
 
     @Value("${frontend.opportunities:true}")
     private boolean showOpportunities;
@@ -79,6 +81,7 @@ public class ExchangeService {
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
                 .filter(o -> o.getExchange().equals(exchange) && (o.getCurrencyPair().equals(getFirstCurrencyPair())))
+                .peek((o -> log.debug("ordernr:{}", o.getOrder())))
                 // pick the last element
                 .reduce((a, b) -> b)
                 .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), dtoUtils.toDTO(orderBook)));
@@ -90,9 +93,9 @@ public class ExchangeService {
         // only get the last value and add it to the reference
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, Opportunities.class))
+                .filter(opportunities -> !opportunities.getValues().isEmpty())
                 // pick the last element
                 .reduce((a, b) -> b)
-                .filter(opportunities -> !opportunities.getValues().isEmpty())
                 .ifPresent(opportunities -> update(opportunityRef, opportunities.getOrder(), dtoUtils.toDTO(opportunities)));
     }
 
@@ -106,7 +109,7 @@ public class ExchangeService {
     void update(ReferenceData data, long orderNr, String message) {
         try {
             data.semaphore.acquire();
-            if ((orderNr == 0) || (data.counter.get() < orderNr)) {
+            if (diffAccepted(data.counter.get(), orderNr)) {
                 data.ref.set(message);
                 data.counter.set(orderNr);
             } else {
@@ -118,6 +121,11 @@ public class ExchangeService {
             data.semaphore.release();
         }
     }
+
+    boolean diffAccepted(long current, long update) {
+        return current < update || (current - update > messageDiff);
+    }
+
 
     @EventListener(ApplicationReadyEvent.class)
     public void applicationReady() {
@@ -164,7 +172,15 @@ public class ExchangeService {
     public void changeExchange(ExchangeEnum exchangeEnum) {
         exchange = exchangeEnum;
         // make sure we receive the data due to order numbering of a different exchange
-        orderBookRef.init();
+
+        try {
+            orderBookRef.semaphore.acquire();
+            orderBookRef.init();
+        } catch (InterruptedException e) {
+            log.info("Exception", e);
+        } finally {
+            orderBookRef.semaphore.release();
+        }
     }
 
     @lombok.Value

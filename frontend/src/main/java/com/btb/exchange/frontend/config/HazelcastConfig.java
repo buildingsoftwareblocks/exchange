@@ -16,7 +16,7 @@ public class HazelcastConfig {
                 .addSemaphoreConfig(new SemaphoreConfig(ExchangeService.HAZELCAST_ORDERBOOKS, true, 1))
                 .addSemaphoreConfig(new SemaphoreConfig(ExchangeService.HAZELCAST_OPPORTUNITIES, true, 1));
         config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-        config.getNetworkConfig().getJoin().getTcpIpConfig().addMember("localhost").setEnabled(true);
+        config.getNetworkConfig().getJoin().getTcpIpConfig().addMember("127.0.0.1").setEnabled(true);
         return config;
     }
 }

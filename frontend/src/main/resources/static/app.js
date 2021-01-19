@@ -9,6 +9,8 @@ function setConnected(connected) {
         $("#conversation").hide();
     }
     $("#asks").html("");
+    $("#bids").html("");
+    $("#opportunities").html("");
 }
 
 function connect() {

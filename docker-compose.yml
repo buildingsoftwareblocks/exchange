@@ -34,10 +34,19 @@ services:
     volumes:
       - ./data/mongodb:/data/db
 
+  nginx-frontend:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+    ports:
+      - "8081:4000"
+
   frontend:
     image: ${REPO}/exchange-frontend
     ports:
-      - "8081:8081"
+      - "8081"
     environment:
       - KAFKA_SERVER=kafka
 
@@ -52,3 +61,10 @@ services:
       - BACKEND_RECORDING=false
       - BACKEND_REPLAY=false
       - JAVA_OPTS=-XX:MaxDirectMemorySize=128m
+
+  analysis:
+    image: ${REPO}/exchange-analysis
+    ports:
+      - "8083"
+    environment:
+      - KAFKA_SERVER=kafka

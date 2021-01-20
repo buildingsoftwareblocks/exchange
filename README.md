@@ -10,6 +10,12 @@ A docker compose script is provided. Start the application with:
 docker-compose --env-file env.dev up -d
 ``
 
+With scaling:
+
+``
+docker-compose --env-file env.dev up --scale frontend=2 --scale backend=2 -d
+``
+
 Create your own *env.dev* file from the *env.template* file.
 
 During development, the supported services (kafka, mongoDB) can be useful. For this a seperate docker-compose file is

@@ -114,7 +114,7 @@ public class ExchangeService {
                 data.ref.set(message);
                 data.counter.set(orderNr);
             } else {
-                log.info("out of sync ({}): {} vs {}", data.name, data.counter.get(), orderNr);
+                log.debug("out of sync ({}): {} vs {}", data.name, data.counter.get(), orderNr);
             }
         } finally {
             data.semaphore.release();

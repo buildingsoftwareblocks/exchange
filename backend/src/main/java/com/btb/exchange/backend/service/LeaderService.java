@@ -46,6 +46,8 @@ public class LeaderService {
 
     private static final String BASE = "/backend/exchange";
     private final GroupMember groupMember;
+    // log the status, but prevent it do it every X seconds.
+    private long nrOfExchangeslogged = 0;
 
     private final ConcurrentHashMap<ExchangeEnum, ExchangeService> clients = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<ExchangeService, Semaphore> semaphores = new ConcurrentHashMap<>();
@@ -90,12 +92,17 @@ public class LeaderService {
         var leaders = clients.values().stream().filter(ExchangeService::hasLeadership).count();
         if (leaders > exchangePerMember) {
             log.info("reschuffle needed : {} / {}", leaders, exchangePerMember);
-            // we must reschedule
+            // we must reschedule number of exchanges we should not have
             var toReschedule = leaders - exchangePerMember;
-            var reschedule = clients.values().stream().filter(ExchangeService::hasLeadership).limit(toReschedule).collect(Collectors.toList());
-            reschedule.forEach(c -> semaphores.get(c).release());
+            clients.values().stream().filter(ExchangeService::hasLeadership).limit(toReschedule).forEach(c -> semaphores.get(c).release());
         } else {
-            log.debug("NO reschuffle needed : {} / {}", leaders, exchangePerMember);
+            if (nrOfExchangeslogged != leaders) {
+                nrOfExchangeslogged = leaders;
+                var exchanges = clients.values().stream().filter(ExchangeService::hasLeadership).map(ExchangeService::leaderOf).collect(Collectors.joining(","));
+                log.info("Handling exchanges({}) : [{}]", leaders, exchanges);
+            } else {
+                log.debug("No reschuffle needed : {} / {}", leaders, exchangePerMember);
+            }
         }
     }
 

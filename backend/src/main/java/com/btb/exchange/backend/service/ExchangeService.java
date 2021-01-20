@@ -78,9 +78,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         return leaderSelector.hasLeadership();
     }
 
-    String leaderOf() {
+    ExchangeEnum leaderOf() {
         if (hasLeadership()) {
-            return exchangeEnum.toString();
+            return exchangeEnum;
         } else {
             return null;
         }

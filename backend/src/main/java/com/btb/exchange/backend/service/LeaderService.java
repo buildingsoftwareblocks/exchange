@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
@@ -47,7 +49,7 @@ public class LeaderService {
     private static final String BASE = "/backend/exchange";
     private final GroupMember groupMember;
     // log the status, but prevent it do it every X seconds.
-    private long nrOfExchangeslogged = 0;
+    private Set<ExchangeEnum> exchangeslogged = new HashSet<>();
 
     private final ConcurrentHashMap<ExchangeEnum, ExchangeService> clients = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<ExchangeService, Semaphore> semaphores = new ConcurrentHashMap<>();
@@ -89,19 +91,18 @@ public class LeaderService {
 
     private void checkExchangeDistribution() {
         var exchangePerMember = ceiling(ExchangeEnum.values().length, groupMember.getCurrentMembers().keySet().size());
-        var leaders = clients.values().stream().filter(ExchangeService::hasLeadership).count();
-        if (leaders > exchangePerMember) {
-            log.info("reschuffle needed : {} / {}", leaders, exchangePerMember);
+        var leaders = clients.values().stream().filter(ExchangeService::hasLeadership).map(ExchangeService::leaderOf).collect(Collectors.toSet());
+        if (leaders.size() > exchangePerMember) {
+            log.info("reschuffle needed : {} / {}", leaders.size(), exchangePerMember);
             // we must reschedule number of exchanges we should not have
-            var toReschedule = leaders - exchangePerMember;
+            var toReschedule = leaders.size() - exchangePerMember;
             clients.values().stream().filter(ExchangeService::hasLeadership).limit(toReschedule).forEach(c -> semaphores.get(c).release());
         } else {
-            if (nrOfExchangeslogged != leaders) {
-                nrOfExchangeslogged = leaders;
-                var exchanges = clients.values().stream().filter(ExchangeService::hasLeadership).map(ExchangeService::leaderOf).collect(Collectors.joining(","));
-                log.info("Handling exchanges({}) : [{}]", leaders, exchanges);
+            if (!exchangeslogged.equals(leaders)) {
+                exchangeslogged = leaders;
+                log.info("Handling exchanges() : {}", leaders);
             } else {
-                log.debug("No reschuffle needed : {} / {}", leaders, exchangePerMember);
+                log.debug("No reschuffle needed : {} / {}", leaders.size(), exchangePerMember);
             }
         }
     }

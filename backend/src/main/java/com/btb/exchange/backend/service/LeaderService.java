@@ -100,7 +100,7 @@ public class LeaderService {
         } else {
             if (!exchangeslogged.equals(leaders)) {
                 exchangeslogged = leaders;
-                log.info("Handling exchanges() : {}", leaders);
+                log.info("Handling exchanges : {}", leaders);
             } else {
                 log.debug("No reschuffle needed : {} / {}", leaders.size(), exchangePerMember);
             }

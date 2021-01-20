@@ -26,6 +26,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/kafka:/kafka
+    depends_on:
+      - kafka_zk
 
   mongodb:
     image: mongo
@@ -68,3 +70,6 @@ services:
       - "8083"
     environment:
       - KAFKA_SERVER=kafka
+      - ANALYSIS_BUYFEES=0
+      - ANALYSIS_SELLFEES=0
+      - ANALYSIS_TRANSPORTFEES=0.1

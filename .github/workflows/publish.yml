@@ -39,3 +39,5 @@ jobs:
         run: docker push $REPO/exchange-backend:latest
       - name: Publish Docker image Frontend
         run: docker push $REPO/exchange-frontend:latest
+      - name: Publish Docker image Analysis
+        run: docker push $REPO/exchange-analysis:latest

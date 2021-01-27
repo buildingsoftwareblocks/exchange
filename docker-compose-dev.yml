@@ -26,54 +26,11 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/kafka:/kafka
-    depends_on:
-      - kafka_zk
 
-  mongo:
+  mongodb:
     image: mongo
     ports:
       - 27017-27019:27017-27019
     volumes:
-      - ./data/mongo:/data/db
+      - ./data/mongodb:/data/db
 
-#
-# https://github.com/deviantony/docker-elk
-#
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:$ELK_VERSION
-    volumes:
-      - ./config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    environment:
-      ES_JAVA_OPTS: "-Xmx1024m -Xms1024m"
-      ELASTIC_PASSWORD: changeme
-      # Use single node discovery in order to disable production mode and avoid bootstrap checks.
-      # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
-      discovery.type: single-node
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:${ELK_VERSION}
-    volumes:
-      - ./config/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./config/pipeline:/usr/share/logstash/pipeline
-    ports:
-      - "5044:5044"
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-      - "9600:9600"
-    environment:
-      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
-    depends_on:
-      - elasticsearch
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:${ELK_VERSION}
-    volumes:
-      - ./config/kibana.yml:/usr/share/kibana/config/kibana.yml
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch

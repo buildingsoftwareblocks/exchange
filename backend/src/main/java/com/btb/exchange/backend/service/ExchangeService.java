@@ -132,7 +132,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     }
 
     public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) {
-        log.debug("Order book: {}", orderBook);
+        log.trace("Order book: {}", orderBook);
         try {
             var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
                     objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(), exchangeEnum, currencyPair, orderBook)));

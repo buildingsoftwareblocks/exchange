@@ -25,6 +25,12 @@ created. Use it with:
 docker-compose -f docker-compose-dev.yml --env-file env.dev up -d
 ``
 
+| System | link |
+| ------- | --- |
+| admin | http://localhost:8080/ |
+| frontend | http://localhost:8081/ |
+| log GUI | http://localhost:5601/ |
+
 ## Test Performance
 
 Using testcontainers can be slow during testing, because the used containers are removed after the test. The article
@@ -129,7 +135,7 @@ mvn versions:display-property-updates | check if latest versions of libraries ar
 - [x] scalable frontend module
 - [x] scalable docker frontend
 - [ ] scalable analysis module
-- [ ] better logging
+- [x] better logging
 - [ ] Triangular Arbitrage
 - [ ] better frontend GUI
 - [ ] Binary messages in Kafka

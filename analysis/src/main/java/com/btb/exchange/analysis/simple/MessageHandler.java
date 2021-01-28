@@ -2,29 +2,35 @@ package com.btb.exchange.analysis.simple;
 
 import com.btb.exchange.analysis.services.OrderService;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.btb.exchange.shared.utils.DTOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class MessageHandler {
 
-    private final ObjectMapper objectMapper;
     private final SimpleExchangeArbitrage simpleExchangeArbitrage;
     private final OrderService orderService;
+    private final DTOUtils dtoUtils;
+
+    public MessageHandler(ObjectMapper objectMapper, SimpleExchangeArbitrage simpleExchangeArbitrage, OrderService orderService) {
+        this.simpleExchangeArbitrage = simpleExchangeArbitrage;
+        this.orderService = orderService;
+        this.dtoUtils = new DTOUtils(objectMapper);
+    }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
-    public void process(String message) throws JsonProcessingException {
-        log.trace("Order book received: {}", message);
-        var orderbook = objectMapper.readValue(message, ExchangeOrderBook.class);
-        var opportunities = simpleExchangeArbitrage.process(orderbook);
-        orderService.processSimpleExchangeArbitrage(opportunities);
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
+    public void process(List<String> messages) {
+        log.debug("process {} messages", messages.size());
+        messages.stream()
+                .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
+                .forEach(orderBook -> orderService.processSimpleExchangeArbitrage(simpleExchangeArbitrage.process(orderBook)));
     }
 }

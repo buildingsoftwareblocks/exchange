@@ -29,7 +29,7 @@ public class ExchangeService {
         return amount.multiply(BigDecimal.valueOf(config.getSellfees()));
     }
 
-    public BigDecimal transportationFees(BigDecimal amount, ExchangeEnum from, ExchangeEnum to, CurrencyPair currencyPair) {
+    public BigDecimal transportationFees(CurrencyPair currencyPair) {
         // just a fixed number to start with
         return switch (currencyPair.base.getCurrencyCode()) {
             case "BTC" -> BigDecimal.valueOf(config.getTransportfees() * 5);

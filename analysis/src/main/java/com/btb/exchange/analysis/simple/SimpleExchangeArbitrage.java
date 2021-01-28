@@ -1,35 +1,46 @@
 package com.btb.exchange.analysis.simple;
 
+import com.btb.exchange.analysis.hazelcast.ExchangeDataSerializableFactory;
 import com.btb.exchange.analysis.services.ExchangeService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.dto.Opportunity;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.trade.LimitOrder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class SimpleExchangeArbitrage {
 
     private final ExchangeService exchangeService;
 
-    private final Map<Key, BigDecimal> bids = new ConcurrentHashMap<>();
-    private final Map<Key, BigDecimal> asks = new ConcurrentHashMap<>();
+    private final Map<Key, BigDecimal> bids;
+    private final Map<Key, BigDecimal> asks;
     // to prevent working with old data
-    private final Map<Key, LocalTime> updated = new ConcurrentHashMap<>();
+    private final Map<Key, LocalTime> updated;
+
+    public SimpleExchangeArbitrage(ExchangeService exchangeService, HazelcastInstance hazelcastInstance) {
+        this.exchangeService = exchangeService;
+        bids = hazelcastInstance.getMap("bids");
+        asks = hazelcastInstance.getMap("asks");
+        updated = hazelcastInstance.getMap("updated");
+    }
 
     public Opportunities process(ExchangeOrderBook orderBook) {
         Optional<BigDecimal> askPrice = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice);
@@ -44,7 +55,7 @@ public class SimpleExchangeArbitrage {
 
     /**
      * Find opportunities
-     *
+     * <p>
      * TODO amount of opportunity should contain amount of incoming order.
      */
     private Opportunities findOpportunities(ExchangeOrderBook orderBook) {
@@ -68,10 +79,33 @@ public class SimpleExchangeArbitrage {
         return opportunitiesBuilder.build();
     }
 
-    @Value
+    @Data
     @AllArgsConstructor
-    static class Key {
-        ExchangeEnum exchange;
-        CurrencyPair currencyPair;
+    @NoArgsConstructor
+    static public class Key implements IdentifiedDataSerializable {
+        private ExchangeEnum exchange;
+        private CurrencyPair currencyPair;
+
+        @Override
+        public int getFactoryId() {
+            return ExchangeDataSerializableFactory.FACTORY_ID;
+        }
+
+        @Override
+        public int getClassId() {
+            return ExchangeDataSerializableFactory.KEY_TYPE;
+        }
+
+        @Override
+        public void writeData(ObjectDataOutput out) throws IOException {
+            out.writeUTF(exchange.toString());
+            out.writeUTF(currencyPair.toString());
+        }
+
+        @Override
+        public void readData(ObjectDataInput in) throws IOException {
+            exchange = ExchangeEnum.valueOf(in.readUTF());
+            currencyPair = new CurrencyPair(in.readUTF());
+        }
     }
 }

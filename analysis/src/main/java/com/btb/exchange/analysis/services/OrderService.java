@@ -3,26 +3,32 @@ package com.btb.exchange.analysis.services;
 import com.btb.exchange.shared.dto.Opportunities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.cp.IAtomicLong;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class OrderService {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ExchangeService exchangeService;
-    private final AtomicLong counter = new AtomicLong(1);
+    private final IAtomicLong counter;
+
+    public OrderService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper, ExchangeService exchangeService, HazelcastInstance hazelcastInstance) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
+        this.exchangeService = exchangeService;
+        this.counter = hazelcastInstance.getCPSubsystem().getAtomicLong("counter");
+    }
 
     /**
      *
@@ -45,7 +51,7 @@ public class OrderService {
             var profit = opportunity.getBid().multiply(factor)
                     .subtract(opportunity.getAsk().multiply(factor))
                     .subtract(exchangeService.transactionBuyFees(amount))
-                    .subtract(exchangeService.transportationFees(amount, opportunity.getFrom(), opportunity.getTo(), opportunity.getCurrencyPair()))
+                    .subtract(exchangeService.transportationFees(opportunity.getCurrencyPair()))
                     .subtract(exchangeService.transactionSellFees(amount));
             // if profit
             if (profit.compareTo(BigDecimal.ZERO) > 0) {

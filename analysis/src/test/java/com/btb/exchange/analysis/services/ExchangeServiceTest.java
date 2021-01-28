@@ -37,12 +37,9 @@ class ExchangeServiceTest {
         var config = new ApplicationConfig();
         config.setTransportfees(1);
         var service = new ExchangeService(config);
-        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.BTC_USD),
-                is(closeTo(BigDecimal.valueOf(5), ERROR)));
-        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.ETH_BTC),
-                is(closeTo(BigDecimal.valueOf(4), ERROR)));
-        assertThat(service.transportationFees(BigDecimal.valueOf(100000), ExchangeEnum.KRAKEN, ExchangeEnum.BINANCE, CurrencyPair.DASH_BTC),
-                is(closeTo(BigDecimal.valueOf(1), ERROR)));
+        assertThat(service.transportationFees( CurrencyPair.BTC_USD), is(closeTo(BigDecimal.valueOf(5), ERROR)));
+        assertThat(service.transportationFees(CurrencyPair.ETH_BTC), is(closeTo(BigDecimal.valueOf(4), ERROR)));
+        assertThat(service.transportationFees(CurrencyPair.DASH_BTC), is(closeTo(BigDecimal.valueOf(1), ERROR)));
     }
 
     @Test

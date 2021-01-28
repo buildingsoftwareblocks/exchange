@@ -2,6 +2,9 @@
 A PoC to retrieve real-time Crypto Exchange data, as first step for an ordering bot! The code belongs to this
 [YouTube serie](https://www.youtube.com/playlist?list=PLQkCUEPgDgc1dItDlEjQ-sTXjY7kR-76z).
 
+## System Overview
+![System Overview](system-overview.png)
+
 ## Run Application
 Prebuild docker containers can be found on: [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks).
 A docker compose script is provided. Start the application with:

@@ -21,8 +21,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -42,7 +45,39 @@ public class SimpleExchangeArbitrage {
         updated = hazelcastInstance.getMap("updated");
     }
 
-    public Opportunities process(ExchangeOrderBook orderBook) {
+    public Opportunities process(List<ExchangeOrderBook> orderBooks) {
+        var opportunitiesList = orderBooks.stream().map(this::process).collect(Collectors.toList());
+        return merge(opportunitiesList);
+    }
+
+    /**
+     * Merge opportunities of same currency pair, from, to together.
+     */
+    Opportunities merge(List<Opportunities> opportunitiesList) {
+        var opportunitiesBuilder = Opportunities.builder();
+        var opportunities = opportunitiesList.stream().flatMap(o -> o.getValues().stream()).collect(Collectors.toList());
+        var distinct = opportunities
+                .stream()
+                .filter(distinctByKeys(Opportunity::getCurrencyPair, Opportunity::getFrom, Opportunity::getTo))
+                .collect(Collectors.toList());
+        return opportunitiesBuilder.values(distinct).build();
+    }
+
+    private static <T> Predicate<T> distinctByKeys(Function<? super T, ?>... keyExtractors) {
+        final Map<List<?>, Boolean> seen = new ConcurrentHashMap<>();
+
+        return t ->
+        {
+            final List<?> keys = Arrays.stream(keyExtractors)
+                    .map(ke -> ke.apply(t))
+                    .collect(Collectors.toList());
+
+            return seen.putIfAbsent(keys, Boolean.TRUE) == null;
+        };
+    }
+
+
+    Opportunities process(ExchangeOrderBook orderBook) {
         Optional<BigDecimal> askPrice = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice);
         Optional<BigDecimal> bidPrice = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice);
 

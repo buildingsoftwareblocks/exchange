@@ -53,7 +53,7 @@ services:
       - KAFKA_SERVER=kafka
       - ADMIN_SERVER=admin
       - LOGSTASH_SERVER=logstash
-      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m
+      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
     depends_on:
       - kafka
 
@@ -66,10 +66,10 @@ services:
       - BACKEND_ZOOKEEPER=exchange_zk:2181
       - MONGO_DB_SERVER=mongo
       - LOGSTASH_SERVER=logstash
+      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
       - ADMIN_SERVER=admin
       - BACKEND_RECORDING=false
       - BACKEND_REPLAY=false
-      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m
     depends_on:
       - mongo
       - kafka
@@ -83,7 +83,7 @@ services:
       - KAFKA_SERVER=kafka
       - LOGSTASH_SERVER=logstash
       - ADMIN_SERVER=admin
-      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m
+      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
       - ANALYSIS_BUYFEES=0
       - ANALYSIS_SELLFEES=0
       - ANALYSIS_TRANSPORTFEES=0.1
@@ -124,7 +124,7 @@ services:
       - "5000:5000/udp"
       - "9600:9600"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
     depends_on:
       - elasticsearch
 

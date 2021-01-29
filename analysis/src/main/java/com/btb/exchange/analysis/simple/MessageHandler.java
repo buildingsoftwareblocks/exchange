@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,8 +30,7 @@ public class MessageHandler {
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
     public void process(List<String> messages) {
         log.debug("process {} messages", messages.size());
-        messages.stream()
-                .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
-                .forEach(orderBook -> orderService.processSimpleExchangeArbitrage(simpleExchangeArbitrage.process(orderBook)));
+        var orderBooks = messages.stream().map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class)).collect(Collectors.toList());
+        orderService.processSimpleExchangeArbitrage(simpleExchangeArbitrage.process(orderBooks));
     }
 }

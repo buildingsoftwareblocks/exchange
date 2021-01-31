@@ -4,9 +4,21 @@ package com.btb.exchange.shared.dto;
  * All possible exchanges
  */
 public enum ExchangeEnum {
-    KRAKEN,
-    BITSTAMP,
+    BANKERA,
     BINANCE,
     BITFINEX,
-    COINBASE
+    BITMEX,
+    BITSTAMP,
+    BTCMARKETS,
+    CEXIO,
+    COINBASE,
+    COINJAR,
+    COINMATE,
+    GEMINI,
+    HITBTC,
+    HUOBI,
+    KRAKEN,
+    LGO,
+    OKCOIN,
+    POLONIEX
 }

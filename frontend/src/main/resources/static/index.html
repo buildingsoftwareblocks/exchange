@@ -38,6 +38,9 @@
                 </div>
             </form>
         </div>
+        <div class="col-sm-1" id="selectExchange">
+            <select id="exchanges"></select>
+        </div>
     </div>
     <div class="row">
         <div class="col-2">
@@ -81,10 +84,24 @@
                     <th style="width: 20%">To</th>
                     <th style="width: 20%">Ask</th>
                     <th style="width: 20%">Bid</th>
-                    <th style="width: 20%">Date</th>
+                    <th style="width: 20%">Timestamp</th>
                 </tr>
                 </thead>
                 <tbody id="opportunities"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Exchange</th>
+                    <th>Timestamp</th>
+                    <th>Currency Pairs</th>
+                </tr>
+                </thead>
+                <tbody id="exchangesUpdated"></tbody>
             </table>
         </div>
     </div>

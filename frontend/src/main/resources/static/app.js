@@ -4,13 +4,18 @@ function setConnected(connected) {
     $("#connect").prop("disabled", connected);
     $("#disconnect").prop("disabled", !connected);
     if (connected) {
-        $("#conversation").show();
+        $("#selectExchange").show();
+        $("#asks").show();
+        $("#bids").show();
+        $("#opportunities").show();
+        $("#exchangesUpdated").show();
     } else {
-        $("#conversation").hide();
+        $("#selectExchange").hide();
+        $("#asks").hide();
+        $("#bids").hide();
+        $("#opportunities").hide();
+        $("#exchangesUpdated").hide();
     }
-    $("#asks").html("");
-    $("#bids").html("");
-    $("#opportunities").html("");
 }
 
 function connect() {
@@ -19,13 +24,40 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
+        fillDropdown();
         stompClient.subscribe('/topic/orderbook', function (message) {
             showOrderBook(JSON.parse(message.body));
         });
         stompClient.subscribe('/topic/opportunities', function (message) {
             showOpportunities(JSON.parse(message.body));
         });
+        stompClient.subscribe('/topic/exchanges', function (message) {
+            showExchanges(JSON.parse(message.body));
+        });
     });
+}
+
+function fillDropdown() {
+    let dropdown = $('#exchanges');
+    dropdown.empty();
+    dropdown.append('<option value="-" selected="true" disabled>Choose Exchange</option>');
+
+    const url = 'exchange/all';
+
+    // Populate dropdown with list of exchanges
+    $.getJSON(url, function (data) {
+        $.each(data, function (key,entry) {
+            dropdown.append($('<option></option>').attr('value', entry).text(entry));
+        })
+    });
+}
+
+function exchangeSelected() {
+    let dropdown =  document.getElementById("exchanges").value;
+    if (dropdown !== "-") {
+        const url = 'exchange/' + dropdown;
+        $.get(url);
+    }
 }
 
 function disconnect() {
@@ -72,7 +104,19 @@ function showOpportunities(message) {
     }
 }
 
+function showExchanges(message) {
+    $("#exchangesUpdated").html("");
+    for (const [key, value] of Object.entries(message)) {
+        $("#exchangesUpdated").append("<tr>");
+        $("#exchangesUpdated").append("<td>" + key + "</td>");
+        $("#exchangesUpdated").append("<td>" + value.timestamp + "</td>");
+        $("#exchangesUpdated").append("<td nowrap>" + value.cps + "</td>");
+        $("#exchangesUpdated").append("</tr>");
+    }
+}
+
 $(function () {
+    setConnected(false);
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
@@ -81,6 +125,9 @@ $(function () {
     });
     $("#disconnect").click(function () {
         disconnect();
+    });
+    $('#exchanges').click(function () {
+        exchangeSelected();
     });
 });
 

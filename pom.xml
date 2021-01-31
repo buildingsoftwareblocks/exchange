@@ -18,8 +18,8 @@
 
     <properties>
         <java.version>15</java.version>
-        <xchange.version>5.0.4</xchange.version>
 
+        <xchange.version>5.0.4</xchange.version>
         <testcontainers.version>1.15.1</testcontainers.version>
         <sockjs-client.version>1.1.2</sockjs-client.version>
         <stomp-websocket.version>2.3.3-1</stomp-websocket.version>
@@ -28,6 +28,7 @@
         <disruptor.version>3.4.2</disruptor.version>
         <curator.version>5.1.0</curator.version>
         <logstash-gelf.version>1.14.1</logstash-gelf.version>
+        <spring-boot-admin.version>2.3.1</spring-boot-admin.version>
 
         <!-- plugins -->
         <sonar.version>3.7.0.1746</sonar.version>
@@ -37,7 +38,6 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
 
         <docker.repo>local</docker.repo>
-        <spring-boot-admin.version>2.3.1</spring-boot-admin.version>
     </properties>
 
     <dependencyManagement>
@@ -77,12 +77,7 @@
             </dependency>
             <dependency>
                 <groupId>org.knowm.xchange</groupId>
-                <artifactId>xchange-stream-kraken</artifactId>
-                <version>${xchange.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.knowm.xchange</groupId>
-                <artifactId>xchange-stream-bitstamp</artifactId>
+                <artifactId>xchange-stream-bankera</artifactId>
                 <version>${xchange.version}</version>
             </dependency>
             <dependency>
@@ -97,7 +92,77 @@
             </dependency>
             <dependency>
                 <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-bitflyer</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-bitmex</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-bitstamp</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-btcmarkets</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-cexio</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
                 <artifactId>xchange-stream-coinbasepro</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-coinjar</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-coinmate</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-gemini</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-hitbtc</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-huobi</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-kraken</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-lgo</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-okcoin</artifactId>
+                <version>${xchange.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.knowm.xchange</groupId>
+                <artifactId>xchange-stream-poloniex2</artifactId>
                 <version>${xchange.version}</version>
             </dependency>
 

@@ -46,18 +46,20 @@ public class OrderService {
 
         opportunities.getValues().forEach(opportunity -> {
             // TODO we assume that all these assets are available in the ask order!
-            var factor = amount.divide(opportunity.getAsk(), MathContext.DECIMAL64);
+            if (opportunity.getAsk().compareTo(BigDecimal.ZERO) > 0) {
+                var factor = amount.divide(opportunity.getAsk(), MathContext.DECIMAL64);
 
-            var profit = opportunity.getBid().multiply(factor)
-                    .subtract(opportunity.getAsk().multiply(factor))
-                    .subtract(exchangeService.transactionBuyFees(amount))
-                    .subtract(exchangeService.transportationFees(opportunity.getCurrencyPair()))
-                    .subtract(exchangeService.transactionSellFees(amount));
-            // if profit
-            if (profit.compareTo(BigDecimal.ZERO) > 0) {
-                opportunity.setAmount(factor);
-                opportunity.setProfit(profit);
-                opportunitiesBuilder.value(opportunity);
+                var profit = opportunity.getBid().multiply(factor)
+                        .subtract(opportunity.getAsk().multiply(factor))
+                        .subtract(exchangeService.transactionBuyFees(amount))
+                        .subtract(exchangeService.transportationFees(opportunity.getCurrencyPair()))
+                        .subtract(exchangeService.transactionSellFees(amount));
+                // if profit
+                if (profit.compareTo(BigDecimal.ZERO) > 0) {
+                    opportunity.setAmount(factor);
+                    opportunity.setProfit(profit);
+                    opportunitiesBuilder.value(opportunity);
+                }
             }
         });
 

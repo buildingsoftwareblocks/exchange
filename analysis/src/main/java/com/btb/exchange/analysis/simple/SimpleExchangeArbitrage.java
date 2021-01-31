@@ -6,6 +6,7 @@ import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.dto.Opportunity;
+import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
@@ -56,8 +57,7 @@ public class SimpleExchangeArbitrage {
     Opportunities merge(List<Opportunities> opportunitiesList) {
         var opportunitiesBuilder = Opportunities.builder();
         var opportunities = opportunitiesList.stream().flatMap(o -> o.getValues().stream()).collect(Collectors.toList());
-        var distinct = opportunities
-                .stream()
+        var distinct = opportunities.stream()
                 .filter(distinctByKeys(Opportunity::getCurrencyPair, Opportunity::getFrom, Opportunity::getTo))
                 .collect(Collectors.toList());
         return opportunitiesBuilder.values(distinct).build();
@@ -105,12 +105,13 @@ public class SimpleExchangeArbitrage {
                 .filter(e -> bid.subtract(e.getValue()).compareTo(BigDecimal.ZERO) > 0)
                 .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, e.getKey().exchange, e.getValue(), orderBook.getExchange(), bid)));
 
-        bids.entrySet().stream()
-                .filter(e -> e.getKey().currencyPair.equals(currencyPair))
-                .filter(e -> exchangeService.validData(e.getKey().exchange, e.getKey().currencyPair, updated.get(e.getKey())))
-                .filter(e -> e.getValue().subtract(ask).compareTo(BigDecimal.ZERO) > 0)
-                .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, orderBook.getExchange(), ask, e.getKey().getExchange(), e.getValue())));
-
+        if (ask.compareTo(BigDecimal.ZERO) > 0) {
+            bids.entrySet().stream()
+                    .filter(e -> e.getKey().currencyPair.equals(currencyPair))
+                    .filter(e -> exchangeService.validData(e.getKey().exchange, e.getKey().currencyPair, updated.get(e.getKey())))
+                    .filter(e -> e.getValue().subtract(ask).compareTo(BigDecimal.ZERO) > 0)
+                    .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, orderBook.getExchange(), ask, e.getKey().getExchange(), e.getValue())));
+        }
         return opportunitiesBuilder.build();
     }
 
@@ -134,13 +135,13 @@ public class SimpleExchangeArbitrage {
         @Override
         public void writeData(ObjectDataOutput out) throws IOException {
             out.writeUTF(exchange.toString());
-            out.writeUTF(currencyPair.toString());
+            CurrencyPairUtils.writeData(out, currencyPair);
         }
 
         @Override
         public void readData(ObjectDataInput in) throws IOException {
             exchange = ExchangeEnum.valueOf(in.readUTF());
-            currencyPair = new CurrencyPair(in.readUTF());
+            currencyPair = CurrencyPairUtils.readData(in);
         }
     }
 }

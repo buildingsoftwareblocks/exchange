@@ -1,5 +1,6 @@
 package com.btb.exchange.frontend.service;
 
+import com.btb.exchange.frontend.hazelcast.ExchangeDataSerializableFactory;
 import com.btb.exchange.shared.utils.DTOUtils;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
@@ -9,12 +10,20 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
 import com.hazelcast.cp.IAtomicReference;
 import com.hazelcast.cp.ISemaphore;
+import com.hazelcast.map.IMap;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -24,8 +33,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
-import java.util.List;
+import java.io.IOException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.btb.exchange.shared.dto.ExchangeEnum.KRAKEN;
 import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
@@ -39,6 +52,7 @@ public class ExchangeService {
 
     private static final String WEBSOCKET_ORDERBOOK = "/topic/orderbook";
     private static final String WEBSOCKET_OPPORTUNITIES = "/topic/opportunities";
+    private static final String WEBSOCKET_EXCHANGES = "/topic/exchanges";
 
     public static final String HAZELCAST_ORDERBOOKS = "orderBooks";
     public static final String HAZELCAST_OPPORTUNITIES = "opportunities";
@@ -62,12 +76,14 @@ public class ExchangeService {
 
     private final ReferenceData orderBookRef;
     private final ReferenceData opportunityRef;
+    private final IMap<Key, ExchangeValue> updated;
 
     public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance, ObjectMapper objectMapper) {
         this.template = template;
         this.dtoUtils = new DTOUtils(objectMapper);
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
+        updated = hazelcastInstance.getMap("frontend_updated");
     }
 
     void init() {
@@ -79,12 +95,19 @@ public class ExchangeService {
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
+        final var now = LocalTime.now();
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
+                .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
                 .filter(o -> o.getExchange().equals(exchange) && (o.getCurrencyPair().equals(getFirstCurrencyPair())))
                 // pick the last element
                 .reduce((a, b) -> b)
                 .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), dtoUtils.toDTO(orderBook)));
+    }
+
+    void updated(Key key, LocalTime localTime, CurrencyPair cp) {
+        updated.computeIfAbsent(key, v -> new ExchangeValue(localTime, cp));
+        updated.computeIfPresent(key, (k,v) -> new ExchangeValue(localTime, v.cps, cp));
     }
 
     @Async
@@ -139,18 +162,25 @@ public class ExchangeService {
                         template.convertAndSend(WEBSOCKET_ORDERBOOK, message);
                         sent.onNext(message);
                     }
-                });
 
-        if (showOpportunities) {
-            // send opportunities if there is data
-            Observable.interval(refreshRate * 2L, TimeUnit.MILLISECONDS).observeOn(Schedulers.io())
-                    .subscribe(e -> {
-                        if (!opportunityRef.ref.isNull()) {
-                            log.debug("Send opportunities: {}", opportunityRef.ref.get());
-                            template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
-                        }
-                    });
-        }
+                    if (showOpportunities && !opportunityRef.ref.isNull()) {
+                        // send opportunities if there is data
+                        log.debug("Send opportunities: {}", opportunityRef.ref.get());
+                        template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
+                    }
+
+                    if (!updated.isEmpty()) {
+                        DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+                        Map<String, Map<String, String>> message = new TreeMap<>();
+                        updated.forEach((k, v) -> {
+                            Map<String, String> map = new HashMap<>();
+                            map.put("timestamp", v.timestamp.format(formatter));
+                            map.put("cps", v.cps.toString());
+                            message.put(k.exchange.toString(), map);
+                        });
+                        template.convertAndSend(WEBSOCKET_EXCHANGES, dtoUtils.toDTO(message));
+                    }
+        });
     }
 
     /**
@@ -201,6 +231,73 @@ public class ExchangeService {
         void init() {
             ref.clear();
             counter.set(-1);
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Key implements IdentifiedDataSerializable {
+        private ExchangeEnum exchange;
+
+        @Override
+        public int getFactoryId() {
+            return ExchangeDataSerializableFactory.FACTORY_ID;
+        }
+
+        @Override
+        public int getClassId() {
+            return ExchangeDataSerializableFactory.KEY_TYPE;
+        }
+
+        @Override
+        public void writeData(ObjectDataOutput out) throws IOException {
+            out.writeUTF(exchange.toString());
+        }
+
+        @Override
+        public void readData(ObjectDataInput in) throws IOException {
+            exchange = ExchangeEnum.valueOf(in.readUTF());
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class ExchangeValue implements IdentifiedDataSerializable {
+        private LocalTime timestamp;
+        private Set<CurrencyPair> cps = new HashSet<>();
+
+        public ExchangeValue(LocalTime localTime, CurrencyPair cp) {
+            this.timestamp = localTime;
+            cps.add(cp);
+        }
+
+        public ExchangeValue(LocalTime localTime, Set<CurrencyPair> cps, CurrencyPair cp) {
+            this.timestamp = localTime;
+            this.cps.addAll(cps);
+            this.cps.add(cp);
+        }
+
+        @Override
+        public int getFactoryId() {
+            return ExchangeDataSerializableFactory.FACTORY_ID;
+        }
+
+        @Override
+        public int getClassId() {
+            return ExchangeDataSerializableFactory.EXCHANGE_VALUE_TYPE;
+        }
+
+        @Override
+        public void writeData(ObjectDataOutput out) throws IOException {
+            out.writeLong(timestamp.toNanoOfDay());
+            out.writeUTFArray(cps.stream().map(CurrencyPair::toString).toArray(String[]::new));
+        }
+
+        @Override
+        public void readData(ObjectDataInput in) throws IOException {
+            timestamp = LocalTime.ofNanoOfDay(in.readLong());
+            cps = Arrays.stream(in.readUTFArray()).map(CurrencyPair::new).collect(Collectors.toSet());
         }
     }
 }

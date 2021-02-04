@@ -7,104 +7,126 @@
     <script src="/webjars/jquery/jquery.min.js"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
     <script src="/accounting.min.js"></script>
     <script src="/app.js"></script>
 </head>
 <body>
 <noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
-    enabled. Please enable
-    Javascript and reload this page!</h2></noscript>
+    enabled. Please enable Javascript and reload this page!</h2></noscript>
+
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-4">
-            <table class="table">
-                <tr>
-                    <th scope="row">Exchange</th>
-                    <td id="exchange"></td>
-                </tr>
-                <tr>
-                    <th scope="row">Currency Pair</th>
-                    <td id="cp"></td>
-                </tr>
-            </table>
-        </div>
-        <div class="col-sm-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="connect">WebSocket connection:</label>
-                    <button id="connect" class="btn" type="submit">Connect</button>
-                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
-                    </button>
+
+    <nav class="navbar navbar-light bg-light justify-content-between">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="opportunities-tab" data-toggle="tab" href="#opportunities-ref" role="tab"
+                   aria-controls="opportunities-ref"
+                   aria-selected="true">Opportunities</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="orderbook-tab" data-toggle="tab" href="#orderbook-ref" role="tab"
+                   aria-controls="orderbook-ref"
+                   aria-selected="false">Order Book</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="timestamps-tab" data-toggle="tab" href="#timestamps-ref" role="tab"
+                   aria-controls="timestamps-ref"
+                   aria-selected="false">Timestamps</a>
+            </li>
+        </ul>
+        <form class="form-inline">
+            <div class="form-group">
+                <button id="connect" class="btn" type="submit">Connect</button>
+                <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
+                </button>
+            </div>
+        </form>
+    </nav>
+
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="opportunities-ref" role="tabpanel"
+             aria-labelledby="opportunities-tab">
+            <div class="row">
+                <div class="col-7">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th style="width: 20%">Currency</th>
+                            <th style="width: 20%">Profit</th>
+                            <th style="width: 20%">From</th>
+                            <th style="width: 20%">To</th>
+                            <th style="width: 20%">Ask</th>
+                            <th style="width: 20%">Bid</th>
+                            <th style="width: 20%">Timestamp</th>
+                        </tr>
+                        </thead>
+                        <tbody id="opportunities"></tbody>
+                    </table>
                 </div>
-            </form>
+            </div>
         </div>
-        <div class="col-sm-1" id="selectExchange">
-            <select id="exchanges"></select>
+
+        <div class="tab-pane fade" id="orderbook-ref" role="tabpanel" aria-labelledby="orderbook-tab">
+            <div class="row">
+                <div class="col-2">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Asking</th>
+                            <th>Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody id="asks"></tbody>
+                    </table>
+                </div>
+                <div class="col-2">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Bidding</th>
+                            <th>Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody id="bids"></tbody>
+                    </table>
+                </div>
+                <div class="col-3">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Exchange</th>
+                            <th nowrap>Currency Pair</th>
+                            <th><select id="exchanges"></select></th>
+                        </tr>
+                        </thead>
+                        <tr>
+                            <td id="exchange"></td>
+                            <td id="cp"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-2">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Orderbook</th>
-                </tr>
-                <tr>
-                    <th>Asking</th>
-                    <th>Amount</th>
-                </tr>
-                </thead>
-                <tbody id="asks"></tbody>
-            </table>
-        </div>
-        <div class="col-2">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Orderbook</th>
-                </tr>
-                <tr>
-                    <th>Bidding</th>
-                    <th>Amount</th>
-                </tr>
-                </thead>
-                <tbody id="bids"></tbody>
-            </table>
-        </div>
-        <div class="col-sm-7">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Opportunities</th>
-                </tr>
-                <tr>
-                    <th style="width: 20%">Currency</th>
-                    <th style="width: 20%">Profit</th>
-                    <th style="width: 20%">From</th>
-                    <th style="width: 20%">To</th>
-                    <th style="width: 20%">Ask</th>
-                    <th style="width: 20%">Bid</th>
-                    <th style="width: 20%">Timestamp</th>
-                </tr>
-                </thead>
-                <tbody id="opportunities"></tbody>
-            </table>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-3">
-            <table class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Exchange</th>
-                    <th>Timestamp</th>
-                    <th>Currency Pairs</th>
-                </tr>
-                </thead>
-                <tbody id="exchangesUpdated"></tbody>
-            </table>
+
+        <div class="tab-pane fade" id="timestamps-ref" role="tabpanel" aria-labelledby="timestamps-tab">
+            <div class="row">
+                <div class="col-3">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Exchange</th>
+                            <th>Timestamp</th>
+                            <th>Currency Pairs</th>
+                        </tr>
+                        </thead>
+                        <tbody id="exchangesUpdated"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
 </body>
 </html>

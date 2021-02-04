@@ -40,7 +40,7 @@ function connect() {
 function fillDropdown() {
     let dropdown = $('#exchanges');
     dropdown.empty();
-    dropdown.append('<option value="-" selected="true" disabled>Choose Exchange</option>');
+    dropdown.append('<option value="-" selected disabled hidden>Choose Exchange</option>');
 
     const url = 'exchange/all';
 
@@ -120,6 +120,7 @@ $(function () {
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
+    connect();
     $("#connect").click(function () {
         connect();
     });

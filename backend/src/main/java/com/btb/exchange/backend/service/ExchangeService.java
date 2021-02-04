@@ -105,7 +105,8 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         if (!config.isReplay()) {
             // set counter to initial value to let the readers know that the counter is reset as well
             counter.set(1);
-            var subscription = CurrencyPairUtils.CurrencyPairs.stream()
+            var subscription = exchange.getExchangeSymbols().stream()
+                    .filter(CurrencyPairUtils.CurrencyPairs::contains)
                     .reduce(ProductSubscription.create(),
                             ProductSubscription.ProductSubscriptionBuilder::addOrderbook,
                             (psb1, psb2) -> {

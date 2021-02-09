@@ -137,7 +137,7 @@ mvn versions:display-property-updates | check if latest versions of libraries ar
 - [x] scalable backend module
 - [x] scalable frontend module
 - [x] scalable docker frontend
-- [ ] scalable analysis module
+- [x] scalable analysis module
 - [x] better logging
 - [ ] Triangular Arbitrage
 - [ ] better frontend GUI

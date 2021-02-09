@@ -23,22 +23,26 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.lang.NonNull;
 
 import java.io.Closeable;
-import java.util.concurrent.Semaphore;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ExchangeService extends LeaderSelectorListenerAdapter implements Closeable {
 
     private final StreamingExchange exchange;
-    private final ExchangeEnum exchangeEnum;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
 
+    private final ExchangeEnum exchangeEnum;
+    private final  boolean subscriptionRequired;
+
     private final LeaderSelector leaderSelector;
-    private final Semaphore mutex;
-    private final LeaderService leaderService;
     private final AtomicLong counter = new AtomicLong();
+    private final AtomicBoolean leader = new AtomicBoolean(false);
 
     /**
      * for testing purposes, to subscribe to broadcast events.
@@ -49,23 +53,23 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     /**
      *
      */
-    public ExchangeService(CuratorFramework client, LeaderService leaderService, StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper,
-                           ApplicationConfig config,
-                           ExchangeEnum exchangeEnum,
-                           String path, Semaphore mutex) {
-        this.mutex = mutex;
-        this.leaderService = leaderService;
+    public ExchangeService(CuratorFramework client, ExecutorService executor,
+                           StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate,
+                           ObjectMapper objectMapper, ApplicationConfig config,
+                           ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path) {
         this.exchange = exchange;
-        this.exchangeEnum = exchangeEnum;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
         this.config = config;
 
-        leaderSelector = new LeaderSelector(client, path, this);
+        this.exchangeEnum = exchangeEnum;
+        this.subscriptionRequired = subscriptionRequired;
+
+        leaderSelector = new LeaderSelector(client, path, executor,this);
         leaderSelector.autoRequeue();
     }
 
-    public void start() {
+    void start() {
         leaderSelector.start();
     }
 
@@ -76,6 +80,13 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     boolean hasLeadership() {
         return leaderSelector.hasLeadership();
+    }
+
+    void interruptLeadership() {
+        if (leader.get()) {
+            log.info("{} interupted", exchangeEnum);
+            leaderSelector.interruptLeadership();
+        }
     }
 
     ExchangeEnum leaderOf() {
@@ -91,12 +102,17 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         try {
             log.info("Take leadership - {}", exchangeEnum);
             init();
-            mutex.acquireUninterruptibly();
+            leader.set(true);
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch(InterruptedException i) {
+            log.info("Interrupted {} : {}", exchangeEnum, i.getMessage());
+            Thread.currentThread().interrupt();
+        } catch(Throwable t) {
+            log.error("Exception", t);
         } finally {
             log.info("Relinquishing leadership - {}", exchangeEnum);
+            leader.set(false);
             teardown();
-            mutex.release();
-            leaderService.acquire(this);
         }
     }
 
@@ -105,25 +121,51 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         if (!config.isReplay()) {
             // set counter to initial value to let the readers know that the counter is reset as well
             counter.set(1);
-            var subscription = exchange.getExchangeSymbols().stream()
-                    .filter(CurrencyPairUtils.CurrencyPairs::contains)
+
+            // set symbol, but due to the different Exchange implementations this is not always successful.
+            final Collection<CurrencyPair> symbols = symbols(exchange);
+            log.info("{} : subscription needed : {}, symbols: {}", exchangeEnum, subscriptionRequired, symbols);
+            var subscription = symbols.stream()
                     .reduce(ProductSubscription.create(),
                             ProductSubscription.ProductSubscriptionBuilder::addOrderbook,
                             (psb1, psb2) -> {
                                 throw new UnsupportedOperationException();
                             }).build();
 
-            exchange.connect(subscription).blockingAwait();
+            if (subscriptionRequired) {
+                exchange.connect(subscription).blockingAwait();
+            } else {
+                exchange.connect().blockingAwait();
+            }
 
             // Subscribe order book data with the reference to the currency pair.
-            CurrencyPairUtils.CurrencyPairs.forEach(this::subscribe);
+            symbols.forEach(this::subscribe);
+        }
+    }
+
+    Collection<CurrencyPair> symbols(StreamingExchange exchange) {
+        try {
+            var results = exchange.getExchangeSymbols().stream().filter(CurrencyPairUtils::overlap).limit(10).collect(Collectors.toSet());
+            // to be sure that the default currency pairs are their as well
+            results.addAll(CurrencyPairUtils.CurrencyPairs);
+            return results;
+        } catch (Exception e) {
+            log.info("Exception: {}", e.getMessage());
+            return CurrencyPairUtils.CurrencyPairs;
         }
     }
 
     private void subscribe(CurrencyPair currencyPair) {
-        exchange.getStreamingMarketDataService().getOrderBook(currencyPair)
-                .subscribe(orderBook -> process(orderBook, currencyPair), throwable -> log.error("Error in trade subscription", throwable));
+        try {
+            log.info("{} : Subscribe: {}", exchangeEnum, currencyPair);
+            exchange.getStreamingMarketDataService().getOrderBook(currencyPair)
+                    .subscribe(orderBook -> process(orderBook, currencyPair), throwable -> log.error("Error in trade subscription", throwable));
+        } catch (Exception e) {
+            log.error("Exception", e);
+        }
     }
+
+
 
     /**
      * for testing purposes
@@ -151,7 +193,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     void teardown() {
         if (!config.isReplay()) {
             // Disconnect from exchange (blocking to wait for it)
-            exchange.disconnect().blockingAwait();
+            if (exchange.isAlive()) {
+                exchange.disconnect().blockingAwait();
+            }
         }
     }
 }

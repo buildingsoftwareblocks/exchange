@@ -32,7 +32,8 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -77,9 +78,10 @@ class DatabaseServiceTest {
     }
 
     ExchangeService createExchangeService() {
+        ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(true, false, true);
-        return new ExchangeService(Mockito.mock(CuratorFramework.class), leaderService, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, objectMapper, config, ExchangeEnum.KRAKEN, "/", Mockito.mock(Semaphore.class));
+        return new ExchangeService(Mockito.mock(CuratorFramework.class), executor, Mockito.mock(StreamingExchange.class),
+                kafkaTemplate, objectMapper, config, ExchangeEnum.KRAKEN,  true,"/");
     }
 
     @Test

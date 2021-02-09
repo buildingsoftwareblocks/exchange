@@ -1,6 +1,5 @@
 package com.btb.exchange.analysis.hazelcast;
 
-import com.btb.exchange.analysis.simple.SimpleExchangeArbitrage;
 import com.hazelcast.nio.serialization.DataSerializableFactory;
 import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
 
@@ -13,7 +12,7 @@ public class ExchangeDataSerializableFactory implements DataSerializableFactory 
     @Override
     public IdentifiedDataSerializable create(int typeId) {
         return switch (typeId) {
-            case KEY_TYPE -> new SimpleExchangeArbitrage.Key();
+            case KEY_TYPE -> new ExchangeCPKey();
             default -> null;
         };
     }

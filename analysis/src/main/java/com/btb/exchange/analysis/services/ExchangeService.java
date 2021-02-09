@@ -1,8 +1,9 @@
 package com.btb.exchange.analysis.services;
 
 import com.btb.exchange.analysis.config.ApplicationConfig;
+import com.btb.exchange.analysis.hazelcast.ExchangeCPKey;
 import com.btb.exchange.shared.dto.ExchangeEnum;
-import lombok.RequiredArgsConstructor;
+import com.hazelcast.core.HazelcastInstance;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.lang.NonNull;
@@ -11,13 +12,19 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class ExchangeService {
 
     private final ApplicationConfig config;
+    private final Map<ExchangeCPKey, LocalTime> updated;
+
+    public ExchangeService(ApplicationConfig config, HazelcastInstance hazelcastInstance) {
+        this.config = config;
+        updated = hazelcastInstance.getMap("exchangeservice.updated");
+    }
 
     // TODO differentiate on exchange / currency pair
     public BigDecimal transactionBuyFees(BigDecimal amount) {
@@ -39,14 +46,14 @@ public class ExchangeService {
     }
 
     public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, @NonNull LocalTime time) {
-        return validData(LocalTime.now(), time);
+        return true;
+        //return validData(LocalTime.now(), time, new ExchangeCPKey(exchange, currencyPair));
     }
 
     /**
      * max acceptable delay in ms of received data
      */
-    // TODO differentiate on exchange / currency pair
-    public boolean validData(@NonNull LocalTime now, @NonNull LocalTime time) {
+    public boolean validData(@NonNull LocalTime now, @NonNull LocalTime time, ExchangeCPKey exchangeCPKey) {
         if (config.isReplay()) {
             return true;
         } else {

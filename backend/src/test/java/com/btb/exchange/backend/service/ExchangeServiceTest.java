@@ -31,7 +31,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
@@ -71,9 +72,10 @@ class ExchangeServiceTest {
     }
 
     ExchangeService createExchangeService() {
+        ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(false, true, true);
-        return new ExchangeService(curatorFramework, leaderService, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, objectMapper, config, ExchangeEnum.KRAKEN, "/", Mockito.mock(Semaphore.class));
+        return new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
+                kafkaTemplate, objectMapper, config, ExchangeEnum.KRAKEN, true,"/");
     }
 
     @Test

@@ -72,5 +72,4 @@
             <artifactId>kafka</artifactId>
         </dependency>
     </dependencies>
-
 </project>

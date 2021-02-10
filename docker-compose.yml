@@ -18,6 +18,7 @@ services:
     environment:
       KAFKA_ADVERTISED_HOST_NAME: ${DOCKER_GATEWAY_HOST:-host.docker.internal}
       KAFKA_ZOOKEEPER_CONNECT: kafka_zk:2181
+      KAFKA_MESSAGE_MAX_BYTES: 3000000
       KAFKA_LOG_RETENTION_HOURS: 24
       KAFKA_LOG_RETENTION_BYTES: 53687091200
       KAFKA_LOG_SEGMENT_BYTES: 1073741824
@@ -63,7 +64,7 @@ services:
       - "8082"
     environment:
       - KAFKA_SERVER=kafka
-      - BACKEND_ZOOKEEPER=exchange_zk:2181
+      - BACKEND_ZOOKEEPER_HOST=exchange_zk:2181
       - MONGO_DB_SERVER=mongo
       - LOGSTASH_SERVER=logstash
       - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector

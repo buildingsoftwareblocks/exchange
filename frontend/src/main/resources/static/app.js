@@ -4,13 +4,16 @@ function setConnected(connected) {
     $("#connect").prop("disabled", connected);
     $("#disconnect").prop("disabled", !connected);
     if (connected) {
-        $("#selectExchange").show();
+        $("#exchange").show();
+        $("#cp").show();
         $("#asks").show();
         $("#bids").show();
         $("#opportunities").show();
         $("#exchangesUpdated").show();
+
     } else {
-        $("#selectExchange").hide();
+        $("#exchange").hide();
+        $("#cp").hide();
         $("#asks").hide();
         $("#bids").hide();
         $("#opportunities").hide();

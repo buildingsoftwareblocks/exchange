@@ -56,6 +56,8 @@ public class ExchangeService {
 
     public static final String HAZELCAST_ORDERBOOKS = "orderBooks";
     public static final String HAZELCAST_OPPORTUNITIES = "opportunities";
+    public static final String HAZELCAST_UPDATED = "updated";
+    public static final String HAZELCAST_EXCHANGE = "exchange";
 
     private final SimpMessagingTemplate template;
     private final DTOUtils dtoUtils;
@@ -69,21 +71,22 @@ public class ExchangeService {
     @Value("${frontend.opportunities:true}")
     private boolean showOpportunities;
 
-    private ExchangeEnum exchange = KRAKEN;
-
     // for testing purposes, to subscribe to the event that send to the websocket
     private final Subject<String> sent = PublishSubject.create();
 
     private final ReferenceData orderBookRef;
     private final ReferenceData opportunityRef;
     private final IMap<Key, ExchangeValue> updated;
+    private final IAtomicReference<ExchangeEnum> exchange;
 
     public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance, ObjectMapper objectMapper) {
         this.template = template;
         this.dtoUtils = new DTOUtils(objectMapper);
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
-        updated = hazelcastInstance.getMap("frontend_updated");
+        updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
+        exchange = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_EXCHANGE);
+        exchange.set(KRAKEN);
     }
 
     void init() {
@@ -99,7 +102,8 @@ public class ExchangeService {
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
                 .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
-                .filter(o -> o.getExchange().equals(exchange) && (o.getCurrencyPair().equals(getFirstCurrencyPair())))
+                //.filter(o -> o.getExchange().equals(exchange.get()) && (o.getCurrencyPair().equals(getFirstCurrencyPair())))
+                .filter(o -> o.getExchange().equals(exchange.get()))
                 // pick the last element
                 .reduce((a, b) -> b)
                 .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), dtoUtils.toDTO(orderBook)));
@@ -170,17 +174,21 @@ public class ExchangeService {
                     }
 
                     if (!updated.isEmpty()) {
-                        DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
-                        Map<String, Map<String, String>> message = new TreeMap<>();
-                        updated.forEach((k, v) -> {
-                            Map<String, String> map = new HashMap<>();
-                            map.put("timestamp", v.timestamp.format(formatter));
-                            map.put("cps", v.cps.toString());
-                            message.put(k.exchange.toString(), map);
-                        });
-                        template.convertAndSend(WEBSOCKET_EXCHANGES, dtoUtils.toDTO(message));
+                        template.convertAndSend(WEBSOCKET_EXCHANGES, exchangesData());
                     }
         });
+    }
+
+    String exchangesData() {
+        DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+        Map<String, Map<String, String>> message = new TreeMap<>();
+        updated.forEach((k, v) -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("timestamp", v.timestamp.format(formatter));
+            map.put("cps", v.cps.toString());
+            message.put(k.exchange.toString(), map);
+        });
+        return dtoUtils.toDTO(message);
     }
 
     /**
@@ -195,6 +203,9 @@ public class ExchangeService {
         if (showOpportunities && !opportunityRef.ref.isNull()) {
             template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
         }
+        if (!updated.isEmpty()) {
+            template.convertAndSend(WEBSOCKET_EXCHANGES, exchangesData());
+        }
     }
 
     /**
@@ -202,7 +213,7 @@ public class ExchangeService {
      */
     @SneakyThrows
     public void changeExchange(ExchangeEnum exchangeEnum) {
-        exchange = exchangeEnum;
+        exchange.set(exchangeEnum);
 
         // make sure we receive the data due to order numbering of a different exchange
         try {
@@ -298,6 +309,33 @@ public class ExchangeService {
         public void readData(ObjectDataInput in) throws IOException {
             timestamp = LocalTime.ofNanoOfDay(in.readLong());
             cps = Arrays.stream(in.readUTFArray()).map(CurrencyPair::new).collect(Collectors.toSet());
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CurrencyPairValue implements IdentifiedDataSerializable {
+        private CurrencyPair currencyPair;
+
+        @Override
+        public int getFactoryId() {
+            return ExchangeDataSerializableFactory.FACTORY_ID;
+        }
+
+        @Override
+        public int getClassId() {
+            return ExchangeDataSerializableFactory.CURRENYPAIR_VALUE_TYPE;
+        }
+
+        @Override
+        public void writeData(ObjectDataOutput out) throws IOException {
+            out.writeUTF(currencyPair.toString());
+        }
+
+        @Override
+        public void readData(ObjectDataInput in) throws IOException {
+            currencyPair = new CurrencyPair(in.readUTF());
         }
     }
 }

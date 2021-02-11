@@ -16,7 +16,7 @@ docker-compose --env-file env.dev up -d
 With scaling:
 
 ``
-docker-compose --env-file env.dev up --scale frontend=2 --scale backend=2 -d
+docker-compose --env-file env.dev up --scale frontend=2 --scale backend=2 --scale analysis=2 -d
 ``
 
 Create your own *env.dev* file from the *env.template* file.

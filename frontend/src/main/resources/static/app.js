@@ -113,7 +113,7 @@ function showExchanges(message) {
         $("#exchangesUpdated").append("<tr>");
         $("#exchangesUpdated").append("<td>" + key + "</td>");
         $("#exchangesUpdated").append("<td>" + value.timestamp + "</td>");
-        $("#exchangesUpdated").append("<td nowrap>" + value.cps + "</td>");
+        $("#exchangesUpdated").append("<td>" + value.cps + "</td>");
         $("#exchangesUpdated").append("</tr>");
     }
 }

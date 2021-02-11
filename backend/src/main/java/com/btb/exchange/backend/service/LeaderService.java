@@ -53,7 +53,7 @@ public class LeaderService {
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
 
-    private static final String BASE = "/backend/exchange";
+    private static final String BASE = "/exchange";
     private final GroupMember groupMember;
     // log the status, but prevent it do it every X seconds.
     private Set<ExchangeEnum> exchangeslogged = new HashSet<>();
@@ -68,7 +68,7 @@ public class LeaderService {
         this.config = config;
 
         String id = "backend-" + UUID.randomUUID().toString();
-        groupMember = new GroupMember(client, "/backend/leaders", id);
+        groupMember = new GroupMember(client, "/leaders", id);
         groupMember.start();
     }
 

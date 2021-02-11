@@ -86,7 +86,10 @@ public class ExchangeService {
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
         updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
         exchange = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_EXCHANGE);
-        exchange.set(KRAKEN);
+        // set default value
+        if (exchange.isNull()) {
+            exchange.set(KRAKEN);
+        }
     }
 
     void init() {

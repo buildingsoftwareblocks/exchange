@@ -46,18 +46,18 @@ public class ExchangeService {
     }
 
     public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, @NonNull LocalTime time) {
-        return true;
-        //return validData(LocalTime.now(), time, new ExchangeCPKey(exchange, currencyPair));
+        return validData(LocalTime.now(), time, new ExchangeCPKey(exchange, currencyPair));
     }
 
     /**
      * max acceptable delay in ms of received data
      */
+    // TODO better config per exchange/currencypair
     public boolean validData(@NonNull LocalTime now, @NonNull LocalTime time, ExchangeCPKey exchangeCPKey) {
         if (config.isReplay()) {
             return true;
         } else {
-            return now.minus(2000, ChronoUnit.MILLIS).isBefore(time);
+            return now.minus(2, ChronoUnit.MINUTES).isBefore(time);
         }
     }
 }

@@ -1,10 +1,10 @@
 package com.btb.exchange.frontend.service;
 
 import com.btb.exchange.frontend.hazelcast.ExchangeDataSerializableFactory;
-import com.btb.exchange.shared.utils.DTOUtils;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;
+import com.btb.exchange.shared.utils.DTOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
@@ -41,7 +41,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.btb.exchange.shared.dto.ExchangeEnum.KRAKEN;
-import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 
 /**
  * Handle Exchanges

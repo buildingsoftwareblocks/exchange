@@ -4,11 +4,12 @@ import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.cp.ISemaphore;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -33,18 +34,31 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class DatabaseService {
+
+    public static final String HAZELCAST_DB = "database";
 
     private final MessageRepository repository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ApplicationConfig config;
     private final ObjectMapper objectMapper;
     private final ReactiveMongoTemplate mongoTemplate;
+    private final ISemaphore semaphore;
 
     // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<Message> stored = PublishSubject.create();
+
+    public DatabaseService(MessageRepository repository, KafkaTemplate<String, String> kafkaTemplate,
+                           ApplicationConfig config, ObjectMapper objectMapper, ReactiveMongoTemplate mongoTemplate,
+                           HazelcastInstance hazelcastInstance) {
+        this.repository = repository;
+        this.kafkaTemplate = kafkaTemplate;
+        this.config = config;
+        this.objectMapper = objectMapper;
+        this.mongoTemplate = mongoTemplate;
+        semaphore = hazelcastInstance.getCPSubsystem().getSemaphore(HAZELCAST_DB);
+    }
 
     @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
@@ -81,15 +95,29 @@ public class DatabaseService {
 
     @EventListener(ContextRefreshedEvent.class)
     public void initIndicesAfterStartup() {
-        log.info("Start create indexes");
-        var mappingContext = mongoTemplate.getConverter().getMappingContext();
-        var resolver = new MongoPersistentEntityIndexResolver(mappingContext);
+        if (config.isReplay() || config.isRecording()) {
+            boolean permit = false;
+            try {
+                // make sure that only 1 backend instance inits the indices
+                semaphore.acquire();
+                permit = true;
+                log.info("Start create indexes");
+                var mappingContext = mongoTemplate.getConverter().getMappingContext();
+                var resolver = new MongoPersistentEntityIndexResolver(mappingContext);
 
-        // consider only entities that are annotated with @Document
-        mappingContext.getPersistentEntities().stream()
-                .filter(it -> it.isAnnotationPresent(Document.class))
-                .forEach(it -> createIndexForEntity(it.getType(), resolver));
-        log.info("End create indexes");
+                // consider only entities that are annotated with @Document
+                mappingContext.getPersistentEntities().stream()
+                        .filter(it -> it.isAnnotationPresent(Document.class))
+                        .forEach(it -> createIndexForEntity(it.getType(), resolver));
+                log.info("End create indexes");
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e.getCause());
+            } finally {
+                if (permit) {
+                    semaphore.release();
+                }
+            }
+        }
     }
 
     @SneakyThrows

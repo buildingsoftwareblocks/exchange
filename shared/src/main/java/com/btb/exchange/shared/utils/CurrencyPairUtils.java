@@ -8,7 +8,8 @@ import org.knowm.xchange.currency.CurrencyPair;
 import java.io.IOException;
 import java.util.List;
 
-import static org.knowm.xchange.currency.CurrencyPair.*;
+import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
+import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @UtilityClass
 public class CurrencyPairUtils {

@@ -70,6 +70,8 @@ public class ExchangeService {
 
     @Value("${frontend.opportunities:true}")
     private boolean showOpportunities;
+    @Value("${frontend.updated:true}")
+    private boolean showUpdated;
 
     // for testing purposes, to subscribe to the event that send to the websocket
     private final Subject<String> sent = PublishSubject.create();
@@ -176,7 +178,7 @@ public class ExchangeService {
                         template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
                     }
 
-                    if (!updated.isEmpty()) {
+                    if (showUpdated && !updated.isEmpty()) {
                         template.convertAndSend(WEBSOCKET_EXCHANGES, exchangesData());
                     }
         });
@@ -206,7 +208,7 @@ public class ExchangeService {
         if (showOpportunities && !opportunityRef.ref.isNull()) {
             template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
         }
-        if (!updated.isEmpty()) {
+        if (showUpdated && !updated.isEmpty()) {
             template.convertAndSend(WEBSOCKET_EXCHANGES, exchangesData());
         }
     }

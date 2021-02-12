@@ -14,6 +14,8 @@ import com.hazelcast.map.IMap;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
@@ -79,14 +81,27 @@ public class ExchangeService {
     private final ReferenceData opportunityRef;
     private final IMap<Key, ExchangeValue> updated;
     private final IAtomicReference<ExchangeEnum> exchange;
+    private final DistributionSummary kafkaMessagesCounter;
+    private final DistributionSummary wsMessagesCounter;
 
-    public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance, ObjectMapper objectMapper) {
+    public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance,
+                           ObjectMapper objectMapper, MeterRegistry registry) {
         this.template = template;
         this.dtoUtils = new DTOUtils(objectMapper);
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
         updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
         exchange = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_EXCHANGE);
+
+        kafkaMessagesCounter = DistributionSummary.builder("frontend.kafka.queue")
+                .description("indicates number of message read form the kafka queue")
+                .register(registry);
+
+        wsMessagesCounter= DistributionSummary.builder("frontend.ws.queue")
+                .description("indicates the size of message send to the web socket")
+                .baseUnit("bytes")
+                .register(registry);
+
         // set default value
         if (exchange.isNull()) {
             exchange.set(KRAKEN);
@@ -102,6 +117,7 @@ public class ExchangeService {
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
+        kafkaMessagesCounter.record(messages.size());
         final var now = LocalTime.now();
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
@@ -167,18 +183,23 @@ public class ExchangeService {
                     if (!orderBookRef.ref.isNull()) {
                         var message = orderBookRef.ref.get();
                         log.debug("Tick : {}", message);
+                        wsMessagesCounter.record(message.length());
                         template.convertAndSend(WEBSOCKET_ORDERBOOK, message);
                         sent.onNext(message);
                     }
 
                     if (showOpportunities && !opportunityRef.ref.isNull()) {
                         // send opportunities if there is data
-                        log.debug("Send opportunities: {}", opportunityRef.ref.get());
-                        template.convertAndSend(WEBSOCKET_OPPORTUNITIES, opportunityRef.ref.get());
+                        var message = opportunityRef.ref.get();
+                        log.debug("Send opportunities: {}", message);
+                        wsMessagesCounter.record(message.length());
+                        template.convertAndSend(WEBSOCKET_OPPORTUNITIES, message);
                     }
 
                     if (showUpdated && !updated.isEmpty()) {
-                        template.convertAndSend(WEBSOCKET_EXCHANGES, exchangesData());
+                        var message =  exchangesData();
+                        wsMessagesCounter.record(message.length());
+                        template.convertAndSend(WEBSOCKET_EXCHANGES, message);
                     }
         });
     }

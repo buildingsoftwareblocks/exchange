@@ -6,6 +6,7 @@ import com.btb.exchange.backend.data.MessageRepository;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchange;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.disposables.CompositeDisposable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -60,6 +61,8 @@ class ExchangeServiceTest {
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
     @Autowired
+    MeterRegistry registry;
+    @Autowired
     CuratorFramework curatorFramework;
     @MockBean
     LeaderService leaderService;
@@ -75,7 +78,7 @@ class ExchangeServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(false, true, true);
         return new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, objectMapper, config, ExchangeEnum.KRAKEN, true,"/");
+                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true,"/");
     }
 
     @Test

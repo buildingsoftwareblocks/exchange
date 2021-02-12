@@ -8,6 +8,7 @@ import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchange;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.disposables.CompositeDisposable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -62,6 +63,8 @@ class DatabaseServiceTest {
     ObjectMapper objectMapper;
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
+    @Autowired
+    MeterRegistry registry;
     @MockBean
     LeaderService leaderService;
 
@@ -81,7 +84,7 @@ class DatabaseServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(true, false, true);
         return new ExchangeService(Mockito.mock(CuratorFramework.class), executor, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, objectMapper, config, ExchangeEnum.KRAKEN,  true,"/");
+                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN,  true,"/");
     }
 
     @Test

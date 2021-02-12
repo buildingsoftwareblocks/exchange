@@ -9,6 +9,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
@@ -44,6 +47,8 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     private final AtomicLong counter = new AtomicLong();
     private final AtomicBoolean leader = new AtomicBoolean(false);
 
+    private final Counter messageCounter;
+
     /**
      * for testing purposes, to subscribe to broadcast events.
      * It's 'BehaviorSubject' so we can process the events, even if  the service is already started via the 'Application Ready event'
@@ -55,6 +60,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
      */
     public ExchangeService(CuratorFramework client, ExecutorService executor,
                            StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate,
+                           MeterRegistry registry,
                            ObjectMapper objectMapper, ApplicationConfig config,
                            ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path) {
         this.exchange = exchange;
@@ -64,6 +70,10 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
         this.exchangeEnum = exchangeEnum;
         this.subscriptionRequired = subscriptionRequired;
+
+        messageCounter = Counter.builder(String.format("backend.exchange.%s.messages", exchangeEnum.toString()))
+                .description("indicates number of message received from the given exchange")
+                .register(registry);
 
         leaderSelector = new LeaderSelector(client, path, executor,this);
         leaderSelector.autoRequeue();
@@ -176,6 +186,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) {
         log.trace("Order book: {}", orderBook);
+        messageCounter.increment();
         try {
             var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
                     objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(), exchangeEnum, currencyPair, orderBook)));

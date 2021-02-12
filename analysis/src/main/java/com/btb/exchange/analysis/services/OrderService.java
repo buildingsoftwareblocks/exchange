@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,17 @@ public class OrderService {
     private final ObjectMapper objectMapper;
     private final ExchangeService exchangeService;
     private final IAtomicLong counter;
+    private final Counter messageCounter;
 
-    public OrderService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper, ExchangeService exchangeService, HazelcastInstance hazelcastInstance) {
+    public OrderService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper,
+                        ExchangeService exchangeService, HazelcastInstance hazelcastInstance, MeterRegistry registry) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
         this.exchangeService = exchangeService;
         this.counter = hazelcastInstance.getCPSubsystem().getAtomicLong("counter");
+        messageCounter = Counter.builder("analysis.order.opportunities")
+                .description("indicates number of message read form the kafka queue")
+                .register(registry);
     }
 
     /**
@@ -35,6 +43,7 @@ public class OrderService {
      */
     public void processSimpleExchangeArbitrage(Opportunities currencyPairOpportunities) {
         // TODO better asset management
+        messageCounter.increment();
         processSimpleExchangeArbitrage(BigDecimal.valueOf(100000), currencyPairOpportunities);
     }
 

@@ -16,6 +16,7 @@ import info.bitrich.xchangestream.hitbtc.HitbtcStreamingExchange;
 import info.bitrich.xchangestream.huobi.HuobiStreamingExchange;
 import info.bitrich.xchangestream.kraken.KrakenStreamingExchange;
 import info.bitrich.xchangestream.poloniex2.PoloniexStreamingExchange;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,7 @@ public class LeaderService {
 
     private final CuratorFramework client;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final MeterRegistry registry;
     private final ObjectMapper objectMapper;
     private final ApplicationConfig config;
 
@@ -60,10 +62,11 @@ public class LeaderService {
 
     private final ConcurrentHashMap<ExchangeEnum, ExchangeService> clients = new ConcurrentHashMap<>();
 
-    public LeaderService(CuratorFramework client, KafkaTemplate<String, String> kafkaTemplate, KafkaConfig kafkaConfig,
+    public LeaderService(CuratorFramework client, KafkaTemplate<String, String> kafkaTemplate, MeterRegistry registry,
                          ObjectMapper objectMapper, ApplicationConfig config) {
         this.client = client;
         this.kafkaTemplate = kafkaTemplate;
+        this.registry = registry;
         this.objectMapper = objectMapper;
         this.config = config;
 
@@ -84,7 +87,7 @@ public class LeaderService {
                 log.info("create - {}", e);
                 String path = BASE + "/" + e.toString();
                 ExchangeService exchangeService = new ExchangeService(client, executor, exchangeFactory(e),
-                        kafkaTemplate, objectMapper, config, e, subscriptionRequired(e), path);
+                        kafkaTemplate, registry, objectMapper, config, e, subscriptionRequired(e), path);
                 clients.put(e, exchangeService);
                 exchangeService.start();
             }

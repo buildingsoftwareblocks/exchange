@@ -54,7 +54,8 @@ public class SimpleExchangeArbitrage {
         var distinct = opportunities.stream()
                 .filter(distinctByKeys(Opportunity::getCurrencyPair, Opportunity::getFrom, Opportunity::getTo))
                 .collect(Collectors.toList());
-        return opportunitiesBuilder.values(distinct).build();
+        var timestamp = distinct.stream().map(Opportunity::getCreated).reduce((a, b) -> a).orElse(null);
+        return opportunitiesBuilder.values(distinct).timestamp(timestamp).build();
     }
 
     private static <T> Predicate<T> distinctByKeys(Function<? super T, ?>... keyExtractors) {
@@ -88,7 +89,7 @@ public class SimpleExchangeArbitrage {
      * TODO amount of opportunity should contain amount of incoming order.
      */
     private Opportunities findOpportunities(ExchangeOrderBook orderBook) {
-        var opportunitiesBuilder = Opportunities.builder();
+        var opportunitiesBuilder = Opportunities.builder().timestamp(orderBook.getTimestamp());
         final BigDecimal ask = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
         final BigDecimal bid = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
         final CurrencyPair currencyPair = orderBook.getCurrencyPair();
@@ -97,14 +98,16 @@ public class SimpleExchangeArbitrage {
                 .filter(e -> e.getKey().getCurrencyPair().equals(currencyPair))
                 .filter(e -> exchangeService.validData(e.getKey().getExchange(), e.getKey().getCurrencyPair(), updated.get(e.getKey())))
                 .filter(e -> bid.subtract(e.getValue()).compareTo(BigDecimal.ZERO) > 0)
-                .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, e.getKey().getExchange(), e.getValue(), orderBook.getExchange(), bid)));
+                .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, e.getKey().getExchange(),
+                        e.getValue(), orderBook.getExchange(), bid, orderBook.getTimestamp())));
 
         if (ask.compareTo(BigDecimal.ZERO) > 0) {
             bids.entrySet().stream()
                     .filter(e -> e.getKey().getCurrencyPair().equals(currencyPair))
                     .filter(e -> exchangeService.validData(e.getKey().getExchange(), e.getKey().getCurrencyPair(), updated.get(e.getKey())))
                     .filter(e -> e.getValue().subtract(ask).compareTo(BigDecimal.ZERO) > 0)
-                    .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, orderBook.getExchange(), ask, e.getKey().getExchange(), e.getValue())));
+                    .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, orderBook.getExchange(),
+                            ask, e.getKey().getExchange(), e.getValue(), orderBook.getTimestamp())));
         }
         return opportunitiesBuilder.build();
     }

@@ -17,7 +17,7 @@ class ExchangeServiceTest {
 
     private static final BigDecimal ERROR = BigDecimal.valueOf(0.0005);
 
-    private static HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance();
+    private static final HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance();
 
     @Test
     void transactionBuyFees() {

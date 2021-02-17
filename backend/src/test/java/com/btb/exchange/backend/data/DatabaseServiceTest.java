@@ -30,6 +30,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
@@ -93,8 +95,8 @@ class DatabaseServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, ExchangeEnum.BITSTAMP, getFirstCurrencyPair(),
-                new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
+                getFirstCurrencyPair(), new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
@@ -132,8 +134,8 @@ class DatabaseServiceTest {
                 service.replayEvents();
             }
         }));
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, ExchangeEnum.BITSTAMP, getFirstCurrencyPair(),
-                new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
+        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
+                getFirstCurrencyPair(), new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

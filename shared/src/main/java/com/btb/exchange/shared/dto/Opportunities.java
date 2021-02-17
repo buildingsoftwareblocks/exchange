@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Singular;
 import lombok.extern.jackson.Jacksonized;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Data
@@ -12,6 +13,7 @@ import java.util.List;
 @Jacksonized
 public class Opportunities {
     long order;
+    LocalTime timestamp;
     @Singular
     List<Opportunity> values;
 }

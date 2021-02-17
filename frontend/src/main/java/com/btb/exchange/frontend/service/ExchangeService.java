@@ -36,8 +36,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -83,6 +85,8 @@ public class ExchangeService {
     private final IAtomicReference<ExchangeEnum> exchange;
     private final DistributionSummary kafkaMessagesCounter;
     private final DistributionSummary wsMessagesCounter;
+    private final DistributionSummary orderbookDelay;
+    private final DistributionSummary opportunityDelay;
 
     public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance,
                            ObjectMapper objectMapper, MeterRegistry registry) {
@@ -100,6 +104,12 @@ public class ExchangeService {
         wsMessagesCounter= DistributionSummary.builder("frontend.ws.queue")
                 .description("indicates the size of message send to the web socket")
                 .baseUnit("bytes")
+                .register(registry);
+
+        orderbookDelay = DistributionSummary.builder("frontend.orderbook.delay")
+                .register(registry);
+
+        opportunityDelay = DistributionSummary.builder("frontend.opportunity.delay")
                 .register(registry);
 
         // set default value
@@ -122,11 +132,11 @@ public class ExchangeService {
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
                 .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
-                //.filter(o -> o.getExchange().equals(exchange.get()) && (o.getCurrencyPair().equals(getFirstCurrencyPair())))
+                // TODO filter on currency pair as well?!
                 .filter(o -> o.getExchange().equals(exchange.get()))
                 // pick the last element
                 .reduce((a, b) -> b)
-                .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), dtoUtils.toDTO(orderBook)));
+                .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), orderBook));
     }
 
     void updated(Key key, LocalTime localTime, CurrencyPair cp) {
@@ -143,11 +153,25 @@ public class ExchangeService {
                 .filter(opportunities -> !opportunities.getValues().isEmpty())
                 // pick the last element
                 .reduce((a, b) -> b)
-                .ifPresent(opportunities -> update(opportunityRef, opportunities.getOrder(), dtoUtils.toDTO(opportunities)));
+                .ifPresent(opportunities -> update(opportunityRef, opportunities.getOrder(), opportunities));
     }
 
     Observable<String> subscribe() {
         return sent;
+    }
+
+    void update(ReferenceData data, long orderNr, ExchangeOrderBook orderBook) {
+        if (orderBook.getTimestamp() != null) {
+            orderbookDelay.record(orderBook.getTimestamp().until(LocalDateTime.now(), ChronoUnit.SECONDS));
+        }
+        update(data, orderNr, dtoUtils.toDTO(orderBook));
+    }
+
+    void update(ReferenceData data, long orderNr, Opportunities opportunities) {
+        if (opportunities.getTimestamp() != null) {
+            opportunityDelay.record(opportunities.getTimestamp().until(LocalDateTime.now(), ChronoUnit.MILLIS));
+        }
+        update(data, orderNr, dtoUtils.toDTO(opportunities));
     }
 
     /**

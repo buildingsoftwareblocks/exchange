@@ -29,6 +29,7 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
@@ -71,7 +72,7 @@ class ExchangeServiceTest {
     void process() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var message = new ExchangeOrderBook(100, ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
+        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
@@ -85,7 +86,7 @@ class ExchangeServiceTest {
     void processNonMatching() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var message = new ExchangeOrderBook(100, ExchangeEnum.BITSTAMP, getSecondCurrencyPair(),
+        var message = new ExchangeOrderBook(100,  LocalTime.now(), ExchangeEnum.BITSTAMP, getSecondCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 

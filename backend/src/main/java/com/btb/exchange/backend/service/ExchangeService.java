@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
@@ -26,6 +25,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.lang.NonNull;
 
 import java.io.Closeable;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -189,7 +189,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         messageCounter.increment();
         try {
             var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
-                    objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(), exchangeEnum, currencyPair, orderBook)));
+                    objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(), LocalTime.now(), exchangeEnum, currencyPair, orderBook)));
 
             future.addCallback(result -> {
                 if (config.isTesting()) {

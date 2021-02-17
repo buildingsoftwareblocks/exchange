@@ -1,7 +1,6 @@
 package com.btb.exchange.backend.service;
 
 import com.btb.exchange.backend.config.ApplicationConfig;
-import com.btb.exchange.backend.config.KafkaConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.bitfinex.BitfinexStreamingExchange;

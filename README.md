@@ -2,7 +2,7 @@
 ![Main](https://github.com/buildingsoftwareblocks/exchange/workflows/Main/badge.svg)
 
 # Exchange Data PoC
-A PoC to retrieve real-time Crypto Exchange data, as first step for an ordering bot! The code belongs to this
+A PoC to retrieve real-time Crypto Exchange data, as a first step for an ordering bot! The code belongs to this
 [YouTube serie](https://www.youtube.com/playlist?list=PLQkCUEPgDgc1dItDlEjQ-sTXjY7kR-76z).
 
 ## System Overview
@@ -24,8 +24,8 @@ docker-compose --env-file env.dev up --scale frontend=2 --scale backend=2 --scal
 
 Create your own *env.dev* file from the *env.template* file.
 
-During development, the supported services (kafka, mongoDB) can be useful. For this a seperate docker-compose file is
-created. Use it with:
+During development, the supported services (kafka, mongoDB, etc.) can be useful. 
+For this a separate docker-compose file is created. Use it with:
 
 ``
 docker-compose -f docker-compose-dev.yml --env-file env.dev up -d

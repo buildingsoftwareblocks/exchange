@@ -1,3 +1,6 @@
+![Develop](https://github.com/buildingsoftwareblocks/exchange/workflows/Develop/badge.svg)
+![Main](https://github.com/buildingsoftwareblocks/exchange/workflows/Main/badge.svg)
+
 # Exchange Data PoC
 A PoC to retrieve real-time Crypto Exchange data, as first step for an ordering bot! The code belongs to this
 [YouTube serie](https://www.youtube.com/playlist?list=PLQkCUEPgDgc1dItDlEjQ-sTXjY7kR-76z).

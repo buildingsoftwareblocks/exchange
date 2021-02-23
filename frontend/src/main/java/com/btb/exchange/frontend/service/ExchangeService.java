@@ -5,6 +5,7 @@ import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.utils.DTOUtils;
+import com.btb.exchange.shared.utils.StringDTOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
@@ -64,6 +65,7 @@ public class ExchangeService {
 
     private final SimpMessagingTemplate template;
     private final DTOUtils dtoUtils;
+    private final StringDTOUtils jsonUtils;
 
     @Value("${frontend.refreshrate:1000}")
     private int refreshRate;
@@ -91,7 +93,8 @@ public class ExchangeService {
     public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance,
                            ObjectMapper objectMapper, MeterRegistry registry) {
         this.template = template;
-        this.dtoUtils = new DTOUtils(objectMapper);
+        this.dtoUtils = new DTOUtils(objectMapper, false);
+        this.jsonUtils = new StringDTOUtils(objectMapper);
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
         updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
@@ -125,12 +128,12 @@ public class ExchangeService {
 
     @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
-    void processOrderBooks(List<String> messages) {
+    void processOrderBooks(List<byte[]> messages) {
         log.debug("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
         final var now = LocalTime.now();
         messages.stream()
-                .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
+                .map(o -> dtoUtils.from(o, ExchangeOrderBook.class))
                 .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
                 // TODO filter on currency pair as well?!
                 .filter(o -> o.getExchange().equals(exchange.get()))
@@ -146,10 +149,10 @@ public class ExchangeService {
 
     @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).OPPORTUNITIES}", containerFactory = "batchFactory")
-    void processOpportunities(List<String> messages) {
+    void processOpportunities(List<byte[]> messages) {
         // only get the last value and add it to the reference
         messages.stream()
-                .map(o -> dtoUtils.fromDTO(o, Opportunities.class))
+                .map(o -> dtoUtils.from(o, Opportunities.class))
                 .filter(opportunities -> !opportunities.getValues().isEmpty())
                 // pick the last element
                 .reduce((a, b) -> b)
@@ -164,25 +167,29 @@ public class ExchangeService {
         if (orderBook.getTimestamp() != null) {
             orderbookDelay.record(orderBook.getTimestamp().until(LocalDateTime.now(), ChronoUnit.SECONDS));
         }
-        update(data, orderNr, dtoUtils.toDTO(orderBook));
+        update(data, orderNr, dtoUtils.to(orderBook));
     }
 
     void update(ReferenceData data, long orderNr, Opportunities opportunities) {
         if (opportunities.getTimestamp() != null) {
             opportunityDelay.record(opportunities.getTimestamp().until(LocalDateTime.now(), ChronoUnit.MILLIS));
         }
-        update(data, orderNr, dtoUtils.toDTO(opportunities));
+        update(data, orderNr, dtoUtils.to(opportunities));
     }
 
     /**
      * Update reference data in an atomic way
      */
     @SneakyThrows
-    void update(ReferenceData data, long orderNr, String message) {
+    void update(ReferenceData data, long orderNr, Object message) {
         try {
             data.semaphore.acquire();
             if (diffAccepted(data.counter.get(), orderNr)) {
-                data.ref.set(message);
+                if (message instanceof String) {
+                    data.ref.set((String)message);
+                } else {
+                    data.ref.set(jsonUtils.to(message));
+                }
                 data.counter.set(orderNr);
             } else {
                 log.debug("out of sync ({}): {} vs {}", data.name, data.counter.get(), orderNr);
@@ -237,7 +244,7 @@ public class ExchangeService {
             map.put("cps", v.cps.toString());
             message.put(k.exchange.toString(), map);
         });
-        return dtoUtils.toDTO(message);
+        return jsonUtils.to(message);
     }
 
     /**

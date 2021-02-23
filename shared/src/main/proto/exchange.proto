@@ -1,0 +1,64 @@
+syntax = "proto3";
+package com.btb.exchange.shared;
+
+option java_multiple_files = true;
+option java_package = "com.btb.exchange.shared.proto";
+
+/**
+ * https://stackoverflow.com/questions/1051732/what-is-the-best-approach-for-serializing-bigdecimal-biginteger-to-protocolbuffer/1052049
+ */
+message P_DecimalValue {
+  uint32 scale = 1;
+  uint32 precision = 2;
+  bytes value = 3;
+}
+
+message P_LimitOrder {
+    P_DecimalValue limitPrice = 1;
+    string type = 2;
+    P_DecimalValue originalAmount = 3;
+    P_CurrencyPair currencyPair = 4;
+    string id = 5;
+    int64 timestamp = 6;
+}
+
+
+message P_OrderBook {
+    repeated P_LimitOrder asks = 1;
+    repeated P_LimitOrder bids = 2;
+    int64 timestamp = 3;
+}
+
+message P_Exchange {
+    string value = 1;
+}
+
+message P_CurrencyPair {
+    string value = 1;
+}
+
+message P_ExchangeOrderBook {
+    int64 order = 1;
+    int64 timestamp = 2;
+    P_Exchange exchange = 3;
+    P_CurrencyPair currencyPair = 4;
+    P_OrderBook orderBook = 5;
+}
+
+
+message P_Opportunity {
+    P_CurrencyPair currencyPair = 1;
+    P_DecimalValue amount = 2;
+    P_DecimalValue profit = 3;
+    P_Exchange from = 4;
+    P_DecimalValue ask = 5;
+    P_Exchange to = 6;
+    P_DecimalValue bid = 7;
+    int64 created = 8;
+}
+
+message P_Opportunities {
+    int64 order = 1;
+    int64 timestamp = 2;
+    repeated P_Opportunity values = 3;
+}

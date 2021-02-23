@@ -27,7 +27,7 @@ public class MessageHandler {
     public MessageHandler(ObjectMapper objectMapper, SimpleExchangeArbitrage simpleExchangeArbitrage, OrderService orderService, MeterRegistry registry) {
         this.simpleExchangeArbitrage = simpleExchangeArbitrage;
         this.orderService = orderService;
-        this.dtoUtils = new DTOUtils(objectMapper);
+        this.dtoUtils = new DTOUtils(objectMapper, false);
         messagesCounter = DistributionSummary.builder("analysis.simple.kafka.queue")
                 .description("indicates number of message read form the kafka queue")
                 .register(registry);
@@ -36,10 +36,10 @@ public class MessageHandler {
     @Async
     @Timed("analysis.simple.process.timed")
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
-    public void process(List<String> messages) {
+    public void process(List<byte[]> messages) {
         log.debug("process {} messages", messages.size());
         messagesCounter.record(messages.size());
-        var orderBooks = messages.stream().map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class)).collect(Collectors.toList());
+        var orderBooks = messages.stream().map(o -> dtoUtils.from(o, ExchangeOrderBook.class)).collect(Collectors.toList());
         orderService.processSimpleExchangeArbitrage(simpleExchangeArbitrage.process(orderBooks));
     }
 }

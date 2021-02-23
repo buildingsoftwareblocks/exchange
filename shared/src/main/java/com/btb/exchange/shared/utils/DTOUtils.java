@@ -1,33 +1,32 @@
 package com.btb.exchange.shared.utils;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class DTOUtils {
-    private final ObjectMapper objectMapper;
 
-    public DTOUtils(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    private final StringDTOUtils stringDTOUtils;
+    private final ByteDTOUtils byteDTOUtils;
+    private final boolean stringResponse;
+
+    public DTOUtils(ObjectMapper objectMapper, boolean stringResponse) {
+        stringDTOUtils = new StringDTOUtils(objectMapper);
+        byteDTOUtils = new ByteDTOUtils();
+        this.stringResponse = stringResponse;
     }
 
-    public <T> T fromDTO(String content, Class<T> valueType) {
-        try {
-            return objectMapper.readValue(content, valueType);
-        } catch (JsonProcessingException e) {
-            log.error("Exception", e);
-            throw new RuntimeException(e.getCause());
+    public <T> T from(Object content, Class<T> valueType) {
+        if (stringResponse) {
+            return stringDTOUtils.from((String) content, valueType);
+        } else {
+            return byteDTOUtils.from((byte[]) content, valueType);
         }
     }
 
-    public String toDTO(Object value) {
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            log.error("Exception", e);
-            throw new RuntimeException(e.getCause());
+    public Object to(Object content) {
+        if (stringResponse) {
+            return stringDTOUtils.to(content);
+        } else {
+            return byteDTOUtils.to(content);
         }
     }
 }

@@ -2,6 +2,8 @@ package com.btb.exchange.backend.data;
 
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.utils.DTOUtils;
+import com.btb.exchange.shared.utils.StringDTOUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
@@ -39,10 +41,13 @@ public class DatabaseService {
 
     public static final String HAZELCAST_DB = "database";
 
+    private static final boolean STRING_KAFKA_MSG = false;
+
     private final MessageRepository repository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ApplicationConfig config;
-    private final ObjectMapper objectMapper;
+    private final DTOUtils dtoUtils;
+    private final StringDTOUtils jsonUtils;
     private final ReactiveMongoTemplate mongoTemplate;
     private final ISemaphore semaphore;
 
@@ -55,14 +60,15 @@ public class DatabaseService {
         this.repository = repository;
         this.kafkaTemplate = kafkaTemplate;
         this.config = config;
-        this.objectMapper = objectMapper;
+        this.dtoUtils = new DTOUtils(objectMapper, STRING_KAFKA_MSG);
+        this.jsonUtils = new StringDTOUtils(objectMapper);
         this.mongoTemplate = mongoTemplate;
         semaphore = hazelcastInstance.getCPSubsystem().getSemaphore(HAZELCAST_DB);
     }
 
     @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
-    public void store(List<String> messages) {
+    public void store(List<byte[]> messages) {
         if (config.isRecording()) {
             log.debug("save {} records", messages.size());
             var records = messages.stream().map(this::createRecord).collect(Collectors.toList());
@@ -74,18 +80,19 @@ public class DatabaseService {
         }
     }
 
-    void store(String message) {
+    void store(Object message) {
         store(List.of(message));
     }
 
     @SneakyThrows
-    Message createRecord(String orderBook) {
-        ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
+    Message createRecord(Object orderBook) {
+        final ExchangeOrderBook exchangeOrderBook = dtoUtils.from(orderBook, ExchangeOrderBook.class);
+        final String msg = STRING_KAFKA_MSG ? (String)orderBook : jsonUtils.to(orderBook);
         return Message.builder()
                 .created(new Date())
                 .exchange(exchangeOrderBook.getExchange())
                 .currencyPair(exchangeOrderBook.getCurrencyPair())
-                .data(orderBook).build();
+                .data(msg).build();
     }
 
 

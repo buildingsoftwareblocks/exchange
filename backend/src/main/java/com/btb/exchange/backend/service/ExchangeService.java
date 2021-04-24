@@ -4,6 +4,7 @@ import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.utils.CurrencyPairUtils;
+import com.btb.exchange.shared.utils.DTOUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,9 +36,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ExchangeService extends LeaderSelectorListenerAdapter implements Closeable {
 
+    static final boolean KAFKA_STRING_MESSAGE = false;
+
     private final StreamingExchange exchange;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final DTOUtils dtoUtils;
     private final ApplicationConfig config;
 
     private final ExchangeEnum exchangeEnum;
@@ -59,13 +62,13 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
      *
      */
     public ExchangeService(CuratorFramework client, ExecutorService executor,
-                           StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate,
+                           StreamingExchange exchange, KafkaTemplate<String, Object> kafkaTemplate,
                            MeterRegistry registry,
                            ObjectMapper objectMapper, ApplicationConfig config,
                            ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path) {
         this.exchange = exchange;
         this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = objectMapper;
+        this.dtoUtils = new DTOUtils(objectMapper, KAFKA_STRING_MESSAGE);
         this.config = config;
 
         this.exchangeEnum = exchangeEnum;
@@ -187,18 +190,14 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) {
         log.trace("Order book: {}", orderBook);
         messageCounter.increment();
-        try {
-            var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
-                    objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(), LocalTime.now(), exchangeEnum, currencyPair, orderBook)));
+        var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
+                dtoUtils.to(new ExchangeOrderBook(counter.getAndIncrement(), LocalTime.now(), exchangeEnum, currencyPair, orderBook)));
 
-            future.addCallback(result -> {
-                if (config.isTesting()) {
-                    messageSent.onNext(result.getRecordMetadata().topic());
-                }
-            }, e -> log.error("Exception-1", e));
-        } catch (JsonProcessingException e) {
-            log.error("Exception-2", e);
-        }
+        future.addCallback(result -> {
+            if (config.isTesting()) {
+                messageSent.onNext(result.getRecordMetadata().topic());
+            }
+        }, e -> log.error("Exception-1", e));
     }
 
     void teardown() {

@@ -29,7 +29,6 @@ class OpportunityTest {
 
     @Test
     void serializeToJson() throws JsonProcessingException, JSONException {
-        //LocalDateTime now = LocalDateTime.of(2021, 1,12,19, 20, 40, 123456789);
         LocalTime now = LocalTime.of(19, 20, 40, 123456789);
         var opportunity = new Opportunity(CurrencyPair.BTC_AUD, BigDecimal.ZERO, BigDecimal.valueOf(10), ExchangeEnum.KRAKEN, BigDecimal.valueOf(100), ExchangeEnum.BITFINEX, BigDecimal.valueOf(110), now);
         var serialized = objectMapper.writeValueAsString(opportunity);

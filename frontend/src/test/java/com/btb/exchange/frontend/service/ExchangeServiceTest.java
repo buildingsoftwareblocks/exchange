@@ -3,6 +3,7 @@ package com.btb.exchange.frontend.service;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.utils.CurrencyPairUtils;
+import com.btb.exchange.shared.utils.DTOUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.mockito.Mockito;
@@ -51,15 +53,21 @@ class ExchangeServiceTest {
     @Autowired
     ExchangeService service;
     @Autowired
-    KafkaTemplate<String, String> kafkaTemplate;
+    KafkaTemplate<String, Object> kafkaTemplate;
     @Autowired
     ObjectMapper objectMapper;
 
     private final CompositeDisposable composite = new CompositeDisposable();
+    private DTOUtils dtoUtils;
 
     @BeforeAll
     static void beforeAll() {
         KAFKA_CONTAINER.start();
+    }
+
+    @BeforeEach
+    void beforeEach() {
+        dtoUtils = new DTOUtils(objectMapper, ExchangeService.KAFKA_STRING_MESSAGE);
     }
 
     @AfterEach
@@ -69,16 +77,17 @@ class ExchangeServiceTest {
     }
 
     @Test
-    void process() throws InterruptedException, JsonProcessingException {
+    void process() throws InterruptedException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
         var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
-        kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
+
+        kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), dtoUtils.to(message));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
-        assertThat("result before timeout", waitResult);
+        assertThat("NO result before timeout", waitResult);
         Mockito.verify(websocketMock).convertAndSend(Mockito.anyString(), Mockito.anyString());
     }
 
@@ -88,7 +97,7 @@ class ExchangeServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
         var message = new ExchangeOrderBook(100,  LocalTime.now(), ExchangeEnum.BITSTAMP, getSecondCurrencyPair(),
                 new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
-        kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
+        kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), dtoUtils.to(message));
 
         var waitResult = latch.await(2, TimeUnit.SECONDS);
 

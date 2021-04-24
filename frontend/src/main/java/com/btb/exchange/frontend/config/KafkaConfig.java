@@ -10,11 +10,11 @@ import org.springframework.kafka.core.ConsumerFactory;
 @RequiredArgsConstructor
 public class KafkaConfig {
 
-    private final ConsumerFactory<String, String> consumerFactory;
+    private final ConsumerFactory<String, Object> consumerFactory;
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> batchFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, Object> batchFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setBatchListener(true);
         return factory;

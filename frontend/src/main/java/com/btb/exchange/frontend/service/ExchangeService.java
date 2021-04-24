@@ -54,6 +54,8 @@ import static com.btb.exchange.shared.dto.ExchangeEnum.KRAKEN;
 @Slf4j
 public class ExchangeService {
 
+    static final boolean KAFKA_STRING_MESSAGE = true;
+
     private static final String WEBSOCKET_ORDERBOOK = "/topic/orderbook";
     private static final String WEBSOCKET_OPPORTUNITIES = "/topic/opportunities";
     private static final String WEBSOCKET_EXCHANGES = "/topic/exchanges";
@@ -93,7 +95,7 @@ public class ExchangeService {
     public ExchangeService(SimpMessagingTemplate template, HazelcastInstance hazelcastInstance,
                            ObjectMapper objectMapper, MeterRegistry registry) {
         this.template = template;
-        this.dtoUtils = new DTOUtils(objectMapper, false);
+        this.dtoUtils = new DTOUtils(objectMapper, KAFKA_STRING_MESSAGE);
         this.jsonUtils = new StringDTOUtils(objectMapper);
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
@@ -109,11 +111,8 @@ public class ExchangeService {
                 .baseUnit("bytes")
                 .register(registry);
 
-        orderbookDelay = DistributionSummary.builder("frontend.orderbook.delay")
-                .register(registry);
-
-        opportunityDelay = DistributionSummary.builder("frontend.opportunity.delay")
-                .register(registry);
+        orderbookDelay = DistributionSummary.builder("frontend.orderbook.delay").register(registry);
+        opportunityDelay = DistributionSummary.builder("frontend.opportunity.delay").register(registry);
 
         // set default value
         if (exchange.isNull()) {
@@ -127,8 +126,11 @@ public class ExchangeService {
     }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
-    void processOrderBooks(List<byte[]> messages) {
+    //@KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*")
+//    void processOrderBooks(List<Object> messages) {
+    void processOrderBooks(Object message) {
+        List<Object> messages = List.of(message);
         log.debug("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
         final var now = LocalTime.now();
@@ -149,7 +151,7 @@ public class ExchangeService {
 
     @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).OPPORTUNITIES}", containerFactory = "batchFactory")
-    void processOpportunities(List<byte[]> messages) {
+    void processOpportunities(List<Object> messages) {
         // only get the last value and add it to the reference
         messages.stream()
                 .map(o -> dtoUtils.from(o, Opportunities.class))

@@ -111,7 +111,9 @@ public class DatabaseService {
                         .forEach(it -> createIndexForEntity(it.getType(), resolver));
                 log.info("End create indexes");
             } catch (InterruptedException e) {
-                throw new IllegalStateException(e.getCause());
+                log.warn("Interrupted", e);
+                // Restore interrupted state...
+                Thread.currentThread().interrupt();
             } finally {
                 if (permit) {
                     semaphore.release();

@@ -10,8 +10,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.mockito.Mockito;
@@ -26,6 +25,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import javax.annotation.PostConstruct;
@@ -40,10 +41,12 @@ import static com.btb.exchange.shared.utils.CurrencyPairUtils.getSecondCurrencyP
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @SpringBootTest
+@Testcontainers
 @Slf4j
 class ExchangeServiceTest {
 
-    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest")).withReuse(true);
+    @Container
+    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
 
     @MockBean
     SimpMessagingTemplate websocketMock;
@@ -57,12 +60,7 @@ class ExchangeServiceTest {
 
     private final CompositeDisposable composite = new CompositeDisposable();
 
-    @BeforeAll
-    static void beforeAll() {
-        KAFKA_CONTAINER.start();
-    }
-
-    @AfterEach
+    @BeforeEach
     void afterEach() {
         service.init();
         composite.clear();
@@ -70,6 +68,8 @@ class ExchangeServiceTest {
 
     @Test
     void process() throws InterruptedException, JsonProcessingException {
+        // unclear why a wait is needed. but it seems that kafka is not complete ready
+        Thread.sleep(1000);
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
         var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
@@ -78,7 +78,7 @@ class ExchangeServiceTest {
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
-        assertThat("result before timeout", waitResult);
+        assertThat("Result before timeout", waitResult);
         Mockito.verify(websocketMock).convertAndSend(Mockito.anyString(), Mockito.anyString());
     }
 
@@ -92,10 +92,9 @@ class ExchangeServiceTest {
 
         var waitResult = latch.await(2, TimeUnit.SECONDS);
 
-        assertThat("result before timeout", !waitResult);
+        assertThat("No result before timeout", !waitResult);
         Mockito.verify(websocketMock, Mockito.never()).convertAndSend(Mockito.anyString(), Mockito.anyString());
     }
-
 
     @DynamicPropertySource
     static void datasourceConfig(DynamicPropertyRegistry registry) {

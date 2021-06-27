@@ -14,11 +14,15 @@ public class ExchangeDataSerializableFactory implements DataSerializableFactory 
 
     @Override
     public IdentifiedDataSerializable create(int typeId) {
-        return switch (typeId) {
-            case KEY_TYPE -> new ExchangeService.Key();
-            case EXCHANGE_VALUE_TYPE -> new ExchangeService.ExchangeValue();
-            case CURRENYPAIR_VALUE_TYPE -> new ExchangeService.CurrencyPairValue();
-            default -> null;
-        };
+        switch (typeId) {
+            case KEY_TYPE:
+                return new ExchangeService.Key();
+            case EXCHANGE_VALUE_TYPE:
+                return new ExchangeService.ExchangeValue();
+            case CURRENYPAIR_VALUE_TYPE:
+                return new ExchangeService.CurrencyPairValue();
+            default:
+                return null;
+        }
     }
 }

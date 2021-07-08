@@ -58,6 +58,7 @@ public class SimpleExchangeArbitrage {
         return opportunitiesBuilder.values(distinct).timestamp(timestamp).build();
     }
 
+    @SafeVarargs
     private static <T> Predicate<T> distinctByKeys(Function<? super T, ?>... keyExtractors) {
         final Map<List<?>, Boolean> seen = new ConcurrentHashMap<>();
 

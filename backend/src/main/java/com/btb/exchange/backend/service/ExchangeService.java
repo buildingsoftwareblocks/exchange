@@ -41,7 +41,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     private final ApplicationConfig config;
 
     private final ExchangeEnum exchangeEnum;
-    private final  boolean subscriptionRequired;
+    private final boolean subscriptionRequired;
 
     private final LeaderSelector leaderSelector;
     private final AtomicLong counter = new AtomicLong();
@@ -75,7 +75,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                 .description("indicates number of message received from the given exchange")
                 .register(registry);
 
-        leaderSelector = new LeaderSelector(client, path, executor,this);
+        leaderSelector = new LeaderSelector(client, path, executor, this);
         leaderSelector.autoRequeue();
     }
 
@@ -114,10 +114,10 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
             init();
             leader.set(true);
             Thread.sleep(Integer.MAX_VALUE);
-        } catch(InterruptedException i) {
+        } catch (InterruptedException i) {
             log.info("Interrupted {} : {}", exchangeEnum, i.getMessage());
             Thread.currentThread().interrupt();
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             log.error("Exception", t);
         } finally {
             log.info("Relinquishing leadership - {}", exchangeEnum);
@@ -176,7 +176,6 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     }
 
 
-
     /**
      * for testing purposes
      */
@@ -202,11 +201,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     }
 
     void teardown() {
-        if (!config.isReplay()) {
-            // Disconnect from exchange (blocking to wait for it)
-            if (exchange.isAlive()) {
-                exchange.disconnect().blockingAwait();
-            }
+        // Disconnect from exchange (blocking to wait for it)
+        if (!config.isReplay() && exchange.isAlive()) {
+            exchange.disconnect().blockingAwait();
         }
     }
 }

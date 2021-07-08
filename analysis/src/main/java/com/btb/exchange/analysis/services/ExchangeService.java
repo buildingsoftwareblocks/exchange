@@ -12,18 +12,15 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
 @Service
 @Slf4j
 public class ExchangeService {
 
     private final ApplicationConfig config;
-    private final Map<ExchangeCPKey, LocalTime> updated;
 
     public ExchangeService(ApplicationConfig config, HazelcastInstance hazelcastInstance) {
         this.config = config;
-        updated = hazelcastInstance.getMap("exchangeservice.updated");
     }
 
     // TODO differentiate on exchange / currency pair

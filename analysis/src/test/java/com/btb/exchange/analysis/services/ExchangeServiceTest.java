@@ -40,7 +40,7 @@ class ExchangeServiceTest {
         var config = new ApplicationConfig();
         config.setTransportfees(1);
         var service = new ExchangeService(config, hazelcastInstance);
-        assertThat(service.transportationFees( CurrencyPair.BTC_USD), is(closeTo(BigDecimal.valueOf(5), ERROR)));
+        assertThat(service.transportationFees(CurrencyPair.BTC_USD), is(closeTo(BigDecimal.valueOf(5), ERROR)));
         assertThat(service.transportationFees(CurrencyPair.ETH_BTC), is(closeTo(BigDecimal.valueOf(4), ERROR)));
         assertThat(service.transportationFees(CurrencyPair.DASH_BTC), is(closeTo(BigDecimal.valueOf(1), ERROR)));
     }

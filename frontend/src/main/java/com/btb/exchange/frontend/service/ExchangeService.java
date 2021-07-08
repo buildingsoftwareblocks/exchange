@@ -101,7 +101,7 @@ public class ExchangeService {
                 .description("indicates number of message read form the kafka queue")
                 .register(registry);
 
-        wsMessagesCounter= DistributionSummary.builder("frontend.ws.queue")
+        wsMessagesCounter = DistributionSummary.builder("frontend.ws.queue")
                 .description("indicates the size of message send to the web socket")
                 .baseUnit("bytes")
                 .register(registry);
@@ -141,7 +141,7 @@ public class ExchangeService {
 
     void updated(Key key, LocalTime localTime, CurrencyPair cp) {
         updated.computeIfAbsent(key, v -> new ExchangeValue(localTime, cp));
-        updated.computeIfPresent(key, (k,v) -> new ExchangeValue(localTime, v.cps, cp));
+        updated.computeIfPresent(key, (k, v) -> new ExchangeValue(localTime, v.cps, cp));
     }
 
     @Async
@@ -221,15 +221,15 @@ public class ExchangeService {
                     }
 
                     if (showUpdated && !updated.isEmpty()) {
-                        var message =  exchangesData();
+                        var message = exchangesData();
                         wsMessagesCounter.record(message.length());
                         template.convertAndSend(WEBSOCKET_EXCHANGES, message);
                     }
-        });
+                });
     }
 
     String exchangesData() {
-        DateTimeFormatter formatter =  DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
         Map<String, Map<String, String>> message = new TreeMap<>();
         updated.forEach((k, v) -> {
             Map<String, String> map = new HashMap<>();

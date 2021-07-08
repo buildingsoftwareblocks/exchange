@@ -78,7 +78,7 @@ class ExchangeServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(false, true, true);
         return new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true,"/");
+                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/");
     }
 
     @Test

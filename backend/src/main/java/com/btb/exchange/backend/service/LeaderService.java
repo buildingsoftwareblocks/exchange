@@ -134,36 +134,39 @@ public class LeaderService {
     }
 
     StreamingExchange exchangeFactory(ExchangeEnum exchange) {
-        //case BANKERA -> StreamingExchangeFactory.INSTANCE.createExchange(BankeraStreamingExchange.class);
-        //case BINANCE -> StreamingExchangeFactory.INSTANCE.createExchange(BinanceStreamingExchange.class);
-        //case CEXIO -> StreamingExchangeFactory.INSTANCE.createExchange(CexioStreamingExchange.class);
-        //case GEMINI -> StreamingExchangeFactory.INSTANCE.createExchange(GeminiStreamingExchange.class);
-        //case LGO -> StreamingExchangeFactory.INSTANCE.createExchange(LgoStreamingExchange.class);
-        //case OKCOIN -> StreamingExchangeFactory.INSTANCE.createExchange(OkCoinStreamingExchange.class);
-        switch (exchange) {
-            case BITFINEX:
-                return StreamingExchangeFactory.INSTANCE.createExchange(BitfinexStreamingExchange.class);
-            case BITMEX:
-                return StreamingExchangeFactory.INSTANCE.createExchange(BitmexStreamingExchange.class);
-            case BITSTAMP:
-                return StreamingExchangeFactory.INSTANCE.createExchange(BitstampStreamingExchange.class);
-            case BTCMARKETS:
-                return StreamingExchangeFactory.INSTANCE.createExchange(BTCMarketsStreamingExchange.class);
-            case COINBASE:
-                return StreamingExchangeFactory.INSTANCE.createExchange(CoinbaseProStreamingExchange.class);
-            case COINJAR:
-                return StreamingExchangeFactory.INSTANCE.createExchange(CoinjarStreamingExchange.class);
-            case HITBTC:
-                return StreamingExchangeFactory.INSTANCE.createExchange(HitbtcStreamingExchange.class);
-            case HUOBI:
-                return StreamingExchangeFactory.INSTANCE.createExchange(HuobiStreamingExchange.class);
-            case KRAKEN:
-                return StreamingExchangeFactory.INSTANCE.createExchange(KrakenStreamingExchange.class);
-            case POLONIEX:
-                return StreamingExchangeFactory.INSTANCE.createExchange(PoloniexStreamingExchange.class);
-            default:
-                return null;
+        try {
+            //case BANKERA -> StreamingExchangeFactory.INSTANCE.createExchange(BankeraStreamingExchange.class);
+            //case BINANCE -> StreamingExchangeFactory.INSTANCE.createExchange(BinanceStreamingExchange.class);
+            //case CEXIO -> StreamingExchangeFactory.INSTANCE.createExchange(CexioStreamingExchange.class);
+            //case GEMINI -> StreamingExchangeFactory.INSTANCE.createExchange(GeminiStreamingExchange.class);
+            //case LGO -> StreamingExchangeFactory.INSTANCE.createExchange(LgoStreamingExchange.class);
+            //case OKCOIN -> StreamingExchangeFactory.INSTANCE.createExchange(OkCoinStreamingExchange.class);
+            switch (exchange) {
+                case BITFINEX:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(BitfinexStreamingExchange.class);
+                case BITMEX:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(BitmexStreamingExchange.class);
+                case BITSTAMP:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(BitstampStreamingExchange.class);
+                case BTCMARKETS:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(BTCMarketsStreamingExchange.class);
+                case COINBASE:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(CoinbaseProStreamingExchange.class);
+//            case COINJAR:
+//                return StreamingExchangeFactory.INSTANCE.createExchange(CoinjarStreamingExchange.class);
+                case HITBTC:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(HitbtcStreamingExchange.class);
+                case HUOBI:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(HuobiStreamingExchange.class);
+                case KRAKEN:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(KrakenStreamingExchange.class);
+                case POLONIEX:
+                    return StreamingExchangeFactory.INSTANCE.createExchange(PoloniexStreamingExchange.class);
+            }
+        } catch (Throwable e) {
+            log.warn("Error creating {}, exception : {}", exchange, e);
         }
+        return null;
     }
 
     boolean subscriptionRequired(ExchangeEnum exchange) {

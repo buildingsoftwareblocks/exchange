@@ -131,7 +131,7 @@ public class ExchangeService {
         final var now = LocalTime.now();
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
-                .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
+                // .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
                 // TODO filter on currency pair as well?!
                 .filter(o -> o.getExchange().equals(exchange.get()))
                 // pick the last element

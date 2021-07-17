@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HazelcastConfig {
 
-    @Value("${frontend.multicast.enabled:true}")
+    @Value("${backend.multicast.enabled:true}")
     private boolean multicast;
 
     @Bean

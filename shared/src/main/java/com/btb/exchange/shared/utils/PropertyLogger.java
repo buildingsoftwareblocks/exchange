@@ -24,12 +24,12 @@ public class PropertyLogger {
         log.info("Active profiles: {}", Arrays.toString(env.getActiveProfiles()));
         final MutablePropertySources sources = ((AbstractEnvironment) env).getPropertySources();
         log.info("Property sources: {}", Arrays.toString(sources.stream()
-                .filter(ps -> ps instanceof EnumerablePropertySource)
+                .filter(EnumerablePropertySource.class::isInstance)
                 .map(PropertySource::getName).toArray()
         ));
 
         StreamSupport.stream(sources.stream().spliterator(), false)
-                .filter(ps -> ps instanceof EnumerablePropertySource)
+                .filter(EnumerablePropertySource.class::isInstance)
                 .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
                 .flatMap(Arrays::stream)
                 .distinct()

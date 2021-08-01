@@ -35,14 +35,11 @@ public class ExchangeService {
 
     public BigDecimal transportationFees(CurrencyPair currencyPair) {
         // just a fixed number to start with
-        switch (currencyPair.base.getCurrencyCode()) {
-            case "BTC":
-                return BigDecimal.valueOf(config.getTransportfees() * 5);
-            case "ETH":
-                return BigDecimal.valueOf(config.getTransportfees() * 4);
-            default:
-                return BigDecimal.valueOf(config.getTransportfees());
-        }
+        return switch (currencyPair.base.getCurrencyCode()) {
+            case "BTC" -> BigDecimal.valueOf(config.getTransportfees() * 5);
+            case "ETH" -> BigDecimal.valueOf(config.getTransportfees() * 4);
+            default -> BigDecimal.valueOf(config.getTransportfees());
+        };
     }
 
     public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, @NonNull LocalTime time) {

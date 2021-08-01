@@ -13,22 +13,19 @@ Prebuild docker containers can be found on: [Docker hub](https://hub.docker.com/
 A docker compose script is provided. Start the application with:
 
 ``
-docker-compose --env-file env.dev up -d
+docker-compose --env-file env.dev --profile full up -d
 ``
 
 With scaling:
 
 ``
-docker-compose --env-file env.dev up --scale frontend=2 --scale backend=2 --scale analysis=2 -d
+docker-compose --env-file env.dev --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d
 ``
 
 Create your own *env.dev* file from the *env.template* file.
 
-During development, the supported services (kafka, mongoDB, etc.) can be useful. 
-For this a separate docker-compose file is created. Use it with:
-
 ``
-docker-compose -f docker-compose-dev.yml --env-file env.dev up -d
+docker-compose --env-file env.dev up -d
 ``
 
 | System | link |

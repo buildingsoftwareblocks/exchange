@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.2</version>
+        <version>2.5.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.btb</groupId>
@@ -17,7 +17,7 @@
     <description>PoC Data of Crypto Exchange</description>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>16</java.version>
 
         <xchange.version>5.0.9</xchange.version>
         <testcontainers.version>1.15.3</testcontainers.version>
@@ -28,7 +28,8 @@
         <disruptor.version>3.4.4</disruptor.version>
         <curator.version>5.1.0</curator.version>
         <logstash-gelf.version>1.14.1</logstash-gelf.version>
-        <spring-boot-admin.version>2.4.2</spring-boot-admin.version>
+        <spring-boot-admin.version>2.4.3</spring-boot-admin.version>
+        <spring-cloud.version>2020.0.3</spring-cloud.version>
 
         <!-- plugins -->
         <sonar.version>3.7.0.1746</sonar.version>
@@ -46,6 +47,15 @@
                 <groupId>com.btb</groupId>
                 <artifactId>shared</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+
+            <!-- spring boot vs spring cloud https://spring.io/projects/spring-cloud -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <!-- Exclude Spring Boot's Default Logging -->
@@ -260,6 +270,12 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
@@ -267,6 +283,7 @@
 
     <modules>
         <module>shared</module>
+        <module>config</module>
         <module>admin</module>
         <module>frontend</module>
         <module>backend</module>

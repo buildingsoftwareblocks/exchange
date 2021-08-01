@@ -11,11 +11,9 @@ public class ExchangeDataSerializableFactory implements DataSerializableFactory 
 
     @Override
     public IdentifiedDataSerializable create(int typeId) {
-        switch (typeId) {
-            case KEY_TYPE:
-                return new ExchangeCPKey();
-            default:
-                return null;
-        }
+        return switch (typeId) {
+            case KEY_TYPE -> new ExchangeCPKey();
+            default -> null;
+        };
     }
 }

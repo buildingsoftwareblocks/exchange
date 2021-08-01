@@ -8,7 +8,6 @@ import info.bitrich.xchangestream.bitmex.BitmexStreamingExchange;
 import info.bitrich.xchangestream.bitstamp.v2.BitstampStreamingExchange;
 import info.bitrich.xchangestream.btcmarkets.BTCMarketsStreamingExchange;
 import info.bitrich.xchangestream.coinbasepro.CoinbaseProStreamingExchange;
-import info.bitrich.xchangestream.coinjar.CoinjarStreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchangeFactory;
 import info.bitrich.xchangestream.hitbtc.HitbtcStreamingExchange;
@@ -170,11 +169,9 @@ public class LeaderService {
     }
 
     boolean subscriptionRequired(ExchangeEnum exchange) {
-        switch (exchange) {//BINANCE,
-            case COINBASE:
-                return true;
-            default:
-                return false;
-        }
+        return switch (exchange) {//BINANCE,
+            case COINBASE -> true;
+            default -> false;
+        };
     }
 }

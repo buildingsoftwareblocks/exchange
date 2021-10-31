@@ -33,7 +33,7 @@
 
         <!-- plugins -->
         <sonar.version>3.7.0.1746</sonar.version>
-        <jacoco.version>0.8.6</jacoco.version>
+        <jacoco.version>0.8.7</jacoco.version>
         <surefire.version>2.22.2</surefire.version>
         <code.coverage.exclusions></code.coverage.exclusions>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>

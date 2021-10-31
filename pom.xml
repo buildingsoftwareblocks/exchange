@@ -26,7 +26,7 @@
         <bootstrap.version>4.5.3</bootstrap.version>
         <jquery.version>3.6.0</jquery.version>
         <disruptor.version>3.4.4</disruptor.version>
-        <curator.version>5.1.0</curator.version>
+        <curator.version>5.2.0</curator.version>
         <logstash-gelf.version>1.14.1</logstash-gelf.version>
         <spring-boot-admin.version>2.5.3</spring-boot-admin.version>
         <spring-cloud.version>2020.0.4</spring-cloud.version>

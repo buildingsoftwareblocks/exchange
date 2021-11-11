@@ -30,7 +30,6 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -65,7 +64,7 @@ public class DatabaseService {
     public void store(List<String> messages) {
         if (config.isRecording()) {
             log.debug("save {} records", messages.size());
-            var records = messages.stream().map(this::createRecord).collect(Collectors.toList());
+            var records = messages.stream().map(this::createRecord).toList();
             repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
                 if (config.isTesting()) {
                     stored.onNext(r);

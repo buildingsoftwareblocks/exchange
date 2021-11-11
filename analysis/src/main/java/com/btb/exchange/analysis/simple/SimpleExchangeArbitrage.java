@@ -41,7 +41,7 @@ public class SimpleExchangeArbitrage {
     }
 
     public Opportunities process(List<ExchangeOrderBook> orderBooks) {
-        var opportunitiesList = orderBooks.stream().map(this::process).collect(Collectors.toList());
+        var opportunitiesList = orderBooks.stream().map(this::process).toList();
         return merge(opportunitiesList);
     }
 
@@ -50,10 +50,10 @@ public class SimpleExchangeArbitrage {
      */
     Opportunities merge(List<Opportunities> opportunitiesList) {
         var opportunitiesBuilder = Opportunities.builder();
-        var opportunities = opportunitiesList.stream().flatMap(o -> o.getValues().stream()).collect(Collectors.toList());
+        var opportunities = opportunitiesList.stream().flatMap(o -> o.getValues().stream()).toList();
         var distinct = opportunities.stream()
                 .filter(distinctByKeys(Opportunity::getCurrencyPair, Opportunity::getFrom, Opportunity::getTo))
-                .collect(Collectors.toList());
+                .toList();
         var timestamp = distinct.stream().map(Opportunity::getCreated).reduce((a, b) -> a).orElse(null);
         return opportunitiesBuilder.values(distinct).timestamp(timestamp).build();
     }
@@ -62,12 +62,8 @@ public class SimpleExchangeArbitrage {
     private static <T> Predicate<T> distinctByKeys(Function<? super T, ?>... keyExtractors) {
         final Map<List<?>, Boolean> seen = new ConcurrentHashMap<>();
 
-        return t ->
-        {
-            final List<?> keys = Arrays.stream(keyExtractors)
-                    .map(ke -> ke.apply(t))
-                    .collect(Collectors.toList());
-
+        return t -> {
+            final List<?> keys = Arrays.stream(keyExtractors).map(ke -> ke.apply(t)).toList();
             return seen.putIfAbsent(keys, Boolean.TRUE) == null;
         };
     }

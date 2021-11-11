@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -39,7 +38,7 @@ public class MessageHandler {
     public void process(List<String> messages) {
         log.debug("process {} messages", messages.size());
         messagesCounter.record(messages.size());
-        var orderBooks = messages.stream().map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class)).collect(Collectors.toList());
+        var orderBooks = messages.stream().map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class)).toList();
         orderService.processSimpleExchangeArbitrage(simpleExchangeArbitrage.process(orderBooks));
     }
 }

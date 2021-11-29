@@ -2,15 +2,18 @@
 ![Main](https://github.com/buildingsoftwareblocks/exchange/workflows/Main/badge.svg)
 
 # Exchange Data PoC
+
 A PoC to retrieve real-time Crypto Exchange data, as a first step for an ordering bot! The code belongs to this
 [YouTube serie](https://www.youtube.com/playlist?list=PLQkCUEPgDgc1dItDlEjQ-sTXjY7kR-76z).
 
 ## System Overview
+
 ![System Overview](system-overview.png)
 
 ## Run Application
-Prebuild docker containers can be found on: [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks).
-A docker compose script is provided. Start the application with:
+
+Prebuild docker containers can be found on: [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks). A docker
+compose script is provided. Start the application with:
 
 ``
 docker-compose --env-file env.dev --profile full up -d
@@ -117,6 +120,7 @@ db.message.aggregate(
 ````
 
 ## Build Application
+
 You can build the application locally via a [maven](https://maven.apache.org/) command:
 
 | target | meaning |
@@ -127,6 +131,7 @@ mvn install -P docker | build docker images
 mvn versions:display-property-updates | check if latest versions of libraries are used.
 
 ## TODO List
+
 - [x] 1 Exchange, 1 Currency pair connected
 - [x] multiple services connected via Kafka
 - [x] build pipeline
@@ -145,10 +150,11 @@ mvn versions:display-property-updates | check if latest versions of libraries ar
 - [ ] more robust error handling
 
 ## Related
+
 - [Sonar cloud](https://sonarcloud.io/dashboard?id=buildingsoftwareblocks_exchange)
-- [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks)
 
 ## Background Information
+
 - [Battle of the Bots: How Market Makers Fight It Out on Crypto Exchanges](https://medium.com/swlh/battle-of-the-bots-how-market-makers-fight-it-out-on-crypto-exchanges-2482eb937107)
 - [known / XChange](https://github.com/knowm/XChange)
 - [Using WebSocket to build an interactive web application](https://spring.io/guides/gs/messaging-stomp-websocket/)

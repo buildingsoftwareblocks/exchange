@@ -45,6 +45,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish Docker image Backend
-        run: docker push ${{ env.REGISTRY }}/exchange-backend:latest
+        run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/exchange-backend:latest
 
 

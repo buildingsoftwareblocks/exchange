@@ -1,10 +1,11 @@
-package com.btb.exchange.backend.data;
+package com.btb.exchange.backend.data.mongodb;
 
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.backend.service.ExchangeService;
 import com.btb.exchange.backend.service.LeaderService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.Orders;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchange;
@@ -47,7 +48,7 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest
 @Testcontainers
 @Slf4j
-class DatabaseServiceTest {
+class MongoDBESDatabaseServiceTest {
 
     @Container
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
@@ -57,9 +58,9 @@ class DatabaseServiceTest {
     private static final GenericContainer ZOOKEEPER = new GenericContainer("zookeeper:latest").withExposedPorts(2181);
 
     @Autowired
-    DatabaseService service;
+    MongoDBDatabaseService service;
     @Autowired
-    MessageRepository repository;
+    MongodbMessageRepository repository;
     @Autowired
     ObjectMapper objectMapper;
     @Autowired
@@ -83,7 +84,7 @@ class DatabaseServiceTest {
 
     ExchangeService createExchangeService() {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
-        ApplicationConfig config = new ApplicationConfig(true, false, true);
+        ApplicationConfig config = new ApplicationConfig(true, false, false, 5, true);
         return new ExchangeService(Mockito.mock(CuratorFramework.class), executor, Mockito.mock(StreamingExchange.class),
                 kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/");
     }
@@ -95,7 +96,7 @@ class DatabaseServiceTest {
 
         var startCount = repository.count().blockingGet();
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                getFirstCurrencyPair(), new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
+                getFirstCurrencyPair(), new Orders(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
@@ -134,7 +135,7 @@ class DatabaseServiceTest {
             }
         }));
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                getFirstCurrencyPair(), new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList())));
+                getFirstCurrencyPair(), new Orders(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

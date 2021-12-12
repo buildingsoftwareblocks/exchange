@@ -2,6 +2,7 @@ package com.btb.exchange.frontend.service;
 
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.Orders;
 import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -73,7 +73,7 @@ class ExchangeServiceTest {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
         var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
-                new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
+                new Orders(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
@@ -87,7 +87,7 @@ class ExchangeServiceTest {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
         var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.BITSTAMP, getSecondCurrencyPair(),
-                new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()));
+                new Orders(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(2, TimeUnit.SECONDS);

@@ -1,8 +1,8 @@
-package com.btb.exchange.backend.data;
+package com.btb.exchange.backend.data.mongodb;
 
 import org.springframework.data.repository.reactive.RxJava2SortingRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MessageRepository extends RxJava2SortingRepository<Message, String> {
+interface MongodbMessageRepository extends RxJava2SortingRepository<Message, String> {
 }

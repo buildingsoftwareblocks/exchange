@@ -1,4 +1,4 @@
-package com.btb.exchange.backend.data;
+package com.btb.exchange.backend.data.mongodb;
 
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import lombok.AllArgsConstructor;
@@ -18,7 +18,7 @@ import static org.springframework.data.mongodb.core.mapping.FieldType.STRING;
 @Builder
 @Document
 @AllArgsConstructor
-public class Message {
+class Message {
 
     @Id
     private String id;

@@ -3,6 +3,7 @@ package com.btb.exchange.backend.service;
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.Orders;
 import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -188,7 +189,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         messageCounter.increment();
         try {
             var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
-                    objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(), LocalTime.now(), exchangeEnum, currencyPair, orderBook)));
+                    objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(),
+                            LocalTime.now(), exchangeEnum, currencyPair,
+                            new Orders(orderBook.getTimeStamp(), orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
 
             future.addCallback(result -> {
                 if (config.isTesting()) {

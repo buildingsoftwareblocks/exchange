@@ -123,12 +123,12 @@ db.message.aggregate(
 
 You can build the application locally via a [maven](https://maven.apache.org/) command:
 
-| target | meaning |
-| ------- | ------ |
-mvn clean | clean environment
-mvn install | build self executable JAR files
-mvn install -P docker | build docker images
-mvn versions:display-property-updates | check if latest versions of libraries are used.
+| target                                | meaning                                         |
+|---------------------------------------|-------------------------------------------------|
+| mvn clean                             | clean environment                               |
+| mvn install                           | build self executable JAR files                 |
+| mvn install -P docker                 | build docker images                             |
+| mvn versions:display-property-updates | check if latest versions of libraries are used. |
 
 ## TODO List
 

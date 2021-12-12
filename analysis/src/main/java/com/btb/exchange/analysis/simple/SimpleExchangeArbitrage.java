@@ -5,10 +5,10 @@ import com.btb.exchange.analysis.services.ExchangeService;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.dto.Opportunity;
+import com.btb.exchange.shared.dto.Order;
 import com.hazelcast.core.HazelcastInstance;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
-import org.knowm.xchange.dto.trade.LimitOrder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -69,8 +69,8 @@ public class SimpleExchangeArbitrage {
 
 
     Opportunities process(ExchangeOrderBook orderBook) {
-        Optional<BigDecimal> askPrice = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice);
-        Optional<BigDecimal> bidPrice = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice);
+        Optional<BigDecimal> askPrice = orderBook.getOrders().getAsks().stream().findFirst().map(Order::getLimitPrice);
+        Optional<BigDecimal> bidPrice = orderBook.getOrders().getBids().stream().findFirst().map(Order::getLimitPrice);
 
         var key = new ExchangeCPKey(orderBook.getExchange(), orderBook.getCurrencyPair());
         bids.put(key, askPrice.orElse(BigDecimal.ZERO));
@@ -86,8 +86,8 @@ public class SimpleExchangeArbitrage {
      */
     private Opportunities findOpportunities(ExchangeOrderBook orderBook) {
         var opportunitiesBuilder = Opportunities.builder().timestamp(orderBook.getTimestamp());
-        final BigDecimal ask = orderBook.getOrderBook().getAsks().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
-        final BigDecimal bid = orderBook.getOrderBook().getBids().stream().findFirst().map(LimitOrder::getLimitPrice).orElse(BigDecimal.ZERO);
+        final BigDecimal ask = orderBook.getOrders().getAsks().stream().findFirst().map(Order::getLimitPrice).orElse(BigDecimal.ZERO);
+        final BigDecimal bid = orderBook.getOrders().getBids().stream().findFirst().map(Order::getLimitPrice).orElse(BigDecimal.ZERO);
         final CurrencyPair currencyPair = orderBook.getCurrencyPair();
 
         asks.entrySet().stream()

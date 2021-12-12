@@ -1,4 +1,4 @@
-package com.btb.exchange.backend.data;
+package com.btb.exchange.backend.data.mongodb;
 
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
@@ -34,11 +34,11 @@ import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
-public class DatabaseService {
+public class MongoDBDatabaseService {
 
     public static final String HAZELCAST_DB = "database";
 
-    private final MessageRepository repository;
+    private final MongodbMessageRepository repository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ApplicationConfig config;
     private final ObjectMapper objectMapper;
@@ -48,9 +48,9 @@ public class DatabaseService {
     // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<Message> stored = PublishSubject.create();
 
-    public DatabaseService(MessageRepository repository, KafkaTemplate<String, String> kafkaTemplate,
-                           ApplicationConfig config, ObjectMapper objectMapper, ReactiveMongoTemplate mongoTemplate,
-                           HazelcastInstance hazelcastInstance) {
+    public MongoDBDatabaseService(MongodbMessageRepository repository, KafkaTemplate<String, String> kafkaTemplate,
+                                  ApplicationConfig config, ObjectMapper objectMapper, ReactiveMongoTemplate mongoTemplate,
+                                  HazelcastInstance hazelcastInstance) {
         this.repository = repository;
         this.kafkaTemplate = kafkaTemplate;
         this.config = config;
@@ -153,5 +153,12 @@ public class DatabaseService {
                     replayWatch.stop();
                     log.info("End replay events, and took: {}", Duration.ofMillis(replayWatch.getTotalTimeMillis()));
                 });
+    }
+
+    /**
+     * for testing purposes
+     */
+    public void deleteAll() {
+        repository.deleteAll().blockingAwait();
     }
 }

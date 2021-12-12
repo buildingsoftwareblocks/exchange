@@ -1,8 +1,7 @@
 package com.btb.exchange.backend.service;
 
 import com.btb.exchange.backend.config.ApplicationConfig;
-import com.btb.exchange.backend.data.DatabaseService;
-import com.btb.exchange.backend.data.MessageRepository;
+import com.btb.exchange.backend.data.mongodb.MongoDBDatabaseService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchange;
@@ -53,9 +52,7 @@ class ExchangeServiceTest {
     private static final GenericContainer ZOOKEEPER = new GenericContainer("zookeeper:latest").withExposedPorts(2181);
 
     @Autowired
-    DatabaseService databaseService;
-    @Autowired
-    MessageRepository repository;
+    MongoDBDatabaseService mongoDBDatabaseService;
     @Autowired
     ObjectMapper objectMapper;
     @Autowired
@@ -71,12 +68,12 @@ class ExchangeServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        repository.deleteAll().blockingAwait();
+        mongoDBDatabaseService.deleteAll();
     }
 
     ExchangeService createExchangeService() {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
-        ApplicationConfig config = new ApplicationConfig(false, true, true);
+        ApplicationConfig config = new ApplicationConfig(false, true, false, 5, true);
         return new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
                 kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/");
     }

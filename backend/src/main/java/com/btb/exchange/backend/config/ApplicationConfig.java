@@ -17,12 +17,17 @@ public class ApplicationConfig {
 
     private boolean recording;
     private boolean replay;
+    private boolean es;
+    private int maxOrders;
     private boolean testing;
 
     @PostConstruct
     void validate() {
         if (recording && replay) {
             throw new IllegalArgumentException("Recording AND replaying is not supported!");
+        }
+        if (maxOrders < 0) {
+            throw new IllegalArgumentException("maxOrders must be >= 0");
         }
     }
 }

@@ -41,7 +41,7 @@
 
         <Root level="info">
             <AppenderRef ref="console"/>
-            <AppenderRef ref="gelf"/>
+<!--            <AppenderRef ref="gelf"/>-->
         </Root>
     </Loggers>
 </Configuration>

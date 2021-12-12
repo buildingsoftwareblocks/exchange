@@ -4,17 +4,13 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Value;
-import org.knowm.xchange.currency.CurrencyPair;
 
-import java.time.LocalTime;
+import java.math.BigDecimal;
 
 @Value
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-public class ExchangeOrderBook {
-    long order;
-    LocalTime timestamp;
-    ExchangeEnum exchange;
-    CurrencyPair currencyPair;
-    Orders orders;
+public class Order {
+    BigDecimal limitPrice;
+    BigDecimal originalAmount;
 }

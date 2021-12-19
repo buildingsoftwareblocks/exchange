@@ -42,7 +42,7 @@ public class ExchangeService {
         };
     }
 
-    public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, @NonNull LocalTime time) {
+    public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, LocalTime time) {
         return validData(LocalTime.now(), time, new ExchangeCPKey(exchange, currencyPair));
     }
 
@@ -50,11 +50,15 @@ public class ExchangeService {
      * max acceptable delay in ms of received data
      */
     // TODO better config per exchange/currencypair
-    public boolean validData(@NonNull LocalTime now, @NonNull LocalTime time, ExchangeCPKey exchangeCPKey) {
+    public boolean validData(@NonNull LocalTime now, LocalTime time, ExchangeCPKey exchangeCPKey) {
         if (config.isReplay()) {
             return true;
         } else {
-            return now.minus(2, ChronoUnit.MINUTES).isBefore(time);
+            if (time != null) {
+                return now.minus(2, ChronoUnit.MINUTES).isBefore(time);
+            } else {
+                return true;
+            }
         }
     }
 }

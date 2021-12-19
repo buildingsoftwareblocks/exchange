@@ -22,6 +22,7 @@ import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter
 import org.apache.curator.utils.CloseableUtils;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
+import org.knowm.xchange.exceptions.ExchangeException;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.lang.NonNull;
 
@@ -72,8 +73,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         this.exchangeEnum = exchangeEnum;
         this.subscriptionRequired = subscriptionRequired;
 
-        messageCounter = Counter.builder(String.format("backend.exchange.%s.messages", exchangeEnum.toString()))
+        messageCounter = Counter.builder("backend.exchange.messages")
                 .description("indicates number of message received from the given exchange")
+                .tag("exchange", exchangeEnum.toString())
                 .register(registry);
 
         leaderSelector = new LeaderSelector(client, path, executor, this);
@@ -171,6 +173,8 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
             log.info("{} : Subscribe: {}", exchangeEnum, currencyPair);
             exchange.getStreamingMarketDataService().getOrderBook(currencyPair)
                     .subscribe(orderBook -> process(orderBook, currencyPair), throwable -> log.error("Error in trade subscription", throwable));
+        } catch (ExchangeException e) {
+            log.warn("Exception", e);
         } catch (Exception e) {
             log.error("Exception", e);
         }

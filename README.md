@@ -130,6 +130,10 @@ You can build the application locally via a [maven](https://maven.apache.org/) c
 | mvn install -P docker                 | build docker images                             |
 | mvn versions:display-property-updates | check if latest versions of libraries are used. |
 
+## Known Problems
+
+The backend doesn't wait for elasticsearch to become available. The workaround is to restart the backend.
+
 ## TODO List
 
 - [x] 1 Exchange, 1 Currency pair connected

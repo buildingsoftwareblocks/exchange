@@ -49,14 +49,14 @@ function fillDropdown() {
 
     // Populate dropdown with list of exchanges
     $.getJSON(url, function (data) {
-        $.each(data, function (key,entry) {
+        $.each(data, function (key, entry) {
             dropdown.append($('<option></option>').attr('value', entry).text(entry));
         })
     });
 }
 
 function exchangeSelected() {
-    let dropdown =  document.getElementById("exchanges").value;
+    let dropdown = document.getElementById("exchanges").value;
     if (dropdown !== "-") {
         const url = 'exchange/' + dropdown;
         $.get(url);
@@ -76,7 +76,7 @@ function showOrderBook(message) {
     $("#exchange").html(message.exchange);
     $("#cp").html(message.currencyPair);
     $("#asks").html("");
-    for (ask of message.orderBook.asks) {
+    for (ask of message.orders.asks) {
         $("#asks").append("<tr>");
         $("#asks").append("<td>" + accounting.formatMoney(ask.limitPrice) + "</td>");
         $("#asks").append("<td>" + accounting.formatNumber(ask.originalAmount, 5) + "</td>");
@@ -84,7 +84,7 @@ function showOrderBook(message) {
     }
 
     $("#bids").html("");
-    for (bid of message.orderBook.bids) {
+    for (bid of message.orders.bids) {
         $("#bids").append("<tr>");
         $("#bids").append("<td>" + accounting.formatMoney(bid.limitPrice) + "</td>");
         $("#bids").append("<td>" + accounting.formatNumber(bid.originalAmount, 5) + "</td>");

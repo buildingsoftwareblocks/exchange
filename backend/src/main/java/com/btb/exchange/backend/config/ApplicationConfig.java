@@ -1,24 +1,28 @@
 package com.btb.exchange.backend.config;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 
 @Configuration
-@ConfigurationProperties(prefix = "backend")
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApplicationConfig {
 
+    @Value("${backend.recording:false}")
     private boolean recording;
+    @Value("${backend.replay:false}")
     private boolean replay;
+    @Value("${backend.es:true}")
     private boolean es;
+    @Value("${backend.orders.max:5}")
     private int maxOrders;
+    @Value("${backend.testing:false}")
     private boolean testing;
 
     @PostConstruct

@@ -128,8 +128,10 @@ public class ExchangeService {
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
+        final var now = LocalTime.now();
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
+                .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
                 // TODO filter on currency pair as well?!
                 .filter(o -> o.getExchange().equals(exchange.get()))
                 // pick the last element
@@ -310,12 +312,12 @@ public class ExchangeService {
 
         @Override
         public void writeData(ObjectDataOutput out) throws IOException {
-            out.writeUTF(exchange.toString());
+            out.writeString(exchange.toString());
         }
 
         @Override
         public void readData(ObjectDataInput in) throws IOException {
-            exchange = ExchangeEnum.valueOf(in.readUTF());
+            exchange = ExchangeEnum.valueOf(in.readString());
         }
     }
 
@@ -349,13 +351,13 @@ public class ExchangeService {
         @Override
         public void writeData(ObjectDataOutput out) throws IOException {
             out.writeLong(timestamp.toNanoOfDay());
-            out.writeUTFArray(cps.stream().map(CurrencyPair::toString).toArray(String[]::new));
+            out.writeStringArray(cps.stream().map(CurrencyPair::toString).toArray(String[]::new));
         }
 
         @Override
         public void readData(ObjectDataInput in) throws IOException {
             timestamp = LocalTime.ofNanoOfDay(in.readLong());
-            cps = Arrays.stream(in.readUTFArray()).map(CurrencyPair::new).collect(Collectors.toSet());
+            cps = Arrays.stream(in.readStringArray()).map(CurrencyPair::new).collect(Collectors.toSet());
         }
     }
 
@@ -377,12 +379,12 @@ public class ExchangeService {
 
         @Override
         public void writeData(ObjectDataOutput out) throws IOException {
-            out.writeUTF(currencyPair.toString());
+            out.writeString(currencyPair.toString());
         }
 
         @Override
         public void readData(ObjectDataInput in) throws IOException {
-            currencyPair = new CurrencyPair(in.readUTF());
+            currencyPair = new CurrencyPair(in.readString());
         }
     }
 }

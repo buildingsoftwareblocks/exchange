@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -20,20 +19,17 @@ import java.util.Objects;
 public class ESDatabaseService {
 
     private final ESMessageRepository repository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
     private final ApplicationConfig config;
     private final DTOUtils dtoUtils;
 
-    public ESDatabaseService(ESMessageRepository repository, KafkaTemplate<String, String> kafkaTemplate,
-                             ApplicationConfig config, ObjectMapper objectMapper) {
+    public ESDatabaseService(ESMessageRepository repository, ApplicationConfig config, ObjectMapper objectMapper) {
         this.repository = repository;
-        this.kafkaTemplate = kafkaTemplate;
         this.config = config;
         this.dtoUtils = new DTOUtils(objectMapper);
     }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "elasticsearch")
     public void store(List<String> messages) {
         if (config.isEs()) {
             log.debug("save {} records", messages.size());

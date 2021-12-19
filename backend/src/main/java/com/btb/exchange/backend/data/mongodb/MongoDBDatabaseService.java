@@ -60,7 +60,7 @@ public class MongoDBDatabaseService {
     }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory")
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "mongodb")
     public void store(List<String> messages) {
         if (config.isRecording()) {
             log.debug("save {} records", messages.size());

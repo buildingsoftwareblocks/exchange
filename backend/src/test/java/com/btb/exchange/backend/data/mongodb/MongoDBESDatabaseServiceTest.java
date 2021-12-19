@@ -27,6 +27,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
@@ -52,6 +53,8 @@ class MongoDBESDatabaseServiceTest {
 
     @Container
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
+    @Container
+    private static final ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.12.1");
     @Container
     private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
     @Container
@@ -105,7 +108,7 @@ class MongoDBESDatabaseServiceTest {
     }
 
     @Test
-    void testKakfaListener() throws InterruptedException {
+    void testKafkaListener() throws InterruptedException {
         ExchangeService exchangeService = createExchangeService();
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
@@ -148,9 +151,11 @@ class MongoDBESDatabaseServiceTest {
     static void datasourceConfig(DynamicPropertyRegistry registry) {
         registry.add("spring.data.mongodb.uri", MONGO_DB_CONTAINER::getReplicaSetUrl);
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
+        registry.add("spring.elasticsearch.uris", ELASTICSEARCH_CONTAINER::getHttpHostAddress);
         registry.add("backend.recording", () -> true);
         registry.add("backend.replay", () -> false);
         registry.add("backend.testing", () -> true);
-        registry.add("backend.zookeeper", () -> "localhost:" + ZOOKEEPER.getFirstMappedPort());
+        registry.add("backend.es", () -> false);
+        registry.add("backend.zookeeper.host", () -> "localhost:" + ZOOKEEPER.getFirstMappedPort());
     }
 }

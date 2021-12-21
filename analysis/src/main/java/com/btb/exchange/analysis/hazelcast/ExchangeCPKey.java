@@ -31,13 +31,13 @@ public class ExchangeCPKey implements IdentifiedDataSerializable {
 
     @Override
     public void writeData(ObjectDataOutput out) throws IOException {
-        out.writeUTF(exchange.toString());
+        out.writeString(exchange.toString());
         CurrencyPairUtils.writeData(out, currencyPair);
     }
 
     @Override
     public void readData(ObjectDataInput in) throws IOException {
-        exchange = ExchangeEnum.valueOf(in.readUTF());
+        exchange = ExchangeEnum.valueOf(in.readString());
         currencyPair = CurrencyPairUtils.readData(in);
     }
 }

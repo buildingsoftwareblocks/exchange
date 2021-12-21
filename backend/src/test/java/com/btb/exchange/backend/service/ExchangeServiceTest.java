@@ -6,7 +6,7 @@ import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.junit.jupiter.api.BeforeEach;

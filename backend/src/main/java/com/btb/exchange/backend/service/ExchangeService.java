@@ -12,9 +12,9 @@ import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
@@ -168,7 +168,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         }
     }
 
-    private void subscribe(CurrencyPair currencyPair) {
+    private void subscribe(final CurrencyPair currencyPair) {
         try {
             log.info("{} : Subscribe: {}", exchangeEnum, currencyPair);
             exchange.getStreamingMarketDataService().getOrderBook(currencyPair)

@@ -24,11 +24,11 @@ public class CurrencyPairUtils {
     }
 
     public static void writeData(ObjectDataOutput out, CurrencyPair currencyPair) throws IOException {
-        out.writeUTF(currencyPair.toString());
+        out.writeString(currencyPair.toString());
     }
 
     public static CurrencyPair readData(ObjectDataInput in) throws IOException {
-        return new CurrencyPair(in.readUTF());
+        return new CurrencyPair(in.readString());
     }
 
     public boolean overlap(CurrencyPair cp) {

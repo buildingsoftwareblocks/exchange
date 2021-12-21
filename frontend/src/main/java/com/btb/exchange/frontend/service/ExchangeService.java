@@ -16,10 +16,10 @@ import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -123,14 +123,14 @@ public class ExchangeService {
         opportunityRef.init();
     }
 
-    @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "frontend")
     void processOrderBooks(List<String> messages) {
-        log.debug("process {} messages", messages.size());
+        log.info("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
         final var now = LocalTime.now();
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
+                .peek(o -> log.info("message number: {}", o.getOrder()))
                 .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
                 // TODO filter on currency pair as well?!
                 .filter(o -> o.getExchange().equals(exchange.get()))

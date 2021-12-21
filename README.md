@@ -31,11 +31,11 @@ Create your own *env.dev* file from the *env.template* file.
 docker-compose --env-file env.dev up -d
 ``
 
-| System | link |
-| ------- | --- |
-| admin | http://localhost:8080/ |
+| System   | link                   |
+|----------|------------------------|
+| admin    | http://localhost:8080/ |
 | frontend | http://localhost:8081/ |
-| log GUI | http://localhost:5601/ |
+| log GUI  | http://localhost:5601/ |
 
 ## Test Performance
 

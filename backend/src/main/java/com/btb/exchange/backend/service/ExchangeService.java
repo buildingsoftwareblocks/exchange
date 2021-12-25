@@ -29,6 +29,7 @@ import org.springframework.lang.NonNull;
 import java.io.Closeable;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -51,6 +52,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     private final Counter messageCounter;
 
+    private final int currencyCount;
+    private final Set<String> currencies;
+
     /**
      * for testing purposes, to subscribe to broadcast events.
      * It's 'BehaviorSubject' so we can process the events, even if  the service is already started via the 'Application Ready event'
@@ -64,7 +68,8 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                            StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate,
                            MeterRegistry registry,
                            ObjectMapper objectMapper, ApplicationConfig config,
-                           ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path) {
+                           ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path,
+                           int currencyCount, Set<String> currencies) {
         this.exchange = exchange;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
@@ -72,6 +77,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
         this.exchangeEnum = exchangeEnum;
         this.subscriptionRequired = subscriptionRequired;
+
+        this.currencyCount = currencyCount;
+        this.currencies = currencies;
 
         messageCounter = Counter.builder("backend.exchange.messages")
                 .description("indicates number of message received from the given exchange")
@@ -158,7 +166,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     Collection<CurrencyPair> symbols(StreamingExchange exchange) {
         try {
-            var results = exchange.getExchangeSymbols().stream().filter(CurrencyPairUtils::overlap).limit(10).collect(Collectors.toSet());
+            var results = exchange.getExchangeSymbols().stream().filter(this::overlap).limit(currencyCount).collect(Collectors.toSet());
             // to be sure that the default currency pairs are their as well
             results.addAll(CurrencyPairUtils.CurrencyPairs);
             return results;
@@ -166,6 +174,10 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
             log.info("Exception: {}", e.getMessage());
             return CurrencyPairUtils.CurrencyPairs;
         }
+    }
+
+    boolean overlap(CurrencyPair cp) {
+        return currencies.contains(cp.base.getCurrencyCode()) || currencies.contains(cp.counter.getCurrencyCode());
     }
 
     private void subscribe(final CurrencyPair currencyPair) {

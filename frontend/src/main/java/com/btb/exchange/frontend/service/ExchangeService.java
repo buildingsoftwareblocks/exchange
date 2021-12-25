@@ -130,9 +130,8 @@ public class ExchangeService {
         final var now = LocalTime.now();
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
-                .peek(o -> log.info("message number: {}", o.getOrder()))
+                //.peek(o -> log.info("message number: {}/{}", o.getExchange(), o.getOrder()))
                 .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
-                // TODO filter on currency pair as well?!
                 .filter(o -> o.getExchange().equals(exchange.get()))
                 // pick the last element
                 .reduce((a, b) -> b)
@@ -145,7 +144,7 @@ public class ExchangeService {
     }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).OPPORTUNITIES}", containerFactory = "batchFactory")
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).OPPORTUNITIES}", containerFactory = "batchFactory", groupId = "frontend")
     void processOpportunities(List<String> messages) {
         // only get the last value and add it to the reference
         messages.stream()
@@ -271,6 +270,10 @@ public class ExchangeService {
         } finally {
             orderBookRef.semaphore.release();
         }
+    }
+
+    public List<ExchangeEnum> activeExchanges() {
+        return updated.keySet().stream().map(Key::getExchange).collect(Collectors.toList());
     }
 
     @lombok.Value

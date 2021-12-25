@@ -4,21 +4,21 @@ package com.btb.exchange.shared.dto;
  * All possible exchanges
  */
 public enum ExchangeEnum {
-    //BANKERA,
-    //BINANCE,
+    BANKERA,
+    BINANCE,
     BITFINEX,
     BITMEX,
     BITSTAMP,
     BTCMARKETS,
-    //CEXIO,
+    CEXIO,
     COINBASE,
     COINJAR,
-    //COINMATE,
-    //GEMINI,
+    COINMATE,
+    GEMINI,
     HITBTC,
     HUOBI,
     KRAKEN,
-    //LGO,
-    //OKCOIN,
+    LGO,
+    OKCOIN,
     POLONIEX
 }

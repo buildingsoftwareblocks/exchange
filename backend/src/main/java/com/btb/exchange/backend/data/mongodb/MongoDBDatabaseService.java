@@ -60,17 +60,19 @@ public class MongoDBDatabaseService {
     }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "mongodb")
+    @KafkaListener(
+            topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*",
+            containerFactory = "batchFactory",
+            groupId = "mongodb",
+            autoStartup = "${backend.recording:false}")
     public void store(List<String> messages) {
-        if (config.isRecording()) {
-            log.debug("save {} records", messages.size());
-            var records = messages.stream().map(this::createRecord).toList();
-            repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
-                if (config.isTesting()) {
-                    stored.onNext(r);
-                }
-            });
-        }
+        log.debug("save {} records", messages.size());
+        var records = messages.stream().map(this::createRecord).toList();
+        repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
+            if (config.isTesting()) {
+                stored.onNext(r);
+            }
+        });
     }
 
     void store(String message) {
@@ -82,6 +84,7 @@ public class MongoDBDatabaseService {
         ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
         return Message.builder()
                 .created(new Date())
+                .order(exchangeOrderBook.getOrder())
                 .exchange(exchangeOrderBook.getExchange())
                 .currencyPair(exchangeOrderBook.getCurrencyPair())
                 .data(orderBook).build();

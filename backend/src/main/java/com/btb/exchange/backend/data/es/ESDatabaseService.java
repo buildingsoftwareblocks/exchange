@@ -1,6 +1,5 @@
 package com.btb.exchange.backend.data.es;
 
-import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.utils.DTOUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,23 +18,23 @@ import java.util.Objects;
 public class ESDatabaseService {
 
     private final ESMessageRepository repository;
-    private final ApplicationConfig config;
     private final DTOUtils dtoUtils;
 
-    public ESDatabaseService(ESMessageRepository repository, ApplicationConfig config, ObjectMapper objectMapper) {
+    public ESDatabaseService(ESMessageRepository repository, ObjectMapper objectMapper) {
         this.repository = repository;
-        this.config = config;
         this.dtoUtils = new DTOUtils(objectMapper);
     }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "elasticsearch")
+    @KafkaListener(
+            topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*",
+            containerFactory = "batchFactory",
+            groupId = "elasticsearch",
+            autoStartup = "${backend.es:false}")
     public void store(List<String> messages) {
-        if (config.isEs()) {
-            log.debug("save {} records", messages.size());
-            var records = messages.stream().map(this::createRecord).toList();
-            repository.saveAll(records);
-        }
+        log.debug("save {} records", messages.size());
+        var records = messages.stream().map(this::createRecord).toList();
+        repository.saveAll(records);
     }
 
     @SneakyThrows

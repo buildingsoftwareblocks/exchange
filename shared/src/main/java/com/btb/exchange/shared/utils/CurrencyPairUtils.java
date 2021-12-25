@@ -30,16 +30,4 @@ public class CurrencyPairUtils {
     public static CurrencyPair readData(ObjectDataInput in) throws IOException {
         return new CurrencyPair(in.readString());
     }
-
-    public boolean overlap(CurrencyPair cp) {
-        for (CurrencyPair i : CurrencyPairs) {
-            if ((i.base == cp.base) || (i.base == cp.counter)) {
-                return true;
-            }
-            if ((i.counter == cp.base) || (i.counter == cp.counter)) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

@@ -3,16 +3,23 @@ package com.btb.exchange.backend.service;
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import info.bitrich.xchangestream.bankera.BankeraStreamingExchange;
+import info.bitrich.xchangestream.binance.BinanceStreamingExchange;
 import info.bitrich.xchangestream.bitfinex.BitfinexStreamingExchange;
 import info.bitrich.xchangestream.bitmex.BitmexStreamingExchange;
 import info.bitrich.xchangestream.bitstamp.v2.BitstampStreamingExchange;
 import info.bitrich.xchangestream.btcmarkets.BTCMarketsStreamingExchange;
+import info.bitrich.xchangestream.cexio.CexioStreamingExchange;
 import info.bitrich.xchangestream.coinbasepro.CoinbaseProStreamingExchange;
+import info.bitrich.xchangestream.coinjar.CoinjarStreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingExchangeFactory;
+import info.bitrich.xchangestream.gemini.GeminiStreamingExchange;
 import info.bitrich.xchangestream.hitbtc.HitbtcStreamingExchange;
 import info.bitrich.xchangestream.huobi.HuobiStreamingExchange;
 import info.bitrich.xchangestream.kraken.KrakenStreamingExchange;
+import info.bitrich.xchangestream.lgo.LgoStreamingExchange;
+import info.bitrich.xchangestream.okcoin.OkCoinStreamingExchange;
 import info.bitrich.xchangestream.poloniex2.PoloniexStreamingExchange;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.core.Observable;
@@ -47,6 +54,14 @@ public class LeaderService {
     @Value("${backend.leader.interval.ms:5000}")
     private int interval;
 
+    @Value("#{'${backend.exchanges}'.split(',')}")
+    private Set<ExchangeEnum> exchanges;
+
+    @Value("${backend.exchange.currencies.max:5}")
+    private int currencyCount;
+    @Value("#{'${backend.exchange.currencies}'.split(',')}")
+    private Set<String> currencies;
+
     private final CuratorFramework client;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final MeterRegistry registry;
@@ -56,7 +71,7 @@ public class LeaderService {
     private static final String BASE = "/exchange";
     private final GroupMember groupMember;
     // log the status, but prevent it do it every X seconds.
-    private Set<ExchangeEnum> exchangeslogged = new HashSet<>();
+    private Set<ExchangeEnum> exchangesLogged = new HashSet<>();
 
     private final ConcurrentHashMap<ExchangeEnum, ExchangeService> clients = new ConcurrentHashMap<>();
 
@@ -80,16 +95,21 @@ public class LeaderService {
         watcher.start();
 
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
-        Arrays.stream(ExchangeEnum.values()).forEach(e -> {
-            if (exchangeFactory(e) != null) {
-                log.info("create - {}", e);
-                String path = BASE + "/" + e;
-                ExchangeService exchangeService = new ExchangeService(client, executor, exchangeFactory(e),
-                        kafkaTemplate, registry, objectMapper, config, e, subscriptionRequired(e), path);
-                clients.put(e, exchangeService);
-                exchangeService.start();
-            }
-        });
+        Arrays.stream(ExchangeEnum.values())
+                .filter(e -> exchanges.contains(e))
+                .forEach(e -> {
+                    log.info("create - {}", e);
+                    String path = BASE + "/" + e;
+                    StreamingExchange streamingExchange = exchangeFactory(e);
+                    if (streamingExchange != null) {
+                        ExchangeService exchangeService = new ExchangeService(client, executor, streamingExchange,
+                                kafkaTemplate, registry, objectMapper, config, e, subscriptionRequired(e), path, currencyCount, currencies);
+                        clients.put(e, exchangeService);
+                        exchangeService.start();
+                    } else {
+                        log.warn("Cant;t create streaming exchange: {}", e);
+                    }
+                });
 
         Observable.interval(interval, TimeUnit.MILLISECONDS).observeOn(Schedulers.io()).subscribe(e -> checkExchangeDistribution());
     }
@@ -110,8 +130,8 @@ public class LeaderService {
                 c.interruptLeadership();
             });
         } else {
-            if (!exchangeslogged.equals(leaders)) {
-                exchangeslogged = leaders;
+            if (!exchangesLogged.equals(leaders)) {
+                exchangesLogged = leaders;
                 log.info("Handling exchanges : {}", leaders);
             } else {
                 log.debug("No reschuffle needed : {} / {}", leaders.size(), exchangePerMember);
@@ -134,40 +154,32 @@ public class LeaderService {
 
     StreamingExchange exchangeFactory(ExchangeEnum exchange) {
         try {
-            //case BANKERA -> StreamingExchangeFactory.INSTANCE.createExchange(BankeraStreamingExchange.class);
-            //case BINANCE -> StreamingExchangeFactory.INSTANCE.createExchange(BinanceStreamingExchange.class);
-            //case CEXIO -> StreamingExchangeFactory.INSTANCE.createExchange(CexioStreamingExchange.class);
-            //case GEMINI -> StreamingExchangeFactory.INSTANCE.createExchange(GeminiStreamingExchange.class);
-            //case LGO -> StreamingExchangeFactory.INSTANCE.createExchange(LgoStreamingExchange.class);
-            //case OKCOIN -> StreamingExchangeFactory.INSTANCE.createExchange(OkCoinStreamingExchange.class);
-            switch (exchange) {
-                case BITFINEX:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(BitfinexStreamingExchange.class);
-                case BITMEX:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(BitmexStreamingExchange.class);
-                case BITSTAMP:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(BitstampStreamingExchange.class);
-                case BTCMARKETS:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(BTCMarketsStreamingExchange.class);
-                case COINBASE:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(CoinbaseProStreamingExchange.class);
-//            case COINJAR:
-//                return StreamingExchangeFactory.INSTANCE.createExchange(CoinjarStreamingExchange.class);
-                case HITBTC:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(HitbtcStreamingExchange.class);
-                case HUOBI:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(HuobiStreamingExchange.class);
-                case KRAKEN:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(KrakenStreamingExchange.class);
-                case POLONIEX:
-                    return StreamingExchangeFactory.INSTANCE.createExchange(PoloniexStreamingExchange.class);
-            }
+            return switch (exchange) {
+                case BANKERA -> StreamingExchangeFactory.INSTANCE.createExchange(BankeraStreamingExchange.class);
+                case BINANCE -> StreamingExchangeFactory.INSTANCE.createExchange(BinanceStreamingExchange.class);
+                case BITFINEX -> StreamingExchangeFactory.INSTANCE.createExchange(BitfinexStreamingExchange.class);
+                case BITMEX -> StreamingExchangeFactory.INSTANCE.createExchange(BitmexStreamingExchange.class);
+                case BITSTAMP -> StreamingExchangeFactory.INSTANCE.createExchange(BitstampStreamingExchange.class);
+                case BTCMARKETS -> StreamingExchangeFactory.INSTANCE.createExchange(BTCMarketsStreamingExchange.class);
+                case CEXIO -> StreamingExchangeFactory.INSTANCE.createExchange(CexioStreamingExchange.class);
+                case COINBASE -> StreamingExchangeFactory.INSTANCE.createExchange(CoinbaseProStreamingExchange.class);
+                case COINJAR -> StreamingExchangeFactory.INSTANCE.createExchange(CoinjarStreamingExchange.class);
+                case GEMINI -> StreamingExchangeFactory.INSTANCE.createExchange(GeminiStreamingExchange.class);
+                case HITBTC -> StreamingExchangeFactory.INSTANCE.createExchange(HitbtcStreamingExchange.class);
+                case HUOBI -> StreamingExchangeFactory.INSTANCE.createExchange(HuobiStreamingExchange.class);
+                case KRAKEN -> StreamingExchangeFactory.INSTANCE.createExchange(KrakenStreamingExchange.class);
+                case LGO -> StreamingExchangeFactory.INSTANCE.createExchange(LgoStreamingExchange.class);
+                case OKCOIN -> StreamingExchangeFactory.INSTANCE.createExchange(OkCoinStreamingExchange.class);
+                case POLONIEX -> StreamingExchangeFactory.INSTANCE.createExchange(PoloniexStreamingExchange.class);
+                default -> throw new IllegalArgumentException(String.format("%s unknown exchange", exchange));
+            };
         } catch (Throwable e) {
             log.warn("Error creating {}, exception : {}", exchange, e);
         }
         return null;
     }
 
+    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     boolean subscriptionRequired(ExchangeEnum exchange) {
         return switch (exchange) {//BINANCE,
             case COINBASE -> true;

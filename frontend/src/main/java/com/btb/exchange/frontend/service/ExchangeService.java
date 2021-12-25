@@ -44,8 +44,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.btb.exchange.shared.dto.ExchangeEnum.KRAKEN;
-
 /**
  * Handle Exchanges
  */
@@ -61,6 +59,7 @@ public class ExchangeService {
     public static final String HAZELCAST_OPPORTUNITIES = "opportunities";
     public static final String HAZELCAST_UPDATED = "updated";
     public static final String HAZELCAST_EXCHANGE = "exchange";
+    public static final String HAZELCAST_CURRENCY_PAIR = "current_pair";
 
     private final SimpMessagingTemplate template;
     private final DTOUtils dtoUtils;
@@ -81,8 +80,11 @@ public class ExchangeService {
 
     private final ReferenceData orderBookRef;
     private final ReferenceData opportunityRef;
+
     private final IMap<Key, ExchangeValue> updated;
-    private final IAtomicReference<ExchangeEnum> exchange;
+    private final IAtomicReference<ExchangeEnum> selectedExchange;
+    private final IAtomicReference<CurrencyPair> selectedCurrency;
+
     private final DistributionSummary kafkaMessagesCounter;
     private final DistributionSummary wsMessagesCounter;
     private final DistributionSummary orderbookDelay;
@@ -95,7 +97,8 @@ public class ExchangeService {
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
         updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
-        exchange = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_EXCHANGE);
+        selectedExchange = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_EXCHANGE);
+        selectedCurrency = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_CURRENCY_PAIR);
 
         kafkaMessagesCounter = DistributionSummary.builder("frontend.kafka.queue")
                 .description("indicates number of message read form the kafka queue")
@@ -111,11 +114,6 @@ public class ExchangeService {
 
         opportunityDelay = DistributionSummary.builder("frontend.opportunity.delay")
                 .register(registry);
-
-        // set default value
-        if (exchange.isNull()) {
-            exchange.set(KRAKEN);
-        }
     }
 
     void init() {
@@ -125,14 +123,15 @@ public class ExchangeService {
 
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "frontend")
     void processOrderBooks(List<String> messages) {
-        log.info("process {} messages", messages.size());
+        log.debug("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
         final var now = LocalTime.now();
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
                 //.peek(o -> log.info("message number: {}/{}", o.getExchange(), o.getOrder()))
                 .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
-                .filter(o -> o.getExchange().equals(exchange.get()))
+                .filter(o -> o.getExchange().equals(selectedExchange.get()))
+                .filter(o -> o.getCurrencyPair().equals(selectedCurrency.get()))
                 // pick the last element
                 .reduce((a, b) -> b)
                 .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), orderBook));
@@ -261,7 +260,15 @@ public class ExchangeService {
      */
     @SneakyThrows
     public void changeExchange(ExchangeEnum exchangeEnum) {
-        exchange.set(exchangeEnum);
+        log.info("change Exchange() : {}", exchangeEnum);
+        selectedExchange.set(exchangeEnum);
+        changeCurrency(null);
+
+        // set default currency
+        ExchangeValue ev = updated.get(new Key(selectedExchange.get()));
+        if (ev != null) {
+            ev.cps.stream().findFirst().ifPresent(this::changeCurrency);
+        }
 
         // make sure we receive the data due to order numbering of a different exchange
         try {
@@ -272,8 +279,22 @@ public class ExchangeService {
         }
     }
 
+    public void changeCurrency(CurrencyPair currencyPair) {
+        log.info("change Currency() : {}", currencyPair);
+        selectedCurrency.set(currencyPair);
+    }
+
     public List<ExchangeEnum> activeExchanges() {
         return updated.keySet().stream().map(Key::getExchange).collect(Collectors.toList());
+    }
+
+    public List<String> activeCurrencies() {
+        if (!selectedExchange.isNull()) {
+            ExchangeValue ev = updated.get(new Key(selectedExchange.get()));
+            return ev.cps.stream().map(CurrencyPair::toString).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     @lombok.Value

@@ -33,9 +33,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 
 @SpringBootTest
 @Testcontainers
@@ -89,7 +89,7 @@ class ExchangeServiceTest {
             latch.countDown();
         }));
 
-        service.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), getFirstCurrencyPair());
+        service.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USD);
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

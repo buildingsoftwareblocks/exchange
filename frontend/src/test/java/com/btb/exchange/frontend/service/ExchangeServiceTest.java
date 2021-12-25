@@ -3,7 +3,6 @@ package com.btb.exchange.frontend.service;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Orders;
-import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,12 +32,13 @@ import javax.annotation.PostConstruct;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
-import static com.btb.exchange.shared.utils.CurrencyPairUtils.getSecondCurrencyPair;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
+import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @SpringBootTest
 @Testcontainers
@@ -72,7 +72,10 @@ class ExchangeServiceTest {
         Thread.sleep(1000);
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, getFirstCurrencyPair(),
+        service.changeExchange(ExchangeEnum.KRAKEN);
+        service.changeCurrency(BTC_USD);
+
+        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, BTC_USD,
                 new Orders(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
@@ -86,7 +89,9 @@ class ExchangeServiceTest {
     void processNonMatching() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.BITSTAMP, getSecondCurrencyPair(),
+        service.changeExchange(ExchangeEnum.KRAKEN);
+
+        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.BITSTAMP, ETH_BTC,
                 new Orders(new Date(), Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
 
@@ -112,7 +117,7 @@ class ExchangeServiceTest {
         @PostConstruct
         public void init() {
             // iterate over currency pairs and register new beans
-            CurrencyPairUtils.CurrencyPairs.forEach(cp ->
+            List.of(BTC_USD, ETH_BTC).forEach(cp ->
                     ac.registerBean(String.format("topic.%s", cp), NewTopic.class, () -> TopicBuilder.name(TopicUtils.orderBook(cp)).build()));
         }
     }

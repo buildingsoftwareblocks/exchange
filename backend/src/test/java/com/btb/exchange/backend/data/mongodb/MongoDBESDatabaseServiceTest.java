@@ -42,10 +42,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.btb.exchange.shared.utils.CurrencyPairUtils.getFirstCurrencyPair;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
+import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 
 @SpringBootTest
 @Testcontainers
@@ -100,7 +100,7 @@ class MongoDBESDatabaseServiceTest {
 
         var startCount = repository.count().blockingGet();
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                getFirstCurrencyPair(), new Orders(new Date(), Collections.emptyList(), Collections.emptyList())));
+                BTC_USD, new Orders(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
@@ -115,7 +115,7 @@ class MongoDBESDatabaseServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var startCount = repository.count().blockingGet();
-        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), getFirstCurrencyPair());
+        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USD);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
@@ -139,7 +139,7 @@ class MongoDBESDatabaseServiceTest {
             }
         }));
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                getFirstCurrencyPair(), new Orders(new Date(), Collections.emptyList(), Collections.emptyList())));
+                BTC_USD, new Orders(new Date(), Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

@@ -130,8 +130,8 @@ public class ExchangeService {
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
                 //.peek(o -> log.info("message number: {}/{}", o.getExchange(), o.getOrder()))
                 .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
-                //.filter(o -> o.getExchange().equals(selectedExchange.get()))
-                //.filter(o -> o.getCurrencyPair().equals(selectedCurrency.get()))
+                .filter(o -> o.getExchange().equals(selectedExchange.get()))
+                .filter(o -> o.getCurrencyPair().equals(selectedCurrency.get()))
                 // pick the last element
                 .reduce((a, b) -> b)
                 .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), orderBook));

@@ -27,7 +27,7 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        fillDropdown();
+        fillExchangeDropdown();
         stompClient.subscribe('/topic/orderbook', function (message) {
             showOrderBook(JSON.parse(message.body));
         });
@@ -40,7 +40,7 @@ function connect() {
     });
 }
 
-function fillDropdown() {
+function fillExchangeDropdown() {
     let dropdown = $('#exchanges');
     dropdown.empty();
     dropdown.append('<option value="-" selected disabled hidden>Choose Exchange</option>');
@@ -55,11 +55,35 @@ function fillDropdown() {
     });
 }
 
+function fillCurrencyDropdown() {
+    let dropdown = $('#currencies');
+    dropdown.empty();
+    dropdown.append('<option value="-" selected disabled hidden>Choose Currency Pair</option>');
+
+    const url = 'exchange/currencies';
+
+    // Populate dropdown with list of exchanges
+    $.getJSON(url, function (data) {
+        $.each(data, function (key, entry) {
+            dropdown.append($('<option></option>').attr('value', entry).text(entry));
+        })
+    });
+}
+
 function exchangeSelected() {
     let dropdown = document.getElementById("exchanges").value;
     if (dropdown !== "-") {
         const url = 'exchange/' + dropdown;
-        $.get(url);
+        $.post(url);
+    }
+    fillCurrencyDropdown();
+}
+
+function currencySelected() {
+    let dropdown = document.getElementById("currencies").value;
+    if (dropdown !== "-") {
+        const url = 'exchange/currency/' + dropdown;
+        $.post(url);
     }
 }
 
@@ -132,6 +156,9 @@ $(function () {
     });
     $('#exchanges').click(function () {
         exchangeSelected();
+    });
+    $('#currencies').click(function () {
+        currencySelected();
     });
 });
 

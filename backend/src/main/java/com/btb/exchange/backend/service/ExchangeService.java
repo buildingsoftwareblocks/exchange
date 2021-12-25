@@ -12,9 +12,9 @@ import info.bitrich.xchangestream.core.ProductSubscription;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.reactivex.Observable;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
@@ -29,6 +29,7 @@ import org.springframework.lang.NonNull;
 import java.io.Closeable;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -51,6 +52,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     private final Counter messageCounter;
 
+    private final int currencyCount;
+    private final Set<String> currencies;
+
     /**
      * for testing purposes, to subscribe to broadcast events.
      * It's 'BehaviorSubject' so we can process the events, even if  the service is already started via the 'Application Ready event'
@@ -64,7 +68,8 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                            StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate,
                            MeterRegistry registry,
                            ObjectMapper objectMapper, ApplicationConfig config,
-                           ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path) {
+                           ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path,
+                           int currencyCount, Set<String> currencies) {
         this.exchange = exchange;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
@@ -72,6 +77,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
         this.exchangeEnum = exchangeEnum;
         this.subscriptionRequired = subscriptionRequired;
+
+        this.currencyCount = currencyCount;
+        this.currencies = currencies;
 
         messageCounter = Counter.builder("backend.exchange.messages")
                 .description("indicates number of message received from the given exchange")
@@ -158,7 +166,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     Collection<CurrencyPair> symbols(StreamingExchange exchange) {
         try {
-            var results = exchange.getExchangeSymbols().stream().filter(CurrencyPairUtils::overlap).limit(10).collect(Collectors.toSet());
+            var results = exchange.getExchangeSymbols().stream().filter(this::overlap).limit(currencyCount).collect(Collectors.toSet());
             // to be sure that the default currency pairs are their as well
             results.addAll(CurrencyPairUtils.CurrencyPairs);
             return results;
@@ -168,7 +176,11 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         }
     }
 
-    private void subscribe(CurrencyPair currencyPair) {
+    boolean overlap(CurrencyPair cp) {
+        return currencies.contains(cp.base.getCurrencyCode()) || currencies.contains(cp.counter.getCurrencyCode());
+    }
+
+    private void subscribe(final CurrencyPair currencyPair) {
         try {
             log.info("{} : Subscribe: {}", exchangeEnum, currencyPair);
             exchange.getStreamingMarketDataService().getOrderBook(currencyPair)

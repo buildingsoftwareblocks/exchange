@@ -6,10 +6,10 @@ import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.ISemaphore;
-import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -60,17 +60,19 @@ public class MongoDBDatabaseService {
     }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "mongodb")
+    @KafkaListener(
+            topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*",
+            containerFactory = "batchFactory",
+            groupId = "mongodb",
+            autoStartup = "${backend.recording:false}")
     public void store(List<String> messages) {
-        if (config.isRecording()) {
-            log.debug("save {} records", messages.size());
-            var records = messages.stream().map(this::createRecord).toList();
-            repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
-                if (config.isTesting()) {
-                    stored.onNext(r);
-                }
-            });
-        }
+        log.debug("save {} records", messages.size());
+        var records = messages.stream().map(this::createRecord).toList();
+        repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
+            if (config.isTesting()) {
+                stored.onNext(r);
+            }
+        });
     }
 
     void store(String message) {
@@ -82,6 +84,7 @@ public class MongoDBDatabaseService {
         ExchangeOrderBook exchangeOrderBook = objectMapper.readValue(orderBook, ExchangeOrderBook.class);
         return Message.builder()
                 .created(new Date())
+                .order(exchangeOrderBook.getOrder())
                 .exchange(exchangeOrderBook.getExchange())
                 .currencyPair(exchangeOrderBook.getCurrencyPair())
                 .data(orderBook).build();

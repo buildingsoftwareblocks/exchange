@@ -13,33 +13,14 @@ import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @UtilityClass
 public class CurrencyPairUtils {
+    // TODO remove
     public static final List<CurrencyPair> CurrencyPairs = List.of(BTC_USD, ETH_BTC);
 
-    public static CurrencyPair getFirstCurrencyPair() {
-        return CurrencyPairs.get(0);
-    }
-
-    public static CurrencyPair getSecondCurrencyPair() {
-        return CurrencyPairs.get(1);
-    }
-
     public static void writeData(ObjectDataOutput out, CurrencyPair currencyPair) throws IOException {
-        out.writeUTF(currencyPair.toString());
+        out.writeString(currencyPair.toString());
     }
 
     public static CurrencyPair readData(ObjectDataInput in) throws IOException {
-        return new CurrencyPair(in.readUTF());
-    }
-
-    public boolean overlap(CurrencyPair cp) {
-        for (CurrencyPair i : CurrencyPairs) {
-            if ((i.base == cp.base) || (i.base == cp.counter)) {
-                return true;
-            }
-            if ((i.counter == cp.base) || (i.counter == cp.counter)) {
-                return true;
-            }
-        }
-        return false;
+        return new CurrencyPair(in.readString());
     }
 }

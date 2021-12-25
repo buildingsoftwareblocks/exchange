@@ -16,10 +16,10 @@ import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
-import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,8 +44,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.btb.exchange.shared.dto.ExchangeEnum.KRAKEN;
-
 /**
  * Handle Exchanges
  */
@@ -61,6 +59,7 @@ public class ExchangeService {
     public static final String HAZELCAST_OPPORTUNITIES = "opportunities";
     public static final String HAZELCAST_UPDATED = "updated";
     public static final String HAZELCAST_EXCHANGE = "exchange";
+    public static final String HAZELCAST_CURRENCY_PAIR = "current_pair";
 
     private final SimpMessagingTemplate template;
     private final DTOUtils dtoUtils;
@@ -81,8 +80,11 @@ public class ExchangeService {
 
     private final ReferenceData orderBookRef;
     private final ReferenceData opportunityRef;
+
     private final IMap<Key, ExchangeValue> updated;
-    private final IAtomicReference<ExchangeEnum> exchange;
+    private final IAtomicReference<ExchangeEnum> selectedExchange;
+    private final IAtomicReference<CurrencyPair> selectedCurrency;
+
     private final DistributionSummary kafkaMessagesCounter;
     private final DistributionSummary wsMessagesCounter;
     private final DistributionSummary orderbookDelay;
@@ -95,7 +97,8 @@ public class ExchangeService {
         orderBookRef = new ReferenceData(hazelcastInstance, HAZELCAST_ORDERBOOKS);
         opportunityRef = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
         updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
-        exchange = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_EXCHANGE);
+        selectedExchange = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_EXCHANGE);
+        selectedCurrency = hazelcastInstance.getCPSubsystem().getAtomicReference(HAZELCAST_CURRENCY_PAIR);
 
         kafkaMessagesCounter = DistributionSummary.builder("frontend.kafka.queue")
                 .description("indicates number of message read form the kafka queue")
@@ -111,11 +114,6 @@ public class ExchangeService {
 
         opportunityDelay = DistributionSummary.builder("frontend.opportunity.delay")
                 .register(registry);
-
-        // set default value
-        if (exchange.isNull()) {
-            exchange.set(KRAKEN);
-        }
     }
 
     void init() {
@@ -123,7 +121,6 @@ public class ExchangeService {
         opportunityRef.init();
     }
 
-    @Async
     @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "frontend")
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
@@ -131,9 +128,10 @@ public class ExchangeService {
         final var now = LocalTime.now();
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, ExchangeOrderBook.class))
+                //.peek(o -> log.info("message number: {}/{}", o.getExchange(), o.getOrder()))
                 .peek(o -> updated(new Key(o.getExchange()), now, o.getCurrencyPair()))
-                // TODO filter on currency pair as well?!
-                .filter(o -> o.getExchange().equals(exchange.get()))
+                .filter(o -> o.getExchange().equals(selectedExchange.get()))
+                .filter(o -> o.getCurrencyPair().equals(selectedCurrency.get()))
                 // pick the last element
                 .reduce((a, b) -> b)
                 .ifPresent(orderBook -> update(orderBookRef, orderBook.getOrder(), orderBook));
@@ -145,7 +143,7 @@ public class ExchangeService {
     }
 
     @Async
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).OPPORTUNITIES}", containerFactory = "batchFactory")
+    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).OPPORTUNITIES}", containerFactory = "batchFactory", groupId = "frontend")
     void processOpportunities(List<String> messages) {
         // only get the last value and add it to the reference
         messages.stream()
@@ -262,7 +260,15 @@ public class ExchangeService {
      */
     @SneakyThrows
     public void changeExchange(ExchangeEnum exchangeEnum) {
-        exchange.set(exchangeEnum);
+        log.info("change Exchange() : {}", exchangeEnum);
+        selectedExchange.set(exchangeEnum);
+        changeCurrency(null);
+
+        // set default currency
+        ExchangeValue ev = updated.get(new Key(selectedExchange.get()));
+        if (ev != null) {
+            ev.cps.stream().findFirst().ifPresent(this::changeCurrency);
+        }
 
         // make sure we receive the data due to order numbering of a different exchange
         try {
@@ -270,6 +276,24 @@ public class ExchangeService {
             orderBookRef.init();
         } finally {
             orderBookRef.semaphore.release();
+        }
+    }
+
+    public void changeCurrency(CurrencyPair currencyPair) {
+        log.info("change Currency() : {}", currencyPair);
+        selectedCurrency.set(currencyPair);
+    }
+
+    public List<ExchangeEnum> activeExchanges() {
+        return updated.keySet().stream().map(Key::getExchange).collect(Collectors.toList());
+    }
+
+    public List<String> activeCurrencies() {
+        if (!selectedExchange.isNull()) {
+            ExchangeValue ev = updated.get(new Key(selectedExchange.get()));
+            return ev.cps.stream().map(CurrencyPair::toString).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
         }
     }
 

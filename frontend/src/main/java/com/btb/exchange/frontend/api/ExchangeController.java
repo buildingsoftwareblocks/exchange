@@ -1,6 +1,7 @@
 package com.btb.exchange.frontend.api;
 
 import com.btb.exchange.frontend.service.ExchangeService;
+import com.btb.exchange.frontend.service.UserState;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/exchange")
@@ -16,6 +18,7 @@ import java.util.List;
 public class ExchangeController {
 
     private final ExchangeService exchangeService;
+    private final UserState userState;
 
     @GetMapping("/all")
     public List<ExchangeEnum> exchanges() {
@@ -24,16 +27,16 @@ public class ExchangeController {
 
     @PostMapping("/{exchange}")
     public void setExchange(@PathVariable ExchangeEnum exchange) {
-        exchangeService.changeExchange(exchange);
+        userState.changeExchange(exchange);
     }
 
     @GetMapping("/currencies")
     public List<String> exchangeCurrencies() {
-        return exchangeService.activeCurrencies();
+        return userState.activeCurrencies().stream().map(CurrencyPair::toString).collect(Collectors.toList());
     }
 
     @PostMapping("/currency/{base}/{counter}")
     public void setCurrency(@PathVariable String base, @PathVariable String counter) {
-        exchangeService.changeCurrency(new CurrencyPair(base, counter));
+        userState.changeCurrency(new CurrencyPair(base, counter));
     }
 }

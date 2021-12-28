@@ -27,14 +27,15 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
+        stompClient.send('/app/init');
         fillExchangeDropdown();
-        stompClient.subscribe('/topic/orderbook', function (message) {
+        stompClient.subscribe('/user/topic/orderbook', function (message) {
             showOrderBook(JSON.parse(message.body));
         });
-        stompClient.subscribe('/topic/opportunities', function (message) {
+        stompClient.subscribe('/user/topic/opportunities', function (message) {
             showOpportunities(JSON.parse(message.body));
         });
-        stompClient.subscribe('/topic/exchanges', function (message) {
+        stompClient.subscribe('/user/topic/exchanges', function (message) {
             showExchanges(JSON.parse(message.body));
         });
     });

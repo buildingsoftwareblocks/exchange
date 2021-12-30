@@ -1,5 +1,6 @@
 package com.btb.exchange.shared.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class ExchangeOrderBook {
     long order;
+    @JsonFormat(pattern = "HH:mm:ss.SSS")
     LocalTime timestamp;
     ExchangeEnum exchange;
     CurrencyPair currencyPair;

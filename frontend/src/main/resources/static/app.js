@@ -27,8 +27,6 @@ function connect() {
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.send('/app/init');
-        fillExchangeDropdown();
         stompClient.subscribe('/user/topic/orderbook', function (message) {
             showOrderBook(JSON.parse(message.body));
         });
@@ -38,6 +36,8 @@ function connect() {
         stompClient.subscribe('/user/topic/exchanges', function (message) {
             showExchanges(JSON.parse(message.body));
         });
+        fillExchangeDropdown();
+        fillCurrencyDropdown();
     });
 }
 
@@ -61,30 +61,15 @@ function fillCurrencyDropdown() {
     dropdown.empty();
     dropdown.append('<option value="-" selected disabled hidden>Choose Currency Pair</option>');
 
-    const url = 'exchange/currencies';
+    if ($("#exchanges").val()) {
+        const url = 'exchange/currencies/' + $("#exchanges").val();
 
-    // Populate dropdown with list of exchanges
-    $.getJSON(url, function (data) {
-        $.each(data, function (key, entry) {
-            dropdown.append($('<option></option>').attr('value', entry).text(entry));
-        })
-    });
-}
-
-function exchangeSelected() {
-    let dropdown = document.getElementById("exchanges").value;
-    if (dropdown !== "-") {
-        const url = 'exchange/' + dropdown;
-        $.post(url);
-    }
-    fillCurrencyDropdown();
-}
-
-function currencySelected() {
-    let dropdown = document.getElementById("currencies").value;
-    if (dropdown !== "-") {
-        const url = 'exchange/currency/' + dropdown;
-        $.post(url);
+        // Populate dropdown with list of exchanges
+        $.getJSON(url, function (data) {
+            $.each(data, function (key, entry) {
+                dropdown.append($('<option></option>').attr('value', entry).text(entry));
+            })
+        });
     }
 }
 
@@ -93,6 +78,15 @@ function disconnect() {
         stompClient.disconnect();
     }
     setConnected(false);
+
+    // clear environment
+    $("#exchange").html("");
+    $("#cp").html("");
+    $("#asks").html("");
+    $("#bids").html("");
+    $("#opportunities").html("");
+    $("#exchangesUpdated").html("");
+
     console.log("Disconnected");
 }
 
@@ -100,6 +94,7 @@ function disconnect() {
 function showOrderBook(message) {
     $("#exchange").html(message.exchange);
     $("#cp").html(message.currencyPair);
+    $("#orderbook_timestamp").html(message.timestamp);
     $("#asks").html("");
     for (ask of message.orders.asks) {
         $("#asks").append("<tr>");
@@ -144,6 +139,9 @@ function showExchanges(message) {
 }
 
 $(function () {
+    // disable all caching for ajax calls
+    $.ajaxSetup({cache: false});
+
     setConnected(false);
     $("form").on('submit', function (e) {
         e.preventDefault();
@@ -155,11 +153,12 @@ $(function () {
     $("#disconnect").click(function () {
         disconnect();
     });
-    $('#exchanges').click(function () {
-        exchangeSelected();
+    $('#exchanges').change(function () {
+        stompClient.send('/app/exchange', {}, JSON.stringify($("#exchanges").val()));
+        fillCurrencyDropdown();
     });
-    $('#currencies').click(function () {
-        currencySelected();
+    $('#currencies').change(function () {
+        stompClient.send('/app/cp', {}, JSON.stringify($("#currencies").val()));
     });
 });
 

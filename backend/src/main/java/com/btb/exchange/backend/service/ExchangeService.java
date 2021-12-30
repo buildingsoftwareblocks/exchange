@@ -105,7 +105,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     void interruptLeadership() {
         if (leader.get()) {
-            log.info("{} interupted", exchangeEnum);
+            log.info("{} interrupted", exchangeEnum);
             leaderSelector.interruptLeadership();
         }
     }

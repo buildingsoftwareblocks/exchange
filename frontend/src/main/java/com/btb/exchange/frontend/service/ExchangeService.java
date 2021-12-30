@@ -16,6 +16,9 @@ import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -56,6 +59,9 @@ public class ExchangeService {
     private final DistributionSummary orderBookDelay;
     private final DistributionSummary opportunityDelay;
 
+    // for testing purposes, to subscribe to the event that an orderbook is received
+    private final Subject<String> orderbookReceived = PublishSubject.create();
+
     /**
      *
      */
@@ -86,6 +92,7 @@ public class ExchangeService {
             ExchangeOrderBook orderBook = dtoUtils.fromDTO(msg, ExchangeOrderBook.class);
             updated(new ExchangeKey(orderBook.getExchange()), now, orderBook.getCurrencyPair());
             orderbooks(new ExchangeCPKey(orderBook.getExchange(), orderBook.getCurrencyPair()), now, orderBook, msg);
+            orderbookReceived.onNext(msg);
         });
     }
 
@@ -328,5 +335,9 @@ public class ExchangeService {
             counter = in.readLong();
             message = in.readString();
         }
+    }
+
+    Observable<String> subscribe() {
+        return orderbookReceived;
     }
 }

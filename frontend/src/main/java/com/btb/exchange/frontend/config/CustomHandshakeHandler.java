@@ -15,7 +15,7 @@ import java.util.UUID;
 public class CustomHandshakeHandler extends DefaultHandshakeHandler {
     @Override
     protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
-        // generate user name by UUID
+        // generate username by UUID
         return new StompPrincipal(UUID.randomUUID().toString());
     }
 }

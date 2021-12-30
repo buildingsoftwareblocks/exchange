@@ -9,7 +9,6 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
-import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
 
 import java.time.Duration;
 
@@ -18,11 +17,11 @@ import java.time.Duration;
 @Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Value("${frontend.websocket.buffersize:100MB}")
+    @Value("${frontend.websocket.buffer.size:100MB}")
     private DataSize bufferSize;
     @Value("${frontend.websocket.duration:PT60s}")
     private Duration duration;
-    @Value("${frontend.websocket.messagesize:3MB}")
+    @Value("${frontend.websocket.message.size:3MB}")
     private DataSize messageSize;
 
     @Override
@@ -36,7 +35,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/websocket")
                 .setHandshakeHandler(new CustomHandshakeHandler())
-                .addInterceptors(new HttpSessionHandshakeInterceptor())
                 .withSockJS();
     }
 

@@ -22,8 +22,6 @@ public class HazelcastConfig {
         Config config = new Config().setClusterName("frontend-hz");
         config.getSerializationConfig().addDataSerializableFactory(ExchangeDataSerializableFactory.FACTORY_ID, new ExchangeDataSerializableFactory());
         config.getCPSubsystemConfig()
-                // TODO check if still needed
-                .addSemaphoreConfig(new SemaphoreConfig(ExchangeService.HAZELCAST_ORDERBOOKS, true, 1))
                 .addSemaphoreConfig(new SemaphoreConfig(ExchangeService.HAZELCAST_OPPORTUNITIES, true, 1));
         if (multicast) {
             config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);

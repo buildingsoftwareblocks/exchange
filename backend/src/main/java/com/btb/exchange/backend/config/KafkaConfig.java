@@ -1,9 +1,11 @@
 package com.btb.exchange.backend.config;
 
+import com.btb.exchange.shared.utils.TopicUtils;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 
@@ -11,8 +13,17 @@ import org.springframework.kafka.core.ConsumerFactory;
 @RequiredArgsConstructor
 public class KafkaConfig {
 
-    private final GenericApplicationContext ac;
     private final ConsumerFactory<String, String> consumerFactory;
+
+    @Value("${backend.kafka.partitions:1}")
+    private int partitions;
+    @Value("${backend.kafka.replication:1}")
+    private short replication;
+
+    @Bean
+    public NewTopic orderbook() {
+        return new NewTopic(TopicUtils.ORDERBOOK_INPUT, partitions, replication);
+    }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> batchFactory() {

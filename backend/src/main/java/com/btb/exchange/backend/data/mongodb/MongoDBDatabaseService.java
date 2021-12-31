@@ -22,7 +22,6 @@ import org.springframework.data.mongodb.core.index.MongoPersistentEntityIndexRes
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
@@ -59,13 +58,10 @@ public class MongoDBDatabaseService {
         semaphore = hazelcastInstance.getCPSubsystem().getSemaphore(HAZELCAST_DB);
     }
 
-    @Async
-    @KafkaListener(
-            topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*",
-            containerFactory = "batchFactory",
-            groupId = "mongodb",
-            autoStartup = "${backend.recording:false}")
-    public void store(List<String> messages) {
+    @KafkaListener(topics = TopicUtils.ORDERBOOK_INPUT, containerFactory = "batchFactory", groupId = "mongodb"
+            //autoStartup = "${backend.recording:true}"
+    )
+    void store(List<String> messages) {
         log.debug("save {} records", messages.size());
         var records = messages.stream().map(this::createRecord).toList();
         repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
@@ -151,7 +147,7 @@ public class MongoDBDatabaseService {
                 .subscribe(m -> {
                     var data = m.getData();
                     log.debug("Replay : {}", data);
-                    kafkaTemplate.send(TopicUtils.orderBook(m.getCurrencyPair()), data);
+                    kafkaTemplate.send(TopicUtils.ORDERBOOK_INPUT, data);
                 }, t -> log.error("Exception", t), () -> {
                     replayWatch.stop();
                     log.info("End replay events, and took: {}", Duration.ofMillis(replayWatch.getTotalTimeMillis()));

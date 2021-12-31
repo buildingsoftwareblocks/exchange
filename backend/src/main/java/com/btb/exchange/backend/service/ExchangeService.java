@@ -204,10 +204,10 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         log.trace("Order book: {}", orderBook);
         messageCounter.increment();
         try {
-            var future = kafkaTemplate.send(TopicUtils.orderBook(currencyPair),
+            var future = kafkaTemplate.send(TopicUtils.ORDERBOOK_INPUT,
                     objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(),
                             LocalTime.now(), exchangeEnum, currencyPair,
-                            new Orders(orderBook.getTimeStamp(), orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
+                            new Orders(orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
 
             future.addCallback(result -> {
                 if (config.isTesting()) {

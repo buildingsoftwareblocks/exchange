@@ -5,6 +5,7 @@ import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.utils.DTOUtils;
+import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
@@ -35,6 +36,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 
 /**
  * Handle a Exchange
@@ -83,7 +86,7 @@ public class ExchangeService {
         opportunities.init();
     }
 
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "frontend")
+    @KafkaListener(topics = TopicUtils.ORDERBOOK_INPUT, containerFactory = "batchFactory", groupId = "frontend")
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
@@ -108,7 +111,7 @@ public class ExchangeService {
         orderBooks.set(key, new OrderBookData(localTime, orderBook.getOrder(), msg));
     }
 
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).OPPORTUNITIES}", containerFactory = "batchFactory", groupId = "frontend")
+    @KafkaListener(topics = OPPORTUNITIES, containerFactory = "batchFactory", groupId = "frontend")
     void processOpportunities(List<String> messages) {
         // only get the last value and add it to the reference
         messages.stream()

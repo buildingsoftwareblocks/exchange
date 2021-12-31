@@ -28,14 +28,11 @@ import org.testcontainers.utility.DockerImageName;
 import javax.annotation.PostConstruct;
 import java.time.LocalTime;
 import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
-import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @SpringBootTest
 @Testcontainers
@@ -68,8 +65,8 @@ class ExchangeServiceTest {
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
         var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, BTC_USD,
-                new Orders(new Date(), Collections.emptyList(), Collections.emptyList()));
-        kafkaTemplate.send(TopicUtils.orderBook(message.getCurrencyPair()), objectMapper.writeValueAsString(message));
+                new Orders(Collections.emptyList(), Collections.emptyList()));
+        kafkaTemplate.send(TopicUtils.ORDERBOOK_INPUT, objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
@@ -91,9 +88,8 @@ class ExchangeServiceTest {
 
         @PostConstruct
         public void init() {
-            // iterate over currency pairs and register new beans
-            List.of(BTC_USD, ETH_BTC).forEach(cp ->
-                    ac.registerBean(String.format("topic.%s", cp), NewTopic.class, () -> TopicBuilder.name(TopicUtils.orderBook(cp)).build()));
+            ac.registerBean(TopicUtils.ORDERBOOK_INPUT, NewTopic.class, () -> TopicBuilder.name(TopicUtils.ORDERBOOK_INPUT).build());
+            ac.registerBean(TopicUtils.OPPORTUNITIES, NewTopic.class, () -> TopicBuilder.name(TopicUtils.OPPORTUNITIES).build());
         }
     }
 }

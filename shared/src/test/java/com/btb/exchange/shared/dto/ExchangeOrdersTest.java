@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;
 import java.util.Collections;
-import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -28,7 +27,7 @@ class ExchangeOrdersTest {
     @Test
     void serializeToJson() throws JsonProcessingException {
         var orderBook = new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP, BTC_USD,
-                new Orders(new Date(), Collections.emptyList(), Collections.emptyList(), 0));
+                new Orders(Collections.emptyList(), Collections.emptyList(), 0));
         var serialized = objectMapper.writeValueAsString(orderBook);
         assertThat("smoke test", serialized, is(notNullValue()));
     }
@@ -36,7 +35,7 @@ class ExchangeOrdersTest {
     @Test
     void deserializeToJson() throws JsonProcessingException {
         var orderBook1 = new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP, BTC_USD,
-                new Orders(new Date(), Collections.emptyList(), Collections.emptyList(), 1));
+                new Orders(Collections.emptyList(), Collections.emptyList(), 1));
         var serialized1 = objectMapper.writeValueAsString(orderBook1);
         var orderBook2 = objectMapper.readValue(serialized1, ExchangeOrderBook.class);
         assertThat("smoke test", orderBook2, is(notNullValue()));

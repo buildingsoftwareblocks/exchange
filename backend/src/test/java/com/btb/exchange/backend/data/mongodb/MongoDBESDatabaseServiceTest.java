@@ -100,7 +100,7 @@ class MongoDBESDatabaseServiceTest {
 
         var startCount = repository.count().blockingGet();
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                BTC_USD, new Orders(new Date(), Collections.emptyList(), Collections.emptyList())));
+                BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
@@ -139,7 +139,7 @@ class MongoDBESDatabaseServiceTest {
             }
         }));
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                BTC_USD, new Orders(new Date(), Collections.emptyList(), Collections.emptyList())));
+                BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

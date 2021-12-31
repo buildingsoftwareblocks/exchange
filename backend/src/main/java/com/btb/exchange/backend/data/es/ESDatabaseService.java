@@ -2,11 +2,11 @@ package com.btb.exchange.backend.data.es;
 
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.utils.DTOUtils;
+import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -25,12 +25,7 @@ public class ESDatabaseService {
         this.dtoUtils = new DTOUtils(objectMapper);
     }
 
-    @Async
-    @KafkaListener(
-            topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*",
-            containerFactory = "batchFactory",
-            groupId = "elasticsearch",
-            autoStartup = "${backend.es:false}")
+    @KafkaListener(topics = TopicUtils.ORDERBOOK_INPUT, containerFactory = "batchFactory", groupId = "elasticsearch", autoStartup = "${backend.es:false}")
     public void store(List<String> messages) {
         log.debug("save {} records", messages.size());
         var records = messages.stream().map(this::createRecord).toList();

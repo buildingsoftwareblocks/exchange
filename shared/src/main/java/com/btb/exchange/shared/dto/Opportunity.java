@@ -1,5 +1,6 @@
 package com.btb.exchange.shared.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class Opportunity {
     private BigDecimal ask;
     private ExchangeEnum to;
     private BigDecimal bid;
+    @JsonFormat(pattern = "HH:mm:ss.SSS")
     private LocalTime created;
 
     public Opportunity(CurrencyPair currencyPair, ExchangeEnum from, BigDecimal ask, ExchangeEnum to, BigDecimal bid, LocalTime timestamp) {

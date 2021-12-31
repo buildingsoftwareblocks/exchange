@@ -1,5 +1,6 @@
 package com.btb.exchange.frontend.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -13,24 +14,28 @@ import java.time.Duration;
 
 @Configuration
 @EnableWebSocketMessageBroker
+@Slf4j
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Value("${frontend.websocket.buffersize:100MB}")
+    @Value("${frontend.websocket.buffer.size:100MB}")
     private DataSize bufferSize;
     @Value("${frontend.websocket.duration:PT60s}")
     private Duration duration;
-    @Value("${frontend.websocket.messagesize:3MB}")
+    @Value("${frontend.websocket.message.size:3MB}")
     private DataSize messageSize;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/app");
+        config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/websocket").withSockJS();
+        registry.addEndpoint("/websocket")
+                .setHandshakeHandler(new CustomHandshakeHandler())
+                .withSockJS();
     }
 
     @Override

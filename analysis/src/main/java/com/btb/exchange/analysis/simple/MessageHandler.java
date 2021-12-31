@@ -3,13 +3,13 @@ package com.btb.exchange.analysis.simple;
 import com.btb.exchange.analysis.services.OrderService;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.utils.DTOUtils;
+import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,9 +32,8 @@ public class MessageHandler {
                 .register(registry);
     }
 
-    @Async
     @Timed("analysis.simple.process.timed")
-    @KafkaListener(topicPattern = "#{ T(com.btb.exchange.shared.utils.TopicUtils).ORDERBOOK_INPUT_PREFIX}.*", containerFactory = "batchFactory", groupId = "analysis")
+    @KafkaListener(topics = TopicUtils.ORDERBOOK_INPUT, containerFactory = "batchFactory", groupId = "analysis")
     public void process(List<String> messages) {
         log.debug("process {} messages", messages.size());
         messagesCounter.record(messages.size());

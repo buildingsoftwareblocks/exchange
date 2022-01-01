@@ -30,6 +30,7 @@ import org.apache.curator.framework.recipes.nodes.GroupMember;
 import org.apache.curator.framework.recipes.watch.PersistentWatcher;
 import org.apache.curator.utils.CloseableUtils;
 import org.apache.zookeeper.WatchedEvent;
+import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -57,10 +58,8 @@ public class LeaderService {
     @Value("#{'${backend.exchanges}'.split(',')}")
     private Set<ExchangeEnum> exchanges;
 
-    @Value("${backend.exchange.currencies.max:5}")
-    private int currencyCount;
-    @Value("#{'${backend.exchange.currencies}'.split(',')}")
-    private Set<String> currencies;
+    @Value("#{'${backend.exchange.currencypairs}'.split(',')}")
+    private Set<CurrencyPair> currencypairs;
 
     private final CuratorFramework client;
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -103,7 +102,7 @@ public class LeaderService {
                     StreamingExchange streamingExchange = exchangeFactory(e);
                     if (streamingExchange != null) {
                         ExchangeService exchangeService = new ExchangeService(client, executor, streamingExchange,
-                                kafkaTemplate, registry, objectMapper, config, e, subscriptionRequired(e), path, currencyCount, currencies);
+                                kafkaTemplate, registry, objectMapper, config, e, subscriptionRequired(e), path, currencypairs);
                         clients.put(e, exchangeService);
                         exchangeService.start();
                     } else {
@@ -181,7 +180,8 @@ public class LeaderService {
 
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
     boolean subscriptionRequired(ExchangeEnum exchange) {
-        return switch (exchange) {//BINANCE,
+        return switch (exchange) {
+            case BINANCE -> true;
             case COINBASE -> true;
             default -> false;
         };

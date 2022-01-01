@@ -22,7 +22,12 @@ public class KafkaConfig {
 
     @Bean
     public NewTopic orderbook() {
-        return new NewTopic(TopicUtils.ORDERBOOK_INPUT, partitions, replication);
+        return new NewTopic(TopicUtils.INPUT_ORDERBOOK, partitions, replication);
+    }
+
+    @Bean
+    public NewTopic ticker() {
+        return new NewTopic(TopicUtils.INPUT_TICKER, partitions, replication);
     }
 
     @Bean

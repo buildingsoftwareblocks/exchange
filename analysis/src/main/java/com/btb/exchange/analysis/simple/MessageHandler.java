@@ -33,7 +33,7 @@ public class MessageHandler {
     }
 
     @Timed("analysis.simple.process.timed")
-    @KafkaListener(topics = TopicUtils.ORDERBOOK_INPUT, containerFactory = "batchFactory", groupId = "analysis")
+    @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "analysis")
     public void process(List<String> messages) {
         log.debug("process {} messages", messages.size());
         messagesCounter.record(messages.size());

@@ -26,7 +26,8 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class WebSocketService {
 
-    private static final String WEBSOCKET_ORDERBOOK = "/topic/orderbook";
+    private static final String WEBSOCKET_ORDERBOOKS = "/topic/orderbooks";
+    private static final String WEBSOCKET_TICKERS = "/topic/tickers";
     private static final String WEBSOCKET_OPPORTUNITIES = "/topic/opportunities";
     private static final String WEBSOCKET_EXCHANGES = "/topic/exchanges";
 
@@ -77,11 +78,12 @@ public class WebSocketService {
         String userId = principal.getName();
         sendOpportunities(userId);
         sendExchanges(userId);
+        sendTickers(userId);
 
         ExchangeEnum exchange = exchanges.get(userId);
         CurrencyPair cp = currencies.get(userId);
         if (exchange != null && cp != null) {
-            sendOrderBook(userId, exchange, cp);
+            sendOrderBooks(userId, exchange, cp);
         }
     }
 
@@ -96,10 +98,17 @@ public class WebSocketService {
         });
     }
 
-    void sendOrderBook(String userId, ExchangeEnum exchange, CurrencyPair currencyPair) {
-        exchangeService.orderbookData(exchange, currencyPair).ifPresent(message -> {
-            log.debug("Send orderbook: '{}/{}'", exchange, currencyPair);
-            template.convertAndSendToUser(userId, WEBSOCKET_ORDERBOOK, message);
+    void sendOrderBooks(String userId, ExchangeEnum exchange, CurrencyPair currencyPair) {
+        exchangeService.orderBooksData(exchange, currencyPair).ifPresent(message -> {
+            log.debug("Send orderbooks: '{}/{}'", exchange, currencyPair);
+            template.convertAndSendToUser(userId, WEBSOCKET_ORDERBOOKS, message);
+        });
+    }
+
+    void sendTickers(String userId) {
+        exchangeService.tickersData().ifPresent(message -> {
+            log.debug("Send tickers: '{}'", message);
+            template.convertAndSendToUser(userId, WEBSOCKET_TICKERS, message);
         });
     }
 }

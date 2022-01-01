@@ -6,15 +6,9 @@ import lombok.experimental.UtilityClass;
 import org.knowm.xchange.currency.CurrencyPair;
 
 import java.io.IOException;
-import java.util.List;
-
-import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
-import static org.knowm.xchange.currency.CurrencyPair.ETH_BTC;
 
 @UtilityClass
 public class CurrencyPairUtils {
-    // TODO remove
-    public static final List<CurrencyPair> CurrencyPairs = List.of(BTC_USD, ETH_BTC);
 
     public static void writeData(ObjectDataOutput out, CurrencyPair currencyPair) throws IOException {
         out.writeString(currencyPair.toString());

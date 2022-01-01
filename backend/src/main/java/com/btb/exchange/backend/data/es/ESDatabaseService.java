@@ -25,7 +25,7 @@ public class ESDatabaseService {
         this.dtoUtils = new DTOUtils(objectMapper);
     }
 
-    @KafkaListener(topics = TopicUtils.ORDERBOOK_INPUT, containerFactory = "batchFactory", groupId = "elasticsearch", autoStartup = "${backend.es:false}")
+    @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "elasticsearch", autoStartup = "${backend.es:false}")
     public void store(List<String> messages) {
         log.debug("save {} records", messages.size());
         var records = messages.stream().map(this::createRecord).toList();

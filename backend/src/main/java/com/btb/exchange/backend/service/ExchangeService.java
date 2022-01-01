@@ -3,8 +3,8 @@ package com.btb.exchange.backend.service;
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.ExchangeTicker;
 import com.btb.exchange.shared.dto.Orders;
-import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +22,7 @@ import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter
 import org.apache.curator.utils.CloseableUtils;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
-import org.knowm.xchange.exceptions.ExchangeException;
+import org.knowm.xchange.dto.marketdata.Ticker;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.lang.NonNull;
 
@@ -52,8 +52,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     private final Counter messageCounter;
 
-    private final int currencyCount;
-    private final Set<String> currencies;
+    private final Set<CurrencyPair> currencyPairs;
 
     /**
      * for testing purposes, to subscribe to broadcast events.
@@ -68,8 +67,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                            StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate,
                            MeterRegistry registry,
                            ObjectMapper objectMapper, ApplicationConfig config,
-                           ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path,
-                           int currencyCount, Set<String> currencies) {
+                           ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path, Set<CurrencyPair> currencyPairs) {
         this.exchange = exchange;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
@@ -78,8 +76,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         this.exchangeEnum = exchangeEnum;
         this.subscriptionRequired = subscriptionRequired;
 
-        this.currencyCount = currencyCount;
-        this.currencies = currencies;
+        this.currencyPairs = currencyPairs;
 
         messageCounter = Counter.builder("backend.exchange.messages")
                 .description("indicates number of message received from the given exchange")
@@ -166,29 +163,27 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     Collection<CurrencyPair> symbols(StreamingExchange exchange) {
         try {
-            var results = exchange.getExchangeSymbols().stream().filter(this::overlap).limit(currencyCount).collect(Collectors.toSet());
-            // to be sure that the default currency pairs are their as well
-            results.addAll(CurrencyPairUtils.CurrencyPairs);
-            return results;
+            return exchange.getExchangeSymbols().stream().filter(currencyPairs::contains).collect(Collectors.toSet());
         } catch (Exception e) {
-            log.info("Exception: {}", e.getMessage());
-            return CurrencyPairUtils.CurrencyPairs;
+            log.warn("exchange:{} : Exception: {}", exchange, e.getMessage());
+            // at least return something and give it a try later in the overall flow.
+            return currencyPairs;
         }
     }
 
-    boolean overlap(CurrencyPair cp) {
-        return currencies.contains(cp.base.getCurrencyCode()) || currencies.contains(cp.counter.getCurrencyCode());
-    }
-
     private void subscribe(final CurrencyPair currencyPair) {
+        log.info("{} : Subscribe: {}", exchangeEnum, currencyPair);
         try {
-            log.info("{} : Subscribe: {}", exchangeEnum, currencyPair);
-            exchange.getStreamingMarketDataService().getOrderBook(currencyPair)
-                    .subscribe(orderBook -> process(orderBook, currencyPair), throwable -> log.error("Error in trade subscription", throwable));
-        } catch (ExchangeException e) {
-            log.warn("Exception", e);
+            exchange.getStreamingMarketDataService().getTicker(currencyPair)
+                    .subscribe(ticker -> process(ticker, currencyPair), throwable -> log.error("Error in ticker subscription", throwable));
         } catch (Exception e) {
-            log.error("Exception", e);
+            log.warn("Ticker: Exchange:{}, currencypair:{}, exception:{}", exchangeEnum, currencyPair, e.getMessage());
+        }
+        try {
+            exchange.getStreamingMarketDataService().getOrderBook(currencyPair)
+                    .subscribe(orderBook -> process(orderBook, currencyPair), throwable -> log.error("Error in order book subscription", throwable));
+        } catch (Exception e) {
+            log.warn("Orderbook: Exchange:{}, currencypair:{}, exception:{}", exchangeEnum, currencyPair, e.getMessage());
         }
     }
 
@@ -204,7 +199,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         log.trace("Order book: {}", orderBook);
         messageCounter.increment();
         try {
-            var future = kafkaTemplate.send(TopicUtils.ORDERBOOK_INPUT,
+            var future = kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK,
                     objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(),
                             LocalTime.now(), exchangeEnum, currencyPair,
                             new Orders(orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
@@ -218,6 +213,24 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
             log.error("Exception-2", e);
         }
     }
+
+    public void process(Ticker ticker, @NonNull CurrencyPair currencyPair) {
+        log.trace("Ticker: {}", ticker);
+        try {
+            var future = kafkaTemplate.send(TopicUtils.INPUT_TICKER,
+                    objectMapper.writeValueAsString(new ExchangeTicker(counter.getAndIncrement(),
+                            LocalTime.now(), exchangeEnum, currencyPair, ticker)));
+
+            future.addCallback(result -> {
+                if (config.isTesting()) {
+                    messageSent.onNext(result.getRecordMetadata().topic());
+                }
+            }, e -> log.error("Exception-1", e));
+        } catch (JsonProcessingException e) {
+            log.error("Exception-2", e);
+        }
+    }
+
 
     void teardown() {
         // Disconnect from exchange (blocking to wait for it)

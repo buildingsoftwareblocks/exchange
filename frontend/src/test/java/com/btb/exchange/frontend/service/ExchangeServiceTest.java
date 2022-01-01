@@ -66,7 +66,7 @@ class ExchangeServiceTest {
 
         var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, BTC_USD,
                 new Orders(Collections.emptyList(), Collections.emptyList()));
-        kafkaTemplate.send(TopicUtils.ORDERBOOK_INPUT, objectMapper.writeValueAsString(message));
+        kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK, objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
@@ -88,7 +88,7 @@ class ExchangeServiceTest {
 
         @PostConstruct
         public void init() {
-            ac.registerBean(TopicUtils.ORDERBOOK_INPUT, NewTopic.class, () -> TopicBuilder.name(TopicUtils.ORDERBOOK_INPUT).build());
+            ac.registerBean(TopicUtils.INPUT_ORDERBOOK, NewTopic.class, () -> TopicBuilder.name(TopicUtils.INPUT_ORDERBOOK).build());
             ac.registerBean(TopicUtils.OPPORTUNITIES, NewTopic.class, () -> TopicBuilder.name(TopicUtils.OPPORTUNITIES).build());
         }
     }

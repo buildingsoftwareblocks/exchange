@@ -203,13 +203,13 @@ public class ExchangeService {
                     .thenComparing(ExchangeTicker::getExchange);
             List<ExchangeTicker> tickers = this.tickers.values().stream()
                     .map(t -> (dtoUtils.fromDTO(t.message, ExchangeTicker.class)))
-                    .sorted(comparator).collect(Collectors.toList());
+                    .sorted(comparator).toList();
             return Optional.of(dtoUtils.toDTO(tickers));
         }
     }
 
     public List<ExchangeEnum> activeExchanges() {
-        return updated.keySet().stream().map(ExchangeKey::getExchange).collect(Collectors.toList());
+        return updated.keySet().stream().map(ExchangeKey::getExchange).toList();
     }
 
     public List<CurrencyPair> activeCurrencies(ExchangeEnum exchange) {

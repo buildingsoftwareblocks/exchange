@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/exchange")
@@ -33,7 +32,7 @@ public class ExchangeController {
         log.info("exchangeCurrencies({})", exchange);
         try {
             ExchangeEnum e = ExchangeEnum.valueOf(exchange);
-            return exchangeService.activeCurrencies(e).stream().map(CurrencyPair::toString).collect(Collectors.toList());
+            return exchangeService.activeCurrencies(e).stream().map(CurrencyPair::toString).toList();
         } catch (IllegalArgumentException e) {
             log.info("Exception {} : {}", exchange, e.getMessage());
         }

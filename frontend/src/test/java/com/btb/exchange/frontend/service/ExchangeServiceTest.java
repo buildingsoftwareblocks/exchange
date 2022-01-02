@@ -59,8 +59,6 @@ class ExchangeServiceTest {
 
     @Test
     void process() throws InterruptedException, JsonProcessingException {
-        // unclear why a wait is needed. but it seems that kafka is not complete ready
-        Thread.sleep(1000);
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 

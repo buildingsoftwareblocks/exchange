@@ -47,10 +47,10 @@ import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 @Slf4j
 public class ExchangeService {
 
-    public static final String HAZELCAST_ORDERBOOKS = "orderBooks";
-    public static final String HAZELCAST_TICKERS = "tickers";
-    public static final String HAZELCAST_OPPORTUNITIES = "opportunities";
-    public static final String HAZELCAST_UPDATED = "updated";
+    public static final String HAZELCAST_ORDERBOOKS = "frontend.orderBooks";
+    public static final String HAZELCAST_TICKERS = "frontend.tickers";
+    public static final String HAZELCAST_OPPORTUNITIES = "frontend.opportunities";
+    public static final String HAZELCAST_UPDATED = "frontend.updated";
 
     private static final String EXCHANGES_TIME_FORMAT = "HH:mm:ss.SSS";
 
@@ -135,10 +135,10 @@ public class ExchangeService {
         // only get the last value and add it to the reference
         messages.stream()
                 .map(o -> dtoUtils.fromDTO(o, Opportunities.class))
-                .filter(opportunities -> !opportunities.getValues().isEmpty())
+                .filter(o -> !o.getValues().isEmpty())
                 // pick the last element
                 .reduce((a, b) -> b)
-                .ifPresent(opportunities -> update(this.opportunities, opportunities.getOrder(), opportunities));
+                .ifPresent(o -> update(this.opportunities, o.getOrder(), o));
     }
 
     void update(ReferenceData data, long orderNr, Opportunities opportunities) {
@@ -295,7 +295,7 @@ public class ExchangeService {
         @Override
         public void readData(ObjectDataInput in) throws IOException {
             exchange = ExchangeEnum.valueOf(in.readString());
-            currencyPair = new CurrencyPair(in.readString());
+            currencyPair = new CurrencyPair(Objects.requireNonNull(in.readString()));
         }
     }
 
@@ -335,7 +335,8 @@ public class ExchangeService {
         @Override
         public void readData(ObjectDataInput in) throws IOException {
             timestamp = LocalTime.ofNanoOfDay(in.readLong());
-            cps = Arrays.stream(in.readStringArray()).map(CurrencyPair::new).collect(Collectors.toSet());
+            cps = Arrays.stream(Objects.requireNonNull(in.readStringArray()))
+                    .map(CurrencyPair::new).collect(Collectors.toSet());
         }
     }
 

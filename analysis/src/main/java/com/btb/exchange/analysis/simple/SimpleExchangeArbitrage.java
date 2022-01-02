@@ -67,7 +67,6 @@ public class SimpleExchangeArbitrage {
         };
     }
 
-
     Opportunities process(ExchangeOrderBook orderBook) {
         Optional<BigDecimal> askPrice = orderBook.getOrders().getAsks().stream().findFirst().map(Order::getLimitPrice);
         Optional<BigDecimal> bidPrice = orderBook.getOrders().getBids().stream().findFirst().map(Order::getLimitPrice);

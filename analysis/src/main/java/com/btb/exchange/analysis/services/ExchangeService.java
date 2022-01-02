@@ -3,7 +3,7 @@ package com.btb.exchange.analysis.services;
 import com.btb.exchange.analysis.config.ApplicationConfig;
 import com.btb.exchange.analysis.hazelcast.ExchangeCPKey;
 import com.btb.exchange.shared.dto.ExchangeEnum;
-import com.hazelcast.core.HazelcastInstance;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.lang.NonNull;
@@ -15,13 +15,10 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ExchangeService {
 
     private final ApplicationConfig config;
-
-    public ExchangeService(ApplicationConfig config, HazelcastInstance hazelcastInstance) {
-        this.config = config;
-    }
 
     // TODO differentiate on exchange / currency pair
     public BigDecimal transactionBuyFees(BigDecimal amount) {

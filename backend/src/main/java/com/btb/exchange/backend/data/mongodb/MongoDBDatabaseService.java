@@ -84,7 +84,6 @@ public class MongoDBDatabaseService {
                 .data(orderBook).build();
     }
 
-
     Observable<Message> subscribe() {
         return stored;
     }

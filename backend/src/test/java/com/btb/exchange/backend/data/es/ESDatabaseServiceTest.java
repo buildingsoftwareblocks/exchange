@@ -1,4 +1,4 @@
-package com.btb.exchange.backend.data.mongodb;
+package com.btb.exchange.backend.data.es;
 
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.backend.service.ExchangeService;
@@ -26,7 +26,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -40,20 +39,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 
 @SpringBootTest
 @Testcontainers
 @Slf4j
-class MongoDBESDatabaseServiceTest {
+class ESDatabaseServiceTest {
 
-    @Container
-    private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
     @Container
     private static final ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.12.1");
     @Container
@@ -62,9 +57,9 @@ class MongoDBESDatabaseServiceTest {
     private static final GenericContainer ZOOKEEPER = new GenericContainer("zookeeper:latest").withExposedPorts(2181);
 
     @Autowired
-    MongoDBDatabaseService service;
+    ESDatabaseService service;
     @Autowired
-    MongodbMessageRepository repository;
+    ESMessageRepository repository;
     @Autowired
     ObjectMapper objectMapper;
     @Autowired
@@ -78,7 +73,7 @@ class MongoDBESDatabaseServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        repository.deleteAll().blockingAwait();
+        repository.deleteAll();
     }
 
     @AfterEach
@@ -97,7 +92,7 @@ class MongoDBESDatabaseServiceTest {
     void testStore() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-        var startCount = repository.count().blockingGet();
+        var startCount = repository.count();
 
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
                 BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
@@ -105,7 +100,7 @@ class MongoDBESDatabaseServiceTest {
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
-        assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(1L));
+        assertThat("check 1 record is added", repository.count() - startCount, is(1L));
     }
 
     @Test
@@ -114,49 +109,19 @@ class MongoDBESDatabaseServiceTest {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
-        var startCount = repository.count().blockingGet();
+        var startCount = repository.count();
         exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USD);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);
-        assertThat("check 1 record is added", repository.count().blockingGet() - startCount, is(1L));
-    }
-
-    @Test
-    void testReplayMessage() throws InterruptedException, JsonProcessingException {
-        // message is stored twice, direct and indirect via replay
-        var latch = new CountDownLatch(2);
-        composite.add(service.subscribe().subscribe(r -> latch.countDown()));
-
-        final var startCount = repository.count().blockingGet();
-        final var replayed = new AtomicBoolean();
-        // make sure we subscribe to the event, before we act on it.
-        composite.add(service.subscribe().subscribe(r -> {
-            // replay only once
-            if (!replayed.getAndSet(true)) {
-                log.info("start replay: '{}'", r);
-                service.replayEvents();
-            }
-        }));
-        var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
-        service.store(msg);
-        var waitResult = latch.await(10, TimeUnit.SECONDS);
-
-        assertThat("result before timeout", waitResult);
-        // because in this test case the replayed records will be stored again, so at least 2 is the answer
-        assertThat("check #records are added", repository.count().blockingGet() - startCount, greaterThanOrEqualTo(2L));
+        assertThat("check 1 record is added", repository.count() - startCount, is(1L));
     }
 
     @DynamicPropertySource
     static void datasourceConfig(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", MONGO_DB_CONTAINER::getReplicaSetUrl);
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
         registry.add("spring.elasticsearch.uris", ELASTICSEARCH_CONTAINER::getHttpHostAddress);
-        registry.add("backend.recording", () -> true);
-        registry.add("backend.replay", () -> false);
-        registry.add("backend.testing", () -> true);
-        registry.add("backend.es", () -> false);
+        registry.add("backend.es", () -> true);
         registry.add("backend.zookeeper.host", () -> "localhost:" + ZOOKEEPER.getFirstMappedPort());
     }
 }

@@ -4,6 +4,8 @@ import com.btb.exchange.shared.dto.ExchangeOrderBook;
 import com.btb.exchange.shared.utils.DTOUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -20,6 +22,12 @@ public class ESDatabaseService {
     private final ESMessageRepository repository;
     private final DTOUtils dtoUtils;
 
+    // for testing purposes, to subscribe to the event that records are saved to the database
+    private final Subject<List<String>> stored = PublishSubject.create();
+
+    /**
+     *
+     */
     public ESDatabaseService(ESMessageRepository repository, ObjectMapper objectMapper) {
         this.repository = repository;
         this.dtoUtils = new DTOUtils(objectMapper);
@@ -30,6 +38,11 @@ public class ESDatabaseService {
         log.debug("save {} records", messages.size());
         var records = messages.stream().map(this::createRecord).toList();
         repository.saveAll(records);
+        stored.onNext(messages);
+    }
+
+    void store(String message) {
+        store(List.of(message));
     }
 
     @SneakyThrows
@@ -41,5 +54,9 @@ public class ESDatabaseService {
                 .currencyPair(Objects.toString(exchangeOrderBook.getCurrencyPair()))
                 .orders(exchangeOrderBook.getOrders())
                 .build();
+    }
+
+    Subject<List<String>> subscribe() {
+        return stored;
     }
 }

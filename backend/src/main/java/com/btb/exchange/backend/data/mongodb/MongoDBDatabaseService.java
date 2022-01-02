@@ -58,9 +58,7 @@ public class MongoDBDatabaseService {
         semaphore = hazelcastInstance.getCPSubsystem().getSemaphore(HAZELCAST_DB);
     }
 
-    @KafkaListener(topics = TopicUtils.ORDERBOOK_INPUT, containerFactory = "batchFactory", groupId = "mongodb"
-            //autoStartup = "${backend.recording:true}"
-    )
+    @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "mongodb", autoStartup = "${backend.recording:false}")
     void store(List<String> messages) {
         log.debug("save {} records", messages.size());
         var records = messages.stream().map(this::createRecord).toList();
@@ -147,7 +145,7 @@ public class MongoDBDatabaseService {
                 .subscribe(m -> {
                     var data = m.getData();
                     log.debug("Replay : {}", data);
-                    kafkaTemplate.send(TopicUtils.ORDERBOOK_INPUT, data);
+                    kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK, data);
                 }, t -> log.error("Exception", t), () -> {
                     replayWatch.stop();
                     log.info("End replay events, and took: {}", Duration.ofMillis(replayWatch.getTotalTimeMillis()));

@@ -3,7 +3,6 @@ package com.btb.exchange.backend.service;
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.bitrich.xchangestream.bankera.BankeraStreamingExchange;
 import info.bitrich.xchangestream.binance.BinanceStreamingExchange;
 import info.bitrich.xchangestream.bitfinex.BitfinexStreamingExchange;
 import info.bitrich.xchangestream.bitmex.BitmexStreamingExchange;
@@ -30,6 +29,7 @@ import org.apache.curator.framework.recipes.nodes.GroupMember;
 import org.apache.curator.framework.recipes.watch.PersistentWatcher;
 import org.apache.curator.utils.CloseableUtils;
 import org.apache.zookeeper.WatchedEvent;
+import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -54,13 +54,11 @@ public class LeaderService {
     @Value("${backend.leader.interval.ms:5000}")
     private int interval;
 
-    @Value("#{'${backend.exchanges}'.split(',')}")
+    @Value("#{'${backend.exchanges}'.trim().split(',')}")
     private Set<ExchangeEnum> exchanges;
 
-    @Value("${backend.exchange.currencies.max:5}")
-    private int currencyCount;
-    @Value("#{'${backend.exchange.currencies}'.split(',')}")
-    private Set<String> currencies;
+    @Value("#{'${backend.exchange.currencypairs}'.trim().split(',')}")
+    private Set<CurrencyPair> currencypairs;
 
     private final CuratorFramework client;
     private final KafkaTemplate<String, String> kafkaTemplate;
@@ -103,7 +101,7 @@ public class LeaderService {
                     StreamingExchange streamingExchange = exchangeFactory(e);
                     if (streamingExchange != null) {
                         ExchangeService exchangeService = new ExchangeService(client, executor, streamingExchange,
-                                kafkaTemplate, registry, objectMapper, config, e, subscriptionRequired(e), path, currencyCount, currencies);
+                                kafkaTemplate, registry, objectMapper, config, e, subscriptionRequired(e), path, currencypairs);
                         clients.put(e, exchangeService);
                         exchangeService.start();
                     } else {
@@ -155,7 +153,6 @@ public class LeaderService {
     StreamingExchange exchangeFactory(ExchangeEnum exchange) {
         try {
             return switch (exchange) {
-                case BANKERA -> StreamingExchangeFactory.INSTANCE.createExchange(BankeraStreamingExchange.class);
                 case BINANCE -> StreamingExchangeFactory.INSTANCE.createExchange(BinanceStreamingExchange.class);
                 case BITFINEX -> StreamingExchangeFactory.INSTANCE.createExchange(BitfinexStreamingExchange.class);
                 case BITMEX -> StreamingExchangeFactory.INSTANCE.createExchange(BitmexStreamingExchange.class);
@@ -179,10 +176,9 @@ public class LeaderService {
         return null;
     }
 
-    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     boolean subscriptionRequired(ExchangeEnum exchange) {
-        return switch (exchange) {//BINANCE,
-            case COINBASE -> true;
+        return switch (exchange) {
+            case BINANCE, COINBASE -> true;
             default -> false;
         };
     }

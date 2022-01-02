@@ -90,7 +90,7 @@ class MongoDBESDatabaseServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(true, false, false, 5, true);
         return new ExchangeService(Mockito.mock(CuratorFramework.class), executor, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/", 5, Set.of("BTC"));
+                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/", Set.of(BTC_USD));
     }
 
     @Test

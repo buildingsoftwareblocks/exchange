@@ -30,6 +30,11 @@
                    aria-selected="false">Order Book</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" id="tickers-tab" data-toggle="tab" href="#tickers-ref" role="tab"
+                   aria-controls="tickers-ref"
+                   aria-selected="false">Tickers</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" id="timestamps-tab" data-toggle="tab" href="#timestamps-ref" role="tab"
                    aria-controls="timestamps-ref"
                    aria-selected="false">Timestamps</a>
@@ -112,6 +117,36 @@
                                 </div>
                             </td>
                         </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade show" id="tickers-ref" role="tabpanel" aria-labelledby="tickers-tab">
+            <div class="row text-nowrap">
+                <div class="col-12">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Exchange</th>
+                            <th>Currency Pair</th>
+                            <th>Timestamp</th>
+                            <th>Message#</th>
+                            <th>Open</th>
+                            <th>Last</th>
+                            <th>Bid</th>
+                            <th>Ask</th>
+                            <th>high</th>
+                            <th>Low</th>
+                            <th>Vwap</th>
+                            <th>Volume</th>
+                            <th>Quote Volume</th>
+                            <th>Bid Size</th>
+                            <th>Ask Size</th>
+                            <th>Change</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tickers"></tbody>
                     </table>
                 </div>
             </div>

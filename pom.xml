@@ -88,11 +88,6 @@
             </dependency>
             <dependency>
                 <groupId>org.knowm.xchange</groupId>
-                <artifactId>xchange-stream-bankera</artifactId>
-                <version>${xchange.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.knowm.xchange</groupId>
                 <artifactId>xchange-stream-binance</artifactId>
                 <version>${xchange.version}</version>
             </dependency>

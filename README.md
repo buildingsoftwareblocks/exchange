@@ -4,7 +4,7 @@
 # Exchange Data PoC
 
 A PoC to retrieve real-time Crypto Exchange data, as a first step for an ordering bot! The code belongs to this
-[YouTube serie](https://www.youtube.com/playlist?list=PLQkCUEPgDgc1dItDlEjQ-sTXjY7kR-76z).
+[YouTube sequence](https://www.youtube.com/playlist?list=PLQkCUEPgDgc1dItDlEjQ-sTXjY7kR-76z).
 
 ## System Overview
 
@@ -141,7 +141,7 @@ The backend doesn't wait for elasticsearch to become available. The workaround i
 - [x] build pipeline
 - [x] store events in database
 - [x] multiple exchanges / multiple Currency pairs
-- [x] orderbook analysis module
+- [x] order book analysis module
 - [x] simple arbitrage
 - [x] scalable backend module
 - [x] scalable frontend module
@@ -149,9 +149,9 @@ The backend doesn't wait for elasticsearch to become available. The workaround i
 - [x] scalable analysis module
 - [x] better logging
 - [ ] Triangular Arbitrage
-- [ ] better frontend GUI
+- [x] better frontend GUI
 - [ ] Binary messages in Kafka
-- [ ] more robust error handling
+- [x] more robust error handling
 
 ## Related
 

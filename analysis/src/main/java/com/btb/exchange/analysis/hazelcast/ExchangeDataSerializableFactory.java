@@ -10,6 +10,7 @@ public class ExchangeDataSerializableFactory implements DataSerializableFactory 
     public static final int KEY_TYPE = 1;
 
     @Override
+    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     public IdentifiedDataSerializable create(int typeId) {
         return switch (typeId) {
             case KEY_TYPE -> new ExchangeCPKey();

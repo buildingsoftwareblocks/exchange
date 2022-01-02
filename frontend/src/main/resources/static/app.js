@@ -1,4 +1,4 @@
-var stompClient = null;
+let stompClient = null;
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -10,6 +10,7 @@ function setConnected(connected) {
         $("#bids").show();
         $("#opportunities").show();
         $("#exchangesUpdated").show();
+        $("#tickers").show();
 
     } else {
         $("#exchange").hide();
@@ -18,17 +19,21 @@ function setConnected(connected) {
         $("#bids").hide();
         $("#opportunities").hide();
         $("#exchangesUpdated").hide();
+        $("#tickers").hide();
     }
 }
 
 function connect() {
-    var socket = new SockJS('/websocket');
+    const socket = new SockJS('/websocket');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/user/topic/orderbook', function (message) {
-            showOrderBook(JSON.parse(message.body));
+        stompClient.subscribe('/user/topic/orderbooks', function (message) {
+            showOrderBooks(JSON.parse(message.body));
+        });
+        stompClient.subscribe('/user/topic/tickers', function (message) {
+            showTickers(JSON.parse(message.body));
         });
         stompClient.subscribe('/user/topic/opportunities', function (message) {
             showOpportunities(JSON.parse(message.body));
@@ -86,12 +91,12 @@ function disconnect() {
     $("#bids").html("");
     $("#opportunities").html("");
     $("#exchangesUpdated").html("");
+    $("#tickers").html("");
 
     console.log("Disconnected");
 }
 
-
-function showOrderBook(message) {
+function showOrderBooks(message) {
     $("#exchange").html(message.exchange);
     $("#cp").html(message.currencyPair);
     $("#orderbook_timestamp").html(message.timestamp);
@@ -109,6 +114,30 @@ function showOrderBook(message) {
         $("#bids").append("<td>" + accounting.formatMoney(bid.limitPrice) + "</td>");
         $("#bids").append("<td>" + accounting.formatNumber(bid.originalAmount, 5) + "</td>");
         $("#bids").append("</tr>");
+    }
+}
+
+function showTickers(message) {
+    $("#tickers").html("");
+    for (t of message) {
+        $("#tickers").append("<tr>");
+        $("#tickers").append("<td>" + t.exchange + "</td>");
+        $("#tickers").append("<td>" + t.currencyPair + "</td>");
+        $("#tickers").append("<td>" + t.timestamp + "</td>");
+        $("#tickers").append("<td class=text-right>" + accounting.formatNumber(t.order) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.open) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.last) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.bid) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.ask) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.high) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.low) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.vwap) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.volume) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.quoteVolume) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.bidSize) + "</td>");
+        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.askSize) + "</td>");
+        $("#tickers").append("<td class=text-right>" + accounting.toFixed(100 * t.ticker.percentageChange, 1) + "% </td>");
+        $("#tickers").append("</tr>");
     }
 }
 

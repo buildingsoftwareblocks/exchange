@@ -58,10 +58,6 @@
 
         <dependency>
             <groupId>org.knowm.xchange</groupId>
-            <artifactId>xchange-stream-bankera</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.knowm.xchange</groupId>
             <artifactId>xchange-stream-binance</artifactId>
         </dependency>
         <dependency>

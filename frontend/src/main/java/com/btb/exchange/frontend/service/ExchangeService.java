@@ -3,6 +3,7 @@ package com.btb.exchange.frontend.service;
 import com.btb.exchange.frontend.hazelcast.ExchangeDataSerializableFactory;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.ExchangeTicker;
 import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.utils.DTOUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
@@ -47,6 +48,7 @@ import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 public class ExchangeService {
 
     public static final String HAZELCAST_ORDERBOOKS = "orderBooks";
+    public static final String HAZELCAST_TICKERS = "tickers";
     public static final String HAZELCAST_OPPORTUNITIES = "opportunities";
     public static final String HAZELCAST_UPDATED = "updated";
 
@@ -56,14 +58,15 @@ public class ExchangeService {
 
     private final ReferenceData opportunities;
     private final IMap<ExchangeKey, ExchangeValue> updated;
-    private final IMap<ExchangeCPKey, OrderBookData> orderBooks;
+    private final IMap<ExchangeCPKey, ExchangeData> orderBooks;
+    private final IMap<ExchangeCPKey, ExchangeData> tickers;
 
     private final DistributionSummary kafkaMessagesCounter;
     private final DistributionSummary orderBookDelay;
     private final DistributionSummary opportunityDelay;
 
     // for testing purposes, to subscribe to the event that an orderbook is received
-    private final Subject<String> orderbookReceived = PublishSubject.create();
+    private final Subject<String> orderBookReceived = PublishSubject.create();
 
     /**
      *
@@ -73,6 +76,7 @@ public class ExchangeService {
         opportunities = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
         updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
         orderBooks = hazelcastInstance.getMap(HAZELCAST_ORDERBOOKS);
+        tickers = hazelcastInstance.getMap(HAZELCAST_TICKERS);
 
         kafkaMessagesCounter = DistributionSummary.builder("frontend.kafka.queue")
                 .description("indicates number of message read form the kafka queue")
@@ -86,7 +90,7 @@ public class ExchangeService {
         opportunities.init();
     }
 
-    @KafkaListener(topics = TopicUtils.ORDERBOOK_INPUT, containerFactory = "batchFactory", groupId = "frontend")
+    @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "frontend")
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
@@ -94,8 +98,19 @@ public class ExchangeService {
         messages.forEach(msg -> {
             ExchangeOrderBook orderBook = dtoUtils.fromDTO(msg, ExchangeOrderBook.class);
             updated(new ExchangeKey(orderBook.getExchange()), now, orderBook.getCurrencyPair());
-            orderbooks(new ExchangeCPKey(orderBook.getExchange(), orderBook.getCurrencyPair()), now, orderBook, msg);
-            orderbookReceived.onNext(msg);
+            orderBook(new ExchangeCPKey(orderBook.getExchange(), orderBook.getCurrencyPair()), now, orderBook, msg);
+            orderBookReceived.onNext(msg);
+        });
+    }
+
+    @KafkaListener(topics = TopicUtils.INPUT_TICKER, containerFactory = "batchFactory", groupId = "frontend")
+    void processTickers(List<String> messages) {
+        log.debug("process {} messages", messages.size());
+        kafkaMessagesCounter.record(messages.size());
+        final var now = LocalTime.now();
+        messages.forEach(msg -> {
+            ExchangeTicker ticker = dtoUtils.fromDTO(msg, ExchangeTicker.class);
+            ticker(new ExchangeCPKey(ticker.getExchange(), ticker.getCurrencyPair()), now, ticker, msg);
         });
     }
 
@@ -104,11 +119,15 @@ public class ExchangeService {
         updated.computeIfPresent(key, (k, v) -> new ExchangeValue(localTime, v.cps, cp));
     }
 
-    void orderbooks(ExchangeCPKey key, LocalTime localTime, ExchangeOrderBook orderBook, String msg) {
+    void orderBook(ExchangeCPKey key, LocalTime localTime, ExchangeOrderBook orderBook, String msg) {
         if (orderBook.getTimestamp() != null) {
             orderBookDelay.record(orderBook.getTimestamp().until(LocalDateTime.now(), ChronoUnit.SECONDS));
         }
-        orderBooks.set(key, new OrderBookData(localTime, orderBook.getOrder(), msg));
+        orderBooks.set(key, new ExchangeData(localTime, orderBook.getOrder(), msg));
+    }
+
+    void ticker(ExchangeCPKey key, LocalTime localTime, ExchangeTicker ticker, String msg) {
+        tickers.set(key, new ExchangeData(localTime, ticker.getOrder(), msg));
     }
 
     @KafkaListener(topics = OPPORTUNITIES, containerFactory = "batchFactory", groupId = "frontend")
@@ -167,12 +186,25 @@ public class ExchangeService {
         }
     }
 
-    public Optional<String> orderbookData(ExchangeEnum exchange, CurrencyPair cp) {
-        OrderBookData data = orderBooks.get(new ExchangeCPKey(exchange, cp));
+    public Optional<String> orderBooksData(ExchangeEnum exchange, CurrencyPair cp) {
+        ExchangeData data = orderBooks.get(new ExchangeCPKey(exchange, cp));
         if (data == null) {
             return Optional.empty();
         } else {
             return Optional.of(data.message);
+        }
+    }
+
+    public Optional<String> tickersData() {
+        if (tickers.isEmpty()) {
+            return Optional.empty();
+        } else {
+            Comparator<ExchangeTicker> comparator = Comparator.comparing(ExchangeTicker::getCurrencyPair)
+                    .thenComparing(ExchangeTicker::getExchange);
+            List<ExchangeTicker> tickers = this.tickers.values().stream()
+                    .map(t -> (dtoUtils.fromDTO(t.message, ExchangeTicker.class)))
+                    .sorted(comparator).collect(Collectors.toList());
+            return Optional.of(dtoUtils.toDTO(tickers));
         }
     }
 
@@ -310,7 +342,7 @@ public class ExchangeService {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class OrderBookData implements IdentifiedDataSerializable {
+    public static class ExchangeData implements IdentifiedDataSerializable {
         private LocalTime timestamp;
         private long counter;
         private String message;
@@ -322,7 +354,7 @@ public class ExchangeService {
 
         @Override
         public int getClassId() {
-            return ExchangeDataSerializableFactory.ORDER_BOOK_DATA_TYPE;
+            return ExchangeDataSerializableFactory.EXCHANGE_DATA_TYPE;
         }
 
         @Override
@@ -341,6 +373,6 @@ public class ExchangeService {
     }
 
     Observable<String> subscribe() {
-        return orderbookReceived;
+        return orderBookReceived;
     }
 }

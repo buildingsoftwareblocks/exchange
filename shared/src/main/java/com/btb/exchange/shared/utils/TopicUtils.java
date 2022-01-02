@@ -8,6 +8,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TopicUtils {
 
-    public static final String ORDERBOOK_INPUT = "orderbook.input";
+    public static final String INPUT_ORDERBOOK = "input.orderbook";
+    public static final String INPUT_TICKER = "input.ticker";
     public static final String OPPORTUNITIES = "order.opportunities";
 }

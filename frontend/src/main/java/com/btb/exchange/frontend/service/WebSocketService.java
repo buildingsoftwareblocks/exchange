@@ -61,17 +61,30 @@ public class WebSocketService {
     @EventListener
     public void sessionConnected(SessionConnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String userId = headerAccessor.getUser().getName();
+        String userId = userId(headerAccessor);
         log.info("Connect: {}", userId);
     }
 
     @EventListener
     public void sessionDisconnected(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String userId = headerAccessor.getUser().getName();
+        String userId = userId(headerAccessor);
         log.info("Disconnect: {}", userId);
         exchanges.remove(userId);
         currencies.remove(userId);
+    }
+
+    private String userId(final StompHeaderAccessor accessor) {
+        if (accessor == null) {
+            return null;
+        } else {
+            Principal principal = accessor.getUser();
+            if (principal == null) {
+                return null;
+            } else {
+                return principal.getName();
+            }
+        }
     }
 
     void send(Principal principal) {

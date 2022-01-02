@@ -1,7 +1,10 @@
 package com.btb.exchange.frontend.service;
 
 import com.btb.exchange.frontend.hazelcast.ExchangeDataSerializableFactory;
-import com.btb.exchange.shared.dto.*;
+import com.btb.exchange.shared.dto.ExchangeEnum;
+import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.ExchangeTicker;
+import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.utils.DTOUtils;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -198,12 +201,10 @@ public class ExchangeService {
         } else {
             Comparator<ExchangeTicker> comparator = Comparator.comparing(ExchangeTicker::getCurrencyPair)
                     .thenComparing(ExchangeTicker::getExchange);
-            ExchangeTickers.ExchangeTickersBuilder builder = ExchangeTickers.builder();
             List<ExchangeTicker> tickers = this.tickers.values().stream()
                     .map(t -> (dtoUtils.fromDTO(t.message, ExchangeTicker.class)))
                     .sorted(comparator).collect(Collectors.toList());
-            builder.values(tickers);
-            return Optional.of(dtoUtils.toDTO(builder.build()));
+            return Optional.of(dtoUtils.toDTO(tickers));
         }
     }
 

@@ -119,12 +119,12 @@ function showOrderBooks(message) {
 
 function showTickers(message) {
     $("#tickers").html("");
-    for (t of message.values) {
-        console.log('message: ' + t.order);
+    for (t of message) {
         $("#tickers").append("<tr>");
         $("#tickers").append("<td>" + t.exchange + "</td>");
         $("#tickers").append("<td>" + t.currencyPair + "</td>");
         $("#tickers").append("<td>" + t.timestamp + "</td>");
+        $("#tickers").append("<td class=text-right>" + accounting.formatNumber(t.order) + "</td>");
         $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.open) + "</td>");
         $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.last) + "</td>");
         $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.bid) + "</td>");
@@ -136,7 +136,7 @@ function showTickers(message) {
         $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.quoteVolume) + "</td>");
         $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.bidSize) + "</td>");
         $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.askSize) + "</td>");
-        $("#tickers").append("<td>" + accounting.formatNumber(t.ticker.percentageChange) + "</td>");
+        $("#tickers").append("<td class=text-right>" + accounting.toFixed(100 * t.ticker.percentageChange, 1) + "% </td>");
         $("#tickers").append("</tr>");
     }
 }

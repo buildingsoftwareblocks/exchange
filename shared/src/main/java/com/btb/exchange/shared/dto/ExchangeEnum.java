@@ -4,7 +4,6 @@ package com.btb.exchange.shared.dto;
  * All possible exchanges
  */
 public enum ExchangeEnum {
-    BANKERA,
     BINANCE,
     BITFINEX,
     BITMEX,

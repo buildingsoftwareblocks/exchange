@@ -3,7 +3,6 @@ package com.btb.exchange.backend.service;
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import info.bitrich.xchangestream.bankera.BankeraStreamingExchange;
 import info.bitrich.xchangestream.binance.BinanceStreamingExchange;
 import info.bitrich.xchangestream.bitfinex.BitfinexStreamingExchange;
 import info.bitrich.xchangestream.bitmex.BitmexStreamingExchange;
@@ -55,10 +54,10 @@ public class LeaderService {
     @Value("${backend.leader.interval.ms:5000}")
     private int interval;
 
-    @Value("#{'${backend.exchanges}'.split(',')}")
+    @Value("#{'${backend.exchanges}'.trim().split(',')}")
     private Set<ExchangeEnum> exchanges;
 
-    @Value("#{'${backend.exchange.currencypairs}'.split(',')}")
+    @Value("#{'${backend.exchange.currencypairs}'.trim().split(',')}")
     private Set<CurrencyPair> currencypairs;
 
     private final CuratorFramework client;
@@ -154,7 +153,6 @@ public class LeaderService {
     StreamingExchange exchangeFactory(ExchangeEnum exchange) {
         try {
             return switch (exchange) {
-                case BANKERA -> StreamingExchangeFactory.INSTANCE.createExchange(BankeraStreamingExchange.class);
                 case BINANCE -> StreamingExchangeFactory.INSTANCE.createExchange(BinanceStreamingExchange.class);
                 case BITFINEX -> StreamingExchangeFactory.INSTANCE.createExchange(BitfinexStreamingExchange.class);
                 case BITMEX -> StreamingExchangeFactory.INSTANCE.createExchange(BitmexStreamingExchange.class);

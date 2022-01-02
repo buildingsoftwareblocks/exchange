@@ -1,5 +1,6 @@
 package com.btb.exchange.frontend.config;
 
+
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
@@ -13,6 +14,7 @@ import java.util.UUID;
  * This is necessary to avoid broadcasting messages but sending them to specific user sessions
  */
 public class CustomHandshakeHandler extends DefaultHandshakeHandler {
+
     @Override
     protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
         // generate username by UUID

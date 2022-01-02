@@ -176,11 +176,9 @@ public class LeaderService {
         return null;
     }
 
-    @SuppressWarnings("SwitchStatementWithTooFewBranches")
     boolean subscriptionRequired(ExchangeEnum exchange) {
         return switch (exchange) {
-            case BINANCE -> true;
-            case COINBASE -> true;
+            case BINANCE, COINBASE -> true;
             default -> false;
         };
     }

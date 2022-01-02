@@ -1,8 +1,7 @@
 package com.btb.exchange.shared.utils;
 
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -13,21 +12,13 @@ public class DTOUtils {
         this.objectMapper = objectMapper;
     }
 
+    @SneakyThrows
     public <T> T fromDTO(String content, Class<T> valueType) {
-        try {
-            return objectMapper.readValue(content, valueType);
-        } catch (JsonProcessingException e) {
-            log.error("Exception", e);
-            throw new RuntimeException(e.getCause());
-        }
+        return objectMapper.readValue(content, valueType);
     }
 
+    @SneakyThrows
     public String toDTO(Object value) {
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            log.error("Exception", e);
-            throw new RuntimeException(e.getCause());
-        }
+        return objectMapper.writeValueAsString(value);
     }
 }

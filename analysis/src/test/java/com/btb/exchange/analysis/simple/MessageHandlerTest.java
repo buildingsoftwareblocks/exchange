@@ -1,20 +1,25 @@
-package com.btb.exchange.frontend.service;
+package com.btb.exchange.analysis.simple;
 
+import com.btb.exchange.analysis.services.OrderService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.dto.Orders;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -37,45 +42,50 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
-class ExchangeServiceTest {
+class MessageHandlerTest {
 
     @Container
     private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
 
     @Autowired
-    ExchangeService service;
+    MessageHandler handler;
+    @Autowired
+    ObjectMapper objectMapper;
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
     @Autowired
-    ObjectMapper objectMapper;
+    MeterRegistry registry;
+
+    @MockBean
+    SimpleExchangeArbitrage simpleExchangeArbitrage;
+    @MockBean
+    OrderService orderService;
 
     private final CompositeDisposable composite = new CompositeDisposable();
 
     @BeforeEach
     void beforeEach() {
-        service.init();
         composite.clear();
     }
 
     @Test
-    void process() throws InterruptedException, JsonProcessingException {
+    void process() throws JsonProcessingException, InterruptedException {
         var latch = new CountDownLatch(1);
-        composite.add(service.subscribe().subscribe(r -> latch.countDown()));
+        composite.add(handler.subscribe().subscribe(r -> latch.countDown()));
+        Mockito.when(simpleExchangeArbitrage.process(Mockito.anyList())).thenReturn(Opportunities.builder().timestamp(LocalTime.now()).build());
 
-        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, BTC_USD,
-                new Orders(Collections.emptyList(), Collections.emptyList()));
+        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK, objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
-        assertThat("Result before timeout", waitResult);
+        assertThat("result before timeout", waitResult);
+        Mockito.verify(orderService).processSimpleExchangeArbitrage(Mockito.any());
     }
 
     @DynamicPropertySource
     static void datasourceConfig(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
-        registry.add("frontend.opportunities", () -> false);
-        registry.add("frontend.updated", () -> false);
     }
 
     @TestConfiguration
@@ -87,8 +97,7 @@ class ExchangeServiceTest {
         @PostConstruct
         public void init() {
             ac.registerBean(TopicUtils.INPUT_ORDERBOOK, NewTopic.class, () -> TopicBuilder.name(TopicUtils.INPUT_ORDERBOOK).build());
-            ac.registerBean(TopicUtils.INPUT_TICKER, NewTopic.class, () -> TopicBuilder.name(TopicUtils.INPUT_TICKER).build());
-            ac.registerBean(TopicUtils.OPPORTUNITIES, NewTopic.class, () -> TopicBuilder.name(TopicUtils.OPPORTUNITIES).build());
         }
     }
+
 }

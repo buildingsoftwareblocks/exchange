@@ -69,11 +69,12 @@ class ExchangeServiceTest {
     @BeforeEach
     void beforeEach() {
         mongoDBDatabaseService.deleteAll();
+        composite.clear();
     }
 
     ExchangeService createExchangeService() {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
-        ApplicationConfig config = new ApplicationConfig(false, true, false, 5, true);
+        ApplicationConfig config = new ApplicationConfig(false, true, false, 5);
         return new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
                 kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/", Set.of(BTC_USD));
     }

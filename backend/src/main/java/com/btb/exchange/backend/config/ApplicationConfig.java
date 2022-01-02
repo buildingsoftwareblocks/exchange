@@ -22,8 +22,6 @@ public class ApplicationConfig {
     private boolean es;
     @Value("${backend.orders.max:5}")
     private int maxOrders;
-    @Value("${backend.testing:false}")
-    private boolean testing;
 
     @PostConstruct
     void validate() {

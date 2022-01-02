@@ -62,11 +62,7 @@ public class MongoDBDatabaseService {
     void store(List<String> messages) {
         log.debug("save {} records", messages.size());
         var records = messages.stream().map(this::createRecord).toList();
-        repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(r -> {
-            if (config.isTesting()) {
-                stored.onNext(r);
-            }
-        });
+        repository.saveAll(records).subscribeOn(Schedulers.io()).subscribe(stored::onNext);
     }
 
     void store(String message) {

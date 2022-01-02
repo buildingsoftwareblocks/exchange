@@ -56,7 +56,6 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     /**
      * for testing purposes, to subscribe to broadcast events.
-     * It's 'BehaviorSubject' so we can process the events, even if  the service is already started via the 'Application Ready event'
      */
     private final Subject<String> messageSent = PublishSubject.create();
 
@@ -187,7 +186,6 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         }
     }
 
-
     /**
      * for testing purposes
      */
@@ -204,11 +202,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                             LocalTime.now(), exchangeEnum, currencyPair,
                             new Orders(orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
 
-            future.addCallback(result -> {
-                if (config.isTesting()) {
-                    messageSent.onNext(result.getRecordMetadata().topic());
-                }
-            }, e -> log.error("Exception-1", e));
+            future.addCallback(result -> messageSent.onNext(result.getRecordMetadata().topic()), e -> log.error("Exception-1", e));
         } catch (JsonProcessingException e) {
             log.error("Exception-2", e);
         }
@@ -221,11 +215,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                     objectMapper.writeValueAsString(new ExchangeTicker(counter.getAndIncrement(),
                             LocalTime.now(), exchangeEnum, currencyPair, ticker)));
 
-            future.addCallback(result -> {
-                if (config.isTesting()) {
-                    messageSent.onNext(result.getRecordMetadata().topic());
-                }
-            }, e -> log.error("Exception-1", e));
+            future.addCallback(result -> messageSent.onNext(result.getRecordMetadata().topic()), e -> log.error("Exception-1", e));
         } catch (JsonProcessingException e) {
             log.error("Exception-2", e);
         }

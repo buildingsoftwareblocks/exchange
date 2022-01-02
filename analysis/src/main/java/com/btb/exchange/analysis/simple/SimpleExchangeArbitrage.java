@@ -91,7 +91,7 @@ public class SimpleExchangeArbitrage {
 
         asks.entrySet().stream()
                 .filter(e -> e.getKey().getCurrencyPair().equals(currencyPair))
-                .filter(e -> exchangeService.validData(e.getKey().getExchange(), e.getKey().getCurrencyPair(), updated.get(e.getKey())))
+                .filter(e -> exchangeService.validData(updated.get(e.getKey())))
                 .filter(e -> bid.subtract(e.getValue()).compareTo(BigDecimal.ZERO) > 0)
                 .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, e.getKey().getExchange(),
                         e.getValue(), orderBook.getExchange(), bid, orderBook.getTimestamp())));
@@ -99,7 +99,7 @@ public class SimpleExchangeArbitrage {
         if (ask.compareTo(BigDecimal.ZERO) > 0) {
             bids.entrySet().stream()
                     .filter(e -> e.getKey().getCurrencyPair().equals(currencyPair))
-                    .filter(e -> exchangeService.validData(e.getKey().getExchange(), e.getKey().getCurrencyPair(), updated.get(e.getKey())))
+                    .filter(e -> exchangeService.validData(updated.get(e.getKey())))
                     .filter(e -> e.getValue().subtract(ask).compareTo(BigDecimal.ZERO) > 0)
                     .forEach(e -> opportunitiesBuilder.value(new Opportunity(currencyPair, orderBook.getExchange(),
                             ask, e.getKey().getExchange(), e.getValue(), orderBook.getTimestamp())));

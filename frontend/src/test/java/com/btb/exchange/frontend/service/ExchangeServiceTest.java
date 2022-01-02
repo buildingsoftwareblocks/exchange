@@ -10,6 +10,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,10 @@ class ExchangeServiceTest {
     @BeforeEach
     void beforeEach() {
         service.init();
+    }
+
+    @AfterEach
+    void afterEach() {
         composite.clear();
     }
 

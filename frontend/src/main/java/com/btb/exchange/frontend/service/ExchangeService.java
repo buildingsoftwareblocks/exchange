@@ -201,10 +201,11 @@ public class ExchangeService {
         } else {
             Comparator<ExchangeTicker> comparator = Comparator.comparing(ExchangeTicker::getCurrencyPair)
                     .thenComparing(ExchangeTicker::getExchange);
-            List<ExchangeTicker> tickers = this.tickers.values().stream()
+            List<ExchangeTicker> result = tickers.values().stream()
                     .map(t -> (dtoUtils.fromDTO(t.message, ExchangeTicker.class)))
-                    .sorted(comparator).toList();
-            return Optional.of(dtoUtils.toDTO(tickers));
+                    .sorted(comparator)
+                    .toList();
+            return Optional.of(dtoUtils.toDTO(result));
         }
     }
 

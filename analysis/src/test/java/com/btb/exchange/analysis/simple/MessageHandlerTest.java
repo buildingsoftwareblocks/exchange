@@ -13,7 +13,7 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +63,8 @@ class MessageHandlerTest {
 
     private final CompositeDisposable composite = new CompositeDisposable();
 
-    @BeforeEach
-    void beforeEach() {
+    @AfterEach
+    void afterEach() {
         composite.clear();
     }
 
@@ -79,7 +79,7 @@ class MessageHandlerTest {
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
-        assertThat("result before timeout", waitResult);
+        assertThat("No result after timeout", waitResult);
         Mockito.verify(orderService).processSimpleExchangeArbitrage(Mockito.any());
     }
 

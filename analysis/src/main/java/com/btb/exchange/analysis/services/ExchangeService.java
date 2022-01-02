@@ -1,8 +1,6 @@
 package com.btb.exchange.analysis.services;
 
 import com.btb.exchange.analysis.config.ApplicationConfig;
-import com.btb.exchange.analysis.hazelcast.ExchangeCPKey;
-import com.btb.exchange.shared.dto.ExchangeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
@@ -39,15 +37,15 @@ public class ExchangeService {
         };
     }
 
-    public boolean validData(@NonNull ExchangeEnum exchange, @NonNull CurrencyPair currencyPair, LocalTime time) {
-        return validData(LocalTime.now(), time, new ExchangeCPKey(exchange, currencyPair));
+    public boolean validData(LocalTime time) {
+        return validData(LocalTime.now(), time);
     }
 
     /**
      * max acceptable delay in ms of received data
      */
     // TODO better config per exchange/currencypair
-    public boolean validData(@NonNull LocalTime now, LocalTime time, ExchangeCPKey exchangeCPKey) {
+    public boolean validData(@NonNull LocalTime now, LocalTime time) {
         if (config.isReplay()) {
             return true;
         } else {

@@ -47,7 +47,7 @@ class ExchangeServiceTest {
         var service = new ExchangeService(config);
         LocalTime now = LocalTime.of(19, 20, 40, 123000000);
         LocalTime time = LocalTime.of(19, 20, 41, 122000000);
-        var result = service.validData(now, time, null);
+        var result = service.validData(now, time);
         assertThat(result, is(true));
     }
 }

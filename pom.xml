@@ -38,7 +38,7 @@
         <surefire.version>2.22.2</surefire.version>
         <code.coverage.exclusions></code.coverage.exclusions>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
-        <dependency-check-maven.version>6.1.1</dependency-check-maven.version>
+        <dependency-check-maven.version>6.5.3</dependency-check-maven.version>
 
         <docker.repo>local</docker.repo>
     </properties>

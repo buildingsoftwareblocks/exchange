@@ -12,8 +12,7 @@ A PoC to retrieve real-time Crypto Exchange data, as a first step for an orderin
 
 ## Run Application
 
-Prebuild docker containers can be found on: [Docker hub](https://hub.docker.com/u/buildingsoftwareblocks). A docker
-compose script is provided. Start the application with:
+A docker compose script is provided. Start the application with:
 
 ``
 docker-compose --env-file env.dev --profile full up -d
@@ -129,6 +128,10 @@ You can build the application locally via a [maven](https://maven.apache.org/) c
 | mvn install                           | build self executable JAR files                 |
 | mvn install -P docker                 | build docker images                             |
 | mvn versions:display-property-updates | check if latest versions of libraries are used. |
+
+The file *env.dev* is intended to make development, also with local docker images, possible.
+For instance the setting in file *env.dev* : ``REPO=local``
+uses the local images build by: ``maven install -P docker``
 
 ## Known Problems
 

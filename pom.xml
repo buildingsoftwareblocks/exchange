@@ -20,7 +20,7 @@
         <java.version>17</java.version>
 
         <xchange.version>5.0.13</xchange.version>
-        <testcontainers.version>1.16.3</testcontainers.version>
+        <testcontainers.version>1.17.1</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
         <stomp-websocket.version>2.3.4</stomp-websocket.version>
         <bootstrap.version>4.5.3</bootstrap.version>
@@ -28,7 +28,7 @@
         <disruptor.version>3.4.4</disruptor.version>
         <curator.version>5.2.1</curator.version>
         <logstash-gelf.version>1.15.0</logstash-gelf.version>
-        <spring-boot-admin.version>2.6.5</spring-boot-admin.version>
+        <spring-boot-admin.version>2.6.6</spring-boot-admin.version>
         <spring-cloud.version>2021.0.1</spring-cloud.version>
         <rxjava3.version>3.1.4</rxjava3.version>
 
@@ -40,7 +40,7 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>6.5.3</dependency-check-maven.version>
 
-        <docker.repo>local</docker.repo>
+        <docker.repo>local/</docker.repo>
     </properties>
 
     <dependencyManagement>
@@ -328,10 +328,39 @@
                         </execution>
                     </executions>
                 </plugin>
+
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>0.39.1</version>
+                    <executions>
+                        <execution>
+                            <id>default</id>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <images>
+                            <image>
+                                <name>${docker.repo}exchange-${project.artifactId}</name>
+                                <build>
+                                    <dockerFileDir>${project.basedir}</dockerFileDir>
+                                </build>
+                            </image>
+                        </images>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -349,30 +378,6 @@
     </build>
 
     <profiles>
-        <profile>
-            <id>docker</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>build-image</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <image>
-                                <name>${docker.repo}/exchange-${project.artifactId}</name>
-                            </image>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
         <profile>
             <id>coverage</id>
             <build>

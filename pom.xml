@@ -40,7 +40,7 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>6.5.3</dependency-check-maven.version>
 
-        <docker.repo>local/</docker.repo>
+        <docker.repo>local</docker.repo>
     </properties>
 
     <dependencyManagement>
@@ -344,7 +344,7 @@
                     <configuration>
                         <images>
                             <image>
-                                <name>${docker.repo}exchange-${project.artifactId}</name>
+                                <name>${docker.repo}/exchange-${project.artifactId}</name>
                                 <build>
                                     <dockerFileDir>${project.basedir}</dockerFileDir>
                                 </build>

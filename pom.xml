@@ -346,7 +346,8 @@
                             <image>
                                 <name>${docker.repo}/exchange-${project.artifactId}</name>
                                 <build>
-                                    <dockerFileDir>${project.basedir}</dockerFileDir>
+                                    <contextDir>${project.basedir}</contextDir>
+                                    <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
                                 </build>
                             </image>
                         </images>

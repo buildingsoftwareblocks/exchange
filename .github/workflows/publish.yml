@@ -44,6 +44,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish Docker image Config
+        run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/exchange-config:latest
       - name: Publish Docker image Backend
         run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/exchange-backend:latest
       - name: Publish Docker image Frontend

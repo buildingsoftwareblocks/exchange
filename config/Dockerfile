@@ -8,7 +8,11 @@ VOLUME /tmp
 RUN addgroup -S demo && adduser -S demo -G demo
 USER demo
 COPY --from=builder dependencies/ ./
+RUN true # This is a workaround to https://github.com/moby/moby/issues/37965
 COPY --from=builder snapshot-dependencies/ ./
+RUN true # This is a workaround to https://github.com/moby/moby/issues/37965
 COPY --from=builder spring-boot-loader/ ./
+RUN true # This is a workaround to https://github.com/moby/moby/issues/37965
 COPY --from=builder application/ ./
+RUN true # This is a workaround to https://github.com/moby/moby/issues/37965
 ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]

@@ -37,7 +37,7 @@ services:
       - kafka_zk
 
   mongo:
-    image: mongo
+    image: mongo:4.4
     ports:
       - "27017-27019:27017-27019"
     volumes:
@@ -124,7 +124,7 @@ services:
   # https://github.com/deviantony/docker-elk
   #
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:$ELK_VERSION
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.2
     volumes:
       - ./configuration/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       - ./data/elasticsearch:/usr/share/elasticsearch/data
@@ -139,7 +139,7 @@ services:
       discovery.type: single-node
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:${ELK_VERSION}
+    image: docker.elastic.co/logstash/logstash:7.17.2
     volumes:
       - ./configuration/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./configuration/pipeline:/usr/share/logstash/pipeline
@@ -152,7 +152,7 @@ services:
       LS_JAVA_OPTS: "-Xmx512m -Xms512m"
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:${ELK_VERSION}
+    image: docker.elastic.co/kibana/kibana:7.17.2
     volumes:
       - ./configuration/kibana.yml:/usr/share/kibana/config/kibana.yml
     ports:

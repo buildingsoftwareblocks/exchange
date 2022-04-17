@@ -43,6 +43,10 @@
         <docker.repo>local</docker.repo>
     </properties>
 
+    <scm>
+        <developerConnection>scm:git:https://github.com/buildingsoftwareblocks/exchange.git</developerConnection>
+    </scm>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -353,6 +357,13 @@
                         </images>
                     </configuration>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>3.0.0-M5</version>
+                </plugin>
+
             </plugins>
         </pluginManagement>
 

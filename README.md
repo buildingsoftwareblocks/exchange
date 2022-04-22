@@ -15,19 +15,13 @@ A PoC to retrieve real-time Crypto Exchange data, as a first step for an orderin
 A docker compose script is provided. Start the application with:
 
 ``
-docker-compose --env-file env.dev --profile full up -d
+docker-compose --profile full up -d
 ``
 
 With scaling:
 
 ``
-docker-compose --env-file env.dev --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d
-``
-
-Create your own *env.dev* file from the *env.template* file.
-
-``
-docker-compose --env-file env.dev up -d
+docker-compose --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d
 ``
 
 | System   | link                   |

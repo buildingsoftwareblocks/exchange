@@ -14,21 +14,11 @@ A PoC to retrieve real-time Crypto Exchange data, as a first step for an orderin
 
 A docker compose script is provided. Start the application with:
 
-``
-docker-compose --env-file env.dev --profile full up -d
-``
+``docker-compose --profile full up -d``
 
 With scaling:
 
-``
-docker-compose --env-file env.dev --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d
-``
-
-Create your own *env.dev* file from the *env.template* file.
-
-``
-docker-compose --env-file env.dev up -d
-``
+``docker-compose --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d``
 
 | System   | link                   |
 |----------|------------------------|
@@ -129,9 +119,10 @@ You can build the application locally via a [maven](https://maven.apache.org/) c
 | mvn install -P docker                 | build docker images                             |
 | mvn versions:display-property-updates | check if latest versions of libraries are used. |
 
-The file *env.dev* is intended to make development, also with local docker images, possible.
-For instance the setting in file *env.dev* : ``REPO=local``
-uses the local images build by: ``maven install -P docker``
+To use the created local docker image, replace ``ghcr.io/buildingsoftwareblocks/``with``local``in
+the used *docker-compose.yml* file.
+
+To make sure that you have the latest images, use: ``docker-compose --profile full pull``.
 
 ## Known Problems
 

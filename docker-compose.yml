@@ -2,7 +2,7 @@ version: '3'
 
 services:
   config:
-    image: ${REPO}/exchange-config
+    image: ghcr.io/buildingsoftwareblocks/exchange-config
     ports:
       - "8888:8888"
     volumes:
@@ -55,7 +55,7 @@ services:
       - "8081:4000"
 
   frontend:
-    image: ${REPO}/exchange-frontend
+    image: ghcr.io/buildingsoftwareblocks/exchange-frontend
     profiles: [ "full" ]
     ports:
       - "8081"
@@ -71,7 +71,7 @@ services:
       - logstash
 
   backend:
-    image: ${REPO}/exchange-backend
+    image: ghcr.io/buildingsoftwareblocks/exchange-backend
     profiles: [ "full" ]
     ports:
       - "8082"
@@ -95,7 +95,7 @@ services:
       - elasticsearch
 
   analysis:
-    image: ${REPO}/exchange-analysis
+    image: ghcr.io/buildingsoftwareblocks/exchange-analysis
     profiles: [ "full" ]
     ports:
       - "8083"
@@ -114,7 +114,7 @@ services:
       - logstash
 
   admin:
-    image: ${REPO}/exchange-admin
+    image: ghcr.io/buildingsoftwareblocks/exchange-admin
     depends_on:
       - config
     ports:

@@ -14,6 +14,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.btb</groupId>
+            <artifactId>shared</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-config-server</artifactId>
         </dependency>

@@ -22,13 +22,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'liberica'
-
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          cache: 'maven'
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml

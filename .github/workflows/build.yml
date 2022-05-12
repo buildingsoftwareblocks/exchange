@@ -22,13 +22,14 @@ jobs:
         with:
           java-version: '17'
           distribution: 'liberica'
+          cache: 'maven'
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+      #      - name: Cache local Maven repository
+      #        uses: actions/cache@v3
+      #        with:
+      #          path: ~/.m2
+      #          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      #          restore-keys: ${{ runner.os }}-m2
 
       - name: SonarCloud Scan
         run: mvn -B verify -Pcoverage,sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}

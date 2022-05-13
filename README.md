@@ -124,10 +124,6 @@ the used *docker-compose.yml* file.
 
 To make sure that you have the latest images, use: ``docker-compose --profile full pull``.
 
-## Known Problems
-
-The backend doesn't wait for elasticsearch to become available. The workaround is to restart the backend.
-
 ## TODO List
 
 - [x] 1 Exchange, 1 Currency pair connected

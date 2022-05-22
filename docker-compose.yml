@@ -44,7 +44,7 @@ services:
       - ./data/mongo:/data/db
 
   nginx:
-    image: nginx:latest
+    image: nginx:stable
     profiles: [ "full" ]
     restart: always
     volumes:

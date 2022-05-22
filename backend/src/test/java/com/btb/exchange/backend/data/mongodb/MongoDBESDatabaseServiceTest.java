@@ -12,7 +12,7 @@ import info.bitrich.xchangestream.core.StreamingExchange;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,8 +37,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -50,6 +48,7 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class MongoDBESDatabaseServiceTest {
 
     @Container
@@ -87,10 +86,11 @@ class MongoDBESDatabaseServiceTest {
     }
 
     private ExchangeService createExchangeService() {
-        ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(true, false, false, 5);
-        return new ExchangeService(Mockito.mock(CuratorFramework.class), executor, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/", Set.of(BTC_USD));
+        LeaderSelector leaderSelector = Mockito.mock(LeaderSelector.class);
+        Mockito.when(leaderSelector.hasLeadership()).thenReturn(true);
+        return new ExchangeService(leaderSelector, Mockito.mock(StreamingExchange.class),
+                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, "123", true, Set.of(BTC_USD));
     }
 
     @Test
@@ -100,7 +100,7 @@ class MongoDBESDatabaseServiceTest {
         var startCount = repository.count().blockingGet();
 
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
+                "123", BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
@@ -139,7 +139,7 @@ class MongoDBESDatabaseServiceTest {
             }
         }));
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
+                "123", BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

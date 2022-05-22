@@ -122,6 +122,7 @@ function showTickers(message) {
     for (t of message) {
         $("#tickers").append("<tr>");
         $("#tickers").append("<td>" + t.exchange + "</td>");
+        $("#tickers").append("<td>" + t.id + "</td>");
         $("#tickers").append("<td>" + t.currencyPair + "</td>");
         $("#tickers").append("<td>" + t.timestamp + "</td>");
         $("#tickers").append("<td class=text-right>" + accounting.formatNumber(t.order) + "</td>");

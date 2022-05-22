@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.7</version>
+        <version>2.7.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.btb</groupId>
@@ -20,7 +20,7 @@
         <java.version>17</java.version>
 
         <xchange.version>5.0.13</xchange.version>
-        <testcontainers.version>1.17.1</testcontainers.version>
+        <testcontainers.version>1.17.2</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
         <stomp-websocket.version>2.3.4</stomp-websocket.version>
         <bootstrap.version>4.5.3</bootstrap.version>
@@ -424,7 +424,6 @@
             <id>sonar</id>
             <properties>
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-                <!--                <sonar.host.url>http://localhost:9000</sonar.host.url>-->
                 <sonar.organization>buildingsoftwareblocks</sonar.organization>
                 <sonar.projectKey>buildingsoftwareblocks_exchange</sonar.projectKey>
                 <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>

@@ -18,6 +18,7 @@ public class ExchangeTicker {
     @JsonFormat(pattern = "HH:mm:ss.SSS")
     LocalTime timestamp;
     ExchangeEnum exchange;
+    String id;
     CurrencyPair currencyPair;
     Ticker ticker;
 }

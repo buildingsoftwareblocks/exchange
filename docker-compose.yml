@@ -3,6 +3,7 @@ version: '3.9'
 services:
   config:
     image: ghcr.io/buildingsoftwareblocks/exchange-config
+    #image: local/exchange-config
     ports:
       - "8888:8888"
     volumes:
@@ -38,11 +39,12 @@ services:
     image: mongo:4.4
     ports:
       - "27017-27019:27017-27019"
+    restart: always
     volumes:
       - ./data/mongo:/data/db
 
   nginx:
-    image: nginx:latest
+    image: nginx:stable
     profiles: [ "full" ]
     restart: always
     volumes:
@@ -54,6 +56,7 @@ services:
 
   frontend:
     image: ghcr.io/buildingsoftwareblocks/exchange-frontend
+    #image: local/exchange-frontend
     profiles: [ "full" ]
     ports:
       - "8081"
@@ -70,6 +73,7 @@ services:
 
   backend:
     image: ghcr.io/buildingsoftwareblocks/exchange-backend
+    #image: local/exchange-backend
     profiles: [ "full" ]
     restart: unless-stopped
     ports:
@@ -101,6 +105,7 @@ services:
 
   analysis:
     image: ghcr.io/buildingsoftwareblocks/exchange-analysis
+    #image: local/exchange-analysis
     profiles: [ "full" ]
     ports:
       - "8083"
@@ -120,6 +125,7 @@ services:
 
   admin:
     image: ghcr.io/buildingsoftwareblocks/exchange-admin
+    #image: local/exchange-admin
     depends_on:
       - config
     ports:

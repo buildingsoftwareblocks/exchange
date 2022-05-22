@@ -30,7 +30,6 @@ import java.io.Closeable;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -63,8 +62,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     /**
      *
      */
-    public ExchangeService(CuratorFramework client, ExecutorService executor,
-                           StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate,
+    public ExchangeService(CuratorFramework client,
+                           StreamingExchange exchange,
+                           KafkaTemplate<String, String> kafkaTemplate,
                            MeterRegistry registry,
                            ObjectMapper objectMapper, ApplicationConfig config,
                            ExchangeEnum exchangeEnum, String id,
@@ -73,24 +73,45 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
         this.config = config;
-
         this.exchangeEnum = exchangeEnum;
         this.id = id;
         this.subscriptionRequired = subscriptionRequired;
-
         this.currencyPairs = currencyPairs;
+        this.leaderSelector = new LeaderSelector(client, path, this);
 
         messageCounter = Counter.builder("backend.exchange.messages")
                 .description("indicates number of message received from the given exchange")
                 .tag("exchange", exchangeEnum.toString())
                 .register(registry);
-
-        leaderSelector = new LeaderSelector(client, path, executor, this);
-        leaderSelector.autoRequeue();
     }
+
+    public ExchangeService(LeaderSelector leaderSelector,
+                           StreamingExchange exchange,
+                           KafkaTemplate<String, String> kafkaTemplate,
+                           MeterRegistry registry,
+                           ObjectMapper objectMapper, ApplicationConfig config,
+                           ExchangeEnum exchangeEnum, String id,
+                           boolean subscriptionRequired, Set<CurrencyPair> currencyPairs) {
+        this.exchange = exchange;
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
+        this.config = config;
+        this.exchangeEnum = exchangeEnum;
+        this.id = id;
+        this.subscriptionRequired = subscriptionRequired;
+        this.currencyPairs = currencyPairs;
+        this.leaderSelector = leaderSelector;
+
+        messageCounter = Counter.builder("backend.exchange.messages")
+                .description("indicates number of message received from the given exchange")
+                .tag("exchange", exchangeEnum.toString())
+                .register(registry);
+    }
+
 
     void start() {
         init();
+        leaderSelector.autoRequeue();
         leaderSelector.start();
     }
 

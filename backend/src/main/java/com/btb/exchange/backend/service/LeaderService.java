@@ -43,8 +43,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -69,7 +67,7 @@ public class LeaderService {
 
     private static final String BASE = "/exchange";
     private final GroupMember groupMember;
-    // log the status, but prevent it do it every X seconds.
+    // log the status, but prevent it to do it every X seconds.
     private Set<ExchangeEnum> exchangesLogged = new HashSet<>();
 
     private final ConcurrentHashMap<ExchangeEnum, ExchangeService> clients = new ConcurrentHashMap<>();
@@ -93,7 +91,6 @@ public class LeaderService {
         watcher.getListenable().addListener(this::process);
         watcher.start();
 
-        ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         final String id = IDUtils.generateID();
         Arrays.stream(ExchangeEnum.values())
                 .filter(e -> exchanges.contains(e))
@@ -102,7 +99,7 @@ public class LeaderService {
                     String path = BASE + "/" + e;
                     StreamingExchange streamingExchange = exchangeFactory(e);
                     if (streamingExchange != null) {
-                        ExchangeService exchangeService = new ExchangeService(client, executor, streamingExchange,
+                        ExchangeService exchangeService = new ExchangeService(client, streamingExchange,
                                 kafkaTemplate, registry, objectMapper, config, e, id, subscriptionRequired(e), path, currencypairs);
                         clients.put(e, exchangeService);
                         exchangeService.start();

@@ -9,6 +9,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +31,6 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -79,12 +78,11 @@ class ExchangeServiceTest {
     }
 
     ExchangeService createExchangeService() {
-        ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(false, true, false, 5);
-        ExchangeService result = new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, "123", true, "/", Set.of(BTC_USD));
-        result.takeLeadership(null);
-        return result;
+        LeaderSelector leaderSelector = Mockito.mock(LeaderSelector.class);
+        Mockito.when(leaderSelector.hasLeadership()).thenReturn(true);
+        return new ExchangeService(leaderSelector, Mockito.mock(StreamingExchange.class),
+                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, "123", true, Set.of(BTC_USD));
     }
 
     @Test

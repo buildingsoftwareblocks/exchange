@@ -81,8 +81,10 @@ class ExchangeServiceTest {
     ExchangeService createExchangeService() {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(false, true, false, 5);
-        return new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
+        ExchangeService result = new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
                 kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, "123", true, "/", Set.of(BTC_USD));
+        result.takeLeadership(null);
+        return result;
     }
 
     @Test

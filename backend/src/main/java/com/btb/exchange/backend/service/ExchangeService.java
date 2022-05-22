@@ -46,7 +46,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     private final String id;
     private final boolean subscriptionRequired;
 
-    private final LeaderSelector leaderSelector;
+    private LeaderSelector leaderSelector;
     private final AtomicLong counter = new AtomicLong();
     private final AtomicBoolean leader = new AtomicBoolean(false);
 
@@ -69,20 +69,8 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                            ObjectMapper objectMapper, ApplicationConfig config,
                            ExchangeEnum exchangeEnum, String id,
                            boolean subscriptionRequired, String path, Set<CurrencyPair> currencyPairs) {
-        this.exchange = exchange;
-        this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = objectMapper;
-        this.config = config;
-        this.exchangeEnum = exchangeEnum;
-        this.id = id;
-        this.subscriptionRequired = subscriptionRequired;
-        this.currencyPairs = currencyPairs;
+        this(null, exchange, kafkaTemplate, registry, objectMapper, config, exchangeEnum, id, subscriptionRequired, currencyPairs);
         this.leaderSelector = new LeaderSelector(client, path, this);
-
-        messageCounter = Counter.builder("backend.exchange.messages")
-                .description("indicates number of message received from the given exchange")
-                .tag("exchange", exchangeEnum.toString())
-                .register(registry);
     }
 
     public ExchangeService(LeaderSelector leaderSelector,

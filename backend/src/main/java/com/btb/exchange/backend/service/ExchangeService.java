@@ -44,6 +44,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     private final ApplicationConfig config;
 
     private final ExchangeEnum exchangeEnum;
+    private final String id;
     private final boolean subscriptionRequired;
 
     private final LeaderSelector leaderSelector;
@@ -66,13 +67,15 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                            StreamingExchange exchange, KafkaTemplate<String, String> kafkaTemplate,
                            MeterRegistry registry,
                            ObjectMapper objectMapper, ApplicationConfig config,
-                           ExchangeEnum exchangeEnum, boolean subscriptionRequired, String path, Set<CurrencyPair> currencyPairs) {
+                           ExchangeEnum exchangeEnum, String id,
+                           boolean subscriptionRequired, String path, Set<CurrencyPair> currencyPairs) {
         this.exchange = exchange;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
         this.config = config;
 
         this.exchangeEnum = exchangeEnum;
+        this.id = id;
         this.subscriptionRequired = subscriptionRequired;
 
         this.currencyPairs = currencyPairs;
@@ -87,11 +90,13 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     }
 
     void start() {
+        init();
         leaderSelector.start();
     }
 
     @Override
     public void close() {
+        teardown();
         CloseableUtils.closeQuietly(leaderSelector);
     }
 
@@ -118,7 +123,6 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     public void takeLeadership(CuratorFramework client) {
         try {
             log.info("Take leadership - {}", exchangeEnum);
-            init();
             leader.set(true);
             Thread.sleep(Integer.MAX_VALUE);
         } catch (InterruptedException i) {
@@ -129,7 +133,6 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         } finally {
             log.info("Relinquishing leadership - {}", exchangeEnum);
             leader.set(false);
-            teardown();
         }
     }
 
@@ -194,30 +197,34 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
     }
 
     public void process(OrderBook orderBook, @NonNull CurrencyPair currencyPair) {
-        log.trace("Order book: {}", orderBook);
-        messageCounter.increment();
-        try {
-            var future = kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK,
-                    objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(),
-                            LocalTime.now(), exchangeEnum, currencyPair,
-                            new Orders(orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
+        if (hasLeadership()) {
+            log.trace("Order book: {}", orderBook);
+            messageCounter.increment();
+            try {
+                var future = kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK,
+                        objectMapper.writeValueAsString(new ExchangeOrderBook(counter.getAndIncrement(),
+                                LocalTime.now(), exchangeEnum, id, currencyPair,
+                                new Orders(orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
 
-            future.addCallback(result -> messageSent.onNext(result.getRecordMetadata().topic()), e -> log.error("Exception-1", e));
-        } catch (JsonProcessingException e) {
-            log.error("Exception-2", e);
+                future.addCallback(result -> messageSent.onNext(result.getRecordMetadata().topic()), e -> log.error("Exception-1", e));
+            } catch (JsonProcessingException e) {
+                log.error("Exception-2", e);
+            }
         }
     }
 
     public void process(Ticker ticker, @NonNull CurrencyPair currencyPair) {
-        log.trace("Ticker: {}", ticker);
-        try {
-            var future = kafkaTemplate.send(TopicUtils.INPUT_TICKER,
-                    objectMapper.writeValueAsString(new ExchangeTicker(counter.getAndIncrement(),
-                            LocalTime.now(), exchangeEnum, currencyPair, ticker)));
+        if (hasLeadership()) {
+            log.trace("Ticker: {}", ticker);
+            try {
+                var future = kafkaTemplate.send(TopicUtils.INPUT_TICKER,
+                        objectMapper.writeValueAsString(new ExchangeTicker(counter.getAndIncrement(),
+                                LocalTime.now(), exchangeEnum, id, currencyPair, ticker)));
 
-            future.addCallback(result -> messageSent.onNext(result.getRecordMetadata().topic()), e -> log.error("Exception-1", e));
-        } catch (JsonProcessingException e) {
-            log.error("Exception-2", e);
+                future.addCallback(result -> messageSent.onNext(result.getRecordMetadata().topic()), e -> log.error("Exception-1", e));
+            } catch (JsonProcessingException e) {
+                log.error("Exception-2", e);
+            }
         }
     }
 

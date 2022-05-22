@@ -26,7 +26,7 @@ class ExchangeOrdersTest {
 
     @Test
     void serializeToJson() throws JsonProcessingException {
-        var orderBook = new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP, BTC_USD,
+        var orderBook = new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP, "123", BTC_USD,
                 new Orders(Collections.emptyList(), Collections.emptyList(), 0));
         var serialized = objectMapper.writeValueAsString(orderBook);
         assertThat("smoke test", serialized, is(notNullValue()));
@@ -34,7 +34,7 @@ class ExchangeOrdersTest {
 
     @Test
     void deserializeToJson() throws JsonProcessingException {
-        var orderBook1 = new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP, BTC_USD,
+        var orderBook1 = new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP, "123", BTC_USD,
                 new Orders(Collections.emptyList(), Collections.emptyList(), 1));
         var serialized1 = objectMapper.writeValueAsString(orderBook1);
         var orderBook2 = objectMapper.readValue(serialized1, ExchangeOrderBook.class);

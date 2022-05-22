@@ -42,6 +42,7 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class MessageHandlerTest {
 
     @Container
@@ -74,7 +75,7 @@ class MessageHandlerTest {
         composite.add(handler.subscribe().subscribe(r -> latch.countDown()));
         Mockito.when(simpleExchangeArbitrage.process(Mockito.anyList())).thenReturn(Opportunities.builder().timestamp(LocalTime.now()).build());
 
-        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList()));
+        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, "12", BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK, objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);

@@ -17,6 +17,7 @@ public class ExchangeOrderBook {
     @JsonFormat(pattern = "HH:mm:ss.SSS")
     LocalTime timestamp;
     ExchangeEnum exchange;
+    String id;
     CurrencyPair currencyPair;
     Orders orders;
 }

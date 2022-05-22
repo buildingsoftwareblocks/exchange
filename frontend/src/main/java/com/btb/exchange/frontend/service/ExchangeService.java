@@ -71,6 +71,7 @@ public class ExchangeService {
     /**
      *
      */
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public ExchangeService(HazelcastInstance hazelcastInstance, ObjectMapper objectMapper, MeterRegistry registry) {
         this.dtoUtils = new DTOUtils(objectMapper);
         opportunities = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
@@ -97,7 +98,7 @@ public class ExchangeService {
         final var now = LocalTime.now();
         messages.forEach(msg -> {
             ExchangeOrderBook orderBook = dtoUtils.fromDTO(msg, ExchangeOrderBook.class);
-            updated(new ExchangeKey(orderBook.getExchange()), now, orderBook.getCurrencyPair());
+            updated(orderBook, now);
             orderBook(new ExchangeCPKey(orderBook.getExchange(), orderBook.getCurrencyPair()), now, orderBook, msg);
             orderBookReceived.onNext(msg);
         });
@@ -114,7 +115,9 @@ public class ExchangeService {
         });
     }
 
-    void updated(ExchangeKey key, LocalTime localTime, CurrencyPair cp) {
+    void updated(ExchangeOrderBook orderBook, LocalTime localTime) {
+        final ExchangeKey key = new ExchangeKey(orderBook.getExchange());
+        final CurrencyPair cp = orderBook.getCurrencyPair();
         updated.computeIfAbsent(key, v -> new ExchangeValue(localTime, cp));
         updated.computeIfPresent(key, (k, v) -> new ExchangeValue(localTime, v.cps, cp));
     }

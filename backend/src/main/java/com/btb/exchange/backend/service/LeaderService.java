@@ -2,6 +2,7 @@ package com.btb.exchange.backend.service;
 
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.shared.dto.ExchangeEnum;
+import com.btb.exchange.shared.utils.IDUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.binance.BinanceStreamingExchange;
 import info.bitrich.xchangestream.bitfinex.BitfinexStreamingExchange;
@@ -73,6 +74,7 @@ public class LeaderService {
 
     private final ConcurrentHashMap<ExchangeEnum, ExchangeService> clients = new ConcurrentHashMap<>();
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     public LeaderService(CuratorFramework client, KafkaTemplate<String, String> kafkaTemplate, MeterRegistry registry,
                          ObjectMapper objectMapper, ApplicationConfig config) {
         this.client = client;
@@ -81,8 +83,7 @@ public class LeaderService {
         this.objectMapper = objectMapper;
         this.config = config;
 
-        String id = "backend-" + UUID.randomUUID();
-        groupMember = new GroupMember(client, "/leaders", id);
+        groupMember = new GroupMember(client, "/leaders", "backend-" + UUID.randomUUID());
         groupMember.start();
     }
 
@@ -93,6 +94,7 @@ public class LeaderService {
         watcher.start();
 
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
+        final String id = IDUtils.generateID();
         Arrays.stream(ExchangeEnum.values())
                 .filter(e -> exchanges.contains(e))
                 .forEach(e -> {
@@ -101,7 +103,7 @@ public class LeaderService {
                     StreamingExchange streamingExchange = exchangeFactory(e);
                     if (streamingExchange != null) {
                         ExchangeService exchangeService = new ExchangeService(client, executor, streamingExchange,
-                                kafkaTemplate, registry, objectMapper, config, e, subscriptionRequired(e), path, currencypairs);
+                                kafkaTemplate, registry, objectMapper, config, e, id, subscriptionRequired(e), path, currencypairs);
                         clients.put(e, exchangeService);
                         exchangeService.start();
                     } else {
@@ -117,11 +119,11 @@ public class LeaderService {
     }
 
     private void checkExchangeDistribution() {
-        var exchangePerMember = ceiling(ExchangeEnum.values().length, groupMember.getCurrentMembers().keySet().size());
+        var exchangePerMember = ceiling(clients.size(), groupMember.getCurrentMembers().keySet().size());
         var leaders = clients.values().stream().filter(ExchangeService::hasLeadership).map(ExchangeService::leaderOf).collect(Collectors.toSet());
         if (leaders.size() > exchangePerMember) {
             log.info("reschuffle needed : {} / {}", leaders.size(), exchangePerMember);
-            // we must reschedule number of exchanges we should not have
+            // we must reschedule: number of exchanges we should not have
             var toReschedule = leaders.size() - exchangePerMember;
             clients.values().stream().filter(ExchangeService::hasLeadership).limit(toReschedule).forEach(c -> {
                 log.info("interrupt {}", c.leaderOf());

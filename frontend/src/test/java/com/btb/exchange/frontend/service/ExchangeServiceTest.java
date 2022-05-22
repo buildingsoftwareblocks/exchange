@@ -38,6 +38,7 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class ExchangeServiceTest {
 
     @Container
@@ -67,7 +68,7 @@ class ExchangeServiceTest {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
-        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, BTC_USD,
+        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, "123", BTC_USD,
                 new Orders(Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK, objectMapper.writeValueAsString(message));
 

@@ -41,6 +41,7 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class ExchangeServiceTest {
 
     @Container
@@ -81,7 +82,7 @@ class ExchangeServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(false, true, false, 5);
         return new ExchangeService(curatorFramework, executor, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/", Set.of(BTC_USD));
+                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, "123", true, "/", Set.of(BTC_USD));
     }
 
     @Test

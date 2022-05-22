@@ -47,6 +47,7 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class ESDatabaseServiceTest {
 
     @Container
@@ -85,7 +86,7 @@ class ESDatabaseServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool(ExchangeEnum.values().length);
         ApplicationConfig config = new ApplicationConfig(true, false, false, 5);
         return new ExchangeService(Mockito.mock(CuratorFramework.class), executor, Mockito.mock(StreamingExchange.class),
-                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, true, "/", Set.of(BTC_USD));
+                kafkaTemplate, registry, objectMapper, config, ExchangeEnum.KRAKEN, "123", true, "/", Set.of(BTC_USD));
     }
 
     @Test
@@ -95,7 +96,7 @@ class ESDatabaseServiceTest {
         var startCount = repository.count();
 
         var msg = objectMapper.writeValueAsString(new ExchangeOrderBook(1, LocalTime.now(), ExchangeEnum.BITSTAMP,
-                BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
+                "123", BTC_USD, new Orders(Collections.emptyList(), Collections.emptyList())));
         service.store(msg);
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

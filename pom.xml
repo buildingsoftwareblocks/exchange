@@ -351,7 +351,7 @@
                                 <name>${docker.repo}/exchange-${project.artifactId}</name>
                                 <build>
                                     <contextDir>${project.basedir}</contextDir>
-                                    <dockerFile>${project.basedir}/src/main/docker/Dockerfile</dockerFile>
+                                    <dockerFile>${project.basedir}/../Dockerfile</dockerFile>
                                     <buildOptions>
                                         <platforms>linux/amd64</platforms>
                                         <version>2</version>    <!-- use BuildKit -->

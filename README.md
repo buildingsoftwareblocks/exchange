@@ -12,6 +12,8 @@ A PoC to retrieve real-time Crypto Exchange data, as a first step for an orderin
 
 ## Run Application
 
+### Docker Compose
+
 A docker compose script is provided. Start the application with:
 
 ``docker compose --profile full up -d``
@@ -19,6 +21,12 @@ A docker compose script is provided. Start the application with:
 With scaling:
 
 ``docker compose --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d``
+
+### Kubernetes
+
+...
+
+### Links
 
 | System   | link                   |
 |----------|------------------------|

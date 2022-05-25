@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: config
+  name: config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: config
+    spec:
+      containers:
+        - image: ghcr.io/buildingsoftwareblocks/exchange-config
+          name: config
+          ports:
+            - containerPort: 8888
+          volumeMounts:
+            - mountPath: /configuration
+              name: config-claim0
+      restartPolicy: Always
+      volumes:
+        - name: config-claim0
+          persistentVolumeClaim:
+            claimName: config-claim0

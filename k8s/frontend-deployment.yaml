@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f ..\docker-compose.yml
+    kompose.version: 1.26.1 (a9d05d509)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: frontend
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: frontend
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f ..\docker-compose.yml
+        kompose.version: 1.26.1 (a9d05d509)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: frontend
+    spec:
+      containers:
+        - env:
+            - name: ADMIN_SERVER
+              value: admin
+            - name: CONFIG_HOST
+              value: config
+            - name: JAVA_OPTS
+              value: -XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+            - name: KAFKA_SERVER
+              value: kafka
+            - name: LOGSTASH_SERVER
+              value: logstash
+          image: ghcr.io/buildingsoftwareblocks/exchange-frontend
+          name: frontend
+          ports:
+            - containerPort: 8081
+          resources: {}
+      restartPolicy: Always
+status: {}

@@ -14,11 +14,11 @@ A PoC to retrieve real-time Crypto Exchange data, as a first step for an orderin
 
 A docker compose script is provided. Start the application with:
 
-``docker-compose --profile full up -d``
+``docker compose --profile full up -d``
 
 With scaling:
 
-``docker-compose --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d``
+``docker compose --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d``
 
 | System   | link                   |
 |----------|------------------------|
@@ -122,7 +122,7 @@ You can build the application locally via a [maven](https://maven.apache.org/) c
 To use the created local docker image, replace ``ghcr.io/buildingsoftwareblocks/``with``local``in
 the used *docker-compose.yml* file.
 
-To make sure that you have the latest images, use: ``docker-compose --profile full pull``.
+To make sure that you have the latest images, use: ``docker compose --profile full pull``.
 
 ## TODO List
 

@@ -2,33 +2,31 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: admin
-  name: admin
+    app: kibana
+  name: kibana
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: admin
+      app: kibana
   template:
     metadata:
       labels:
-        app: admin
+        app: kibana
     spec:
       containers:
-        - image: ghcr.io/buildingsoftwareblocks/exchange-admin
-          name: admin
-          ports:
-            - containerPort: 8080
+        image: kibana:7.17.2
+        name: kibana
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: admin
+  name: kibana
 spec:
   selector:
-    app: admin
+    app: kibana
   ports:
-    - port: 8080
+    - port: 5601
       protocol: TCP
-      targetPort: 8080
+      targetPort: 5601
   type: LoadBalancer

@@ -1,27 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f ..\docker-compose.yml
-    kompose.version: 1.26.1 (a9d05d509)
-  creationTimestamp: null
   labels:
-    io.kompose.service: analysis
+    app: analysis
   name: analysis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: analysis
-  strategy: {}
+      app: analysis
   template:
     metadata:
-      annotations:
-        kompose.cmd: C:\ProgramData\chocolatey\lib\kubernetes-kompose\tools\kompose.exe convert -f ..\docker-compose.yml
-        kompose.version: 1.26.1 (a9d05d509)
-      creationTimestamp: null
       labels:
-        io.kompose.service: analysis
+        app: analysis
     spec:
       containers:
         - env:
@@ -45,6 +36,4 @@ spec:
           name: analysis
           ports:
             - containerPort: 8083
-          resources: {}
-      restartPolicy: Always
-status: {}
+

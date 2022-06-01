@@ -1,5 +1,5 @@
-apiVersion: apps/v1
 kind: Deployment
+apiVersion: apps/v1
 metadata:
   labels:
     app: frontend
@@ -16,23 +16,18 @@ spec:
     spec:
       containers:
         - env:
-            - name: ADMIN_SERVER
-              value: admin
-            - name: CONFIG_HOST
-              value: config
             - name: JAVA_OPTS
               value: -XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
-            - name: KAFKA_SERVER
-              value: kafka
-            - name: LOGSTASH_SERVER
-              value: logstash
-          image: ghcr.io/buildingsoftwareblocks/exchange-frontend
+          image: local/exchange-frontend
+          imagePullPolicy: IfNotPresent
           name: frontend
           ports:
             - containerPort: 8081
+
 ---
-apiVersion: v1
+
 kind: Service
+apiVersion: v1
 metadata:
   name: frontend
 spec:

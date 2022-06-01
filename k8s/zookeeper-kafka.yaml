@@ -1,0 +1,38 @@
+#
+#  Zookeeper instance needed for Kafka
+#
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: zookeeper-kafka
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: zookeeper-kafka
+  template:
+    metadata:
+      labels:
+        app: zookeeper-kafka
+    spec:
+      containers:
+        - name: zookeeper-kafka
+          image: wurstmeister/zookeeper
+          ports:
+            - containerPort: 2181
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: zookeeper-kafka
+  labels:
+    name: zookeeper-kafka
+spec:
+  ports:
+    - port: 2181
+      protocol: TCP
+      targetPort: 2181
+  selector:
+    app: zookeeper-kafka

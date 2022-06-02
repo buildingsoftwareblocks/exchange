@@ -1,0 +1,26 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    app: backend
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - env:
+            - name: JAVA_OPTS
+              value: -XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+          image: local/exchange-backend
+          imagePullPolicy: IfNotPresent
+          name: backend
+          ports:
+            - containerPort: 8082
+

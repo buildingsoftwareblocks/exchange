@@ -22,9 +22,11 @@ spec:
           name: elasticsearch
           ports:
             - containerPort: 9200
+
 ---
-apiVersion: v1
+
 kind: Service
+apiVersion: v1
 metadata:
   name: elasticsearch
 spec:

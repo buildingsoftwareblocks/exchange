@@ -23,4 +23,33 @@ spec:
           name: analysis
           ports:
             - containerPort: 8083
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8083
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
+            periodSeconds: 3
+            failureThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8083
+            initialDelaySeconds: 20
+            timeoutSeconds: 2
+            periodSeconds: 8
+            failureThreshold: 1
 
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: analysis
+spec:
+  selector:
+    app: analysis
+  ports:
+    - protocol: TCP
+      port: 8083
+      targetPort: 8083

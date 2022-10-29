@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.0</version>
+        <version>2.7.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.btb</groupId>
@@ -19,18 +19,18 @@
     <properties>
         <java.version>17</java.version>
 
-        <xchange.version>5.0.13</xchange.version>
-        <testcontainers.version>1.17.2</testcontainers.version>
+        <xchange.version>5.0.14</xchange.version>
+        <testcontainers.version>1.17.5</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
         <stomp-websocket.version>2.3.4</stomp-websocket.version>
         <bootstrap.version>4.5.3</bootstrap.version>
-        <jquery.version>3.6.0</jquery.version>
+        <jquery.version>3.6.1</jquery.version>
         <disruptor.version>3.4.4</disruptor.version>
-        <curator.version>5.2.1</curator.version>
+        <curator.version>5.4.0</curator.version>
         <logstash-gelf.version>1.15.0</logstash-gelf.version>
         <spring-boot-admin.version>2.6.6</spring-boot-admin.version>
-        <spring-cloud.version>2021.0.2</spring-cloud.version>
-        <rxjava3.version>3.1.4</rxjava3.version>
+        <spring-cloud.version>2021.0.4</spring-cloud.version>
+        <rxjava3.version>3.1.5</rxjava3.version>
 
         <!-- plugins -->
         <sonar.version>3.9.1.2184</sonar.version>
@@ -39,6 +39,7 @@
         <code.coverage.exclusions/>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>6.5.3</dependency-check-maven.version>
+        <spotify.fmt.version>2.19</spotify.fmt.version>
 
         <docker.repo>local</docker.repo>
     </properties>
@@ -366,6 +367,19 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.0.0-M5</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.spotify.fmt</groupId>
+                    <artifactId>fmt-maven-plugin</artifactId>
+                    <version>${spotify.fmt.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>format</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
 
             </plugins>

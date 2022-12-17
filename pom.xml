@@ -5,9 +5,10 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.6</version>
+        <version>3.0.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+
     <groupId>com.btb</groupId>
     <artifactId>exchange</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -30,9 +31,9 @@
         <curator.version>5.4.0</curator.version>
         <logstash-gelf.version>1.15.0</logstash-gelf.version>
         <spring-boot-admin.version>2.6.6</spring-boot-admin.version>
-        <spring-cloud.version>2021.0.5</spring-cloud.version>
-        <rxjava3.version>3.1.5</rxjava3.version>
+        <spring-cloud.version>2022.0.0</spring-cloud.version>
         <javamelody.version>1.91.0</javamelody.version>
+        <snakeyaml.version>1.33</snakeyaml.version>
 
         <!-- plugins -->
         <sonar.version>3.9.1.2184</sonar.version>

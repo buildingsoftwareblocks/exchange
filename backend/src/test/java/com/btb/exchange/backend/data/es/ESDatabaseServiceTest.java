@@ -45,11 +45,10 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class ESDatabaseServiceTest {
 
     @Container
-    private static final ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.12.1");
+    private static final ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.17.8");
     @Container
     private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
     @Container
@@ -105,12 +104,15 @@ class ESDatabaseServiceTest {
 
     @Test
     void testKafkaListener() throws InterruptedException {
-        ExchangeService exchangeService = createExchangeService();
-        var latch = new CountDownLatch(1);
-        composite.add(service.subscribe().subscribe(r -> latch.countDown()));
+        CountDownLatch latch;
+        long startCount;
+        try (ExchangeService exchangeService = createExchangeService()) {
+            latch = new CountDownLatch(1);
+            composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
-        var startCount = repository.count();
-        exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USD);
+            startCount = repository.count();
+            exchangeService.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USD);
+        }
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 
         assertThat("result before timeout", waitResult);

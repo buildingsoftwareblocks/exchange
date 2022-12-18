@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.mockito.Mockito;
@@ -40,13 +39,12 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class ExchangeServiceTest {
 
     @Container
     private static final MongoDBContainer MONGO_DB_CONTAINER = new MongoDBContainer("mongo:latest");
     @Container
-    private static final ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.12.1");
+    private static final ElasticsearchContainer ELASTICSEARCH_CONTAINER = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.17.8");
     @Container
     private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest")).withEmbeddedZookeeper();
     @Container
@@ -67,11 +65,6 @@ class ExchangeServiceTest {
 
     private final CompositeDisposable composite = new CompositeDisposable();
 
-    @BeforeEach
-    void beforeEach() {
-        mongoDBDatabaseService.deleteAll();
-    }
-
     @AfterEach
     void afterEach() {
         composite.clear();
@@ -87,16 +80,18 @@ class ExchangeServiceTest {
 
     @Test
     void process() throws InterruptedException {
-        ExchangeService service = createExchangeService();
+        CountDownLatch latch;
+        final List<String> results;
+        try (ExchangeService service = createExchangeService()) {
+            latch = new CountDownLatch(1);
+            results = new ArrayList<>();
+            composite.add(service.subscribe().subscribe(r -> {
+                results.add(r);
+                latch.countDown();
+            }));
 
-        var latch = new CountDownLatch(1);
-        final List<String> results = new ArrayList<>();
-        composite.add(service.subscribe().subscribe(r -> {
-            results.add(r);
-            latch.countDown();
-        }));
-
-        service.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USD);
+            service.process(new OrderBook(new Date(), Collections.emptyList(), Collections.emptyList()), BTC_USD);
+        }
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

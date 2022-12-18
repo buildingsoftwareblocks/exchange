@@ -215,7 +215,13 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                                 LocalTime.now(), exchangeEnum, id, currencyPair,
                                 new Orders(orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
 
-                future.addCallback(result -> messageSent.onNext(result.getRecordMetadata().topic()), e -> log.error("Exception-1", e));
+                future.whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        messageSent.onNext(result.getRecordMetadata().topic());
+                    } else {
+                        log.error("Exception-1", ex);
+                    }
+                });
             } catch (JsonProcessingException e) {
                 log.error("Exception-2", e);
             }
@@ -230,13 +236,18 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                         objectMapper.writeValueAsString(new ExchangeTicker(counter.getAndIncrement(),
                                 LocalTime.now(), exchangeEnum, id, currencyPair, ticker)));
 
-                future.addCallback(result -> messageSent.onNext(result.getRecordMetadata().topic()), e -> log.error("Exception-1", e));
+                future.whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        messageSent.onNext(result.getRecordMetadata().topic());
+                    } else {
+                        log.error("Exception-1", ex);
+                    }
+                });
             } catch (JsonProcessingException e) {
                 log.error("Exception-2", e);
             }
         }
     }
-
 
     void teardown() {
         // Disconnect from exchange (blocking to wait for it)

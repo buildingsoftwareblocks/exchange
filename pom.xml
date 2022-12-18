@@ -41,7 +41,7 @@
         <surefire.version>2.22.2</surefire.version>
         <code.coverage.exclusions/>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
-        <dependency-check-maven.version>6.5.3</dependency-check-maven.version>
+        <dependency-check-maven.version>7.4.1</dependency-check-maven.version>
         <spotify.fmt.version>2.19</spotify.fmt.version>
         <docker-maven-plugin.version>0.40.2</docker-maven-plugin.version>
     </properties>

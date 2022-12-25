@@ -7,6 +7,7 @@ import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class MessageHandler {
         this.simpleExchangeArbitrage = simpleExchangeArbitrage;
         this.orderService = orderService;
         this.dtoUtils = new DTOUtils(objectMapper);
-        messagesCounter = DistributionSummary.builder("analysis.simple.kafka.queue")
+        this.messagesCounter = DistributionSummary.builder("analysis.simple.kafka.queue")
                 .description("indicates number of message read form the kafka queue")
                 .register(registry);
     }
@@ -51,7 +52,7 @@ public class MessageHandler {
     /**
      * for testing purposes
      */
-    final Subject<String> subscribe() {
+    Observable<String> subscribe() {
         return processed;
     }
 }

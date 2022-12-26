@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.0</version>
+        <version>2.7.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -31,9 +31,11 @@
         <curator.version>5.4.0</curator.version>
         <logstash-gelf.version>1.15.0</logstash-gelf.version>
         <spring-boot-admin.version>2.6.6</spring-boot-admin.version>
-        <spring-cloud.version>2022.0.0</spring-cloud.version>
+        <spring-cloud.version>2021.0.5</spring-cloud.version>
+        <!--        <spring-cloud.version>2022.0.0</spring-cloud.version>-->
         <javamelody.version>1.91.0</javamelody.version>
         <snakeyaml.version>1.33</snakeyaml.version>
+        <rxjava3.version>3.1.5</rxjava3.version>
 
         <!-- plugins -->
         <sonar.version>3.9.1.2184</sonar.version>
@@ -43,7 +45,7 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>7.4.1</dependency-check-maven.version>
         <spotify.fmt.version>2.19</spotify.fmt.version>
-        <docker-maven-plugin.version>0.40.2</docker-maven-plugin.version>
+        <docker-maven-plugin.version>0.40.3</docker-maven-plugin.version>
     </properties>
 
     <scm>
@@ -411,7 +413,6 @@
                         </execution>
                     </executions>
                 </plugin>
-
             </plugins>
         </pluginManagement>
 

@@ -45,7 +45,6 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class MessageHandlerTest {
 
     @Container

@@ -17,8 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.test.utils.ContainerTestUtils;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.KafkaContainer;
@@ -45,6 +47,9 @@ class ExchangeServiceTest {
             new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
 
     @Autowired
+    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+
+    @Autowired
     ExchangeService service;
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
@@ -54,8 +59,13 @@ class ExchangeServiceTest {
     private final CompositeDisposable composite = new CompositeDisposable();
 
     @BeforeEach
-    void beforeEach() {
+    void beforeTest() {
         service.init();
+        kafkaListenerEndpointRegistry
+                .getListenerContainers()
+                .forEach(
+                        messageListenerContainer ->
+                                ContainerTestUtils.waitForAssignment(messageListenerContainer, 1));
     }
 
     @AfterEach

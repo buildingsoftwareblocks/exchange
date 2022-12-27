@@ -13,25 +13,27 @@ import org.springframework.context.annotation.Primary;
 @Configuration
 public class HazelcastConfig {
 
-    @Value("${backend.multicast.enabled:true}")
-    private boolean multicast;
+  @Value("${backend.multicast.enabled:true}")
+  private boolean multicast;
 
-    @Bean
-    Config hazelCastConfig() {
-        Config config = new Config().setClusterName("backend-hz");
-        config.getCPSubsystemConfig().addSemaphoreConfig(new SemaphoreConfig(MongoDBDatabaseService.HAZELCAST_DB, true, 1));
-        if (multicast) {
-            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);
-        } else {
-            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-            config.getNetworkConfig().getJoin().getTcpIpConfig().addMember("127.0.0.1").setEnabled(true);
-        }
-        return config;
+  @Bean
+  Config hazelCastConfig() {
+    Config config = new Config().setClusterName("backend-hz");
+    config
+        .getCPSubsystemConfig()
+        .addSemaphoreConfig(new SemaphoreConfig(MongoDBDatabaseService.HAZELCAST_DB, true, 1));
+    if (multicast) {
+      config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);
+    } else {
+      config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+      config.getNetworkConfig().getJoin().getTcpIpConfig().addMember("127.0.0.1").setEnabled(true);
     }
+    return config;
+  }
 
-    @Bean
-    @Primary
-    HazelcastInstance hazelcastInstance(Config config) {
-        return Hazelcast.newHazelcastInstance(config);
-    }
+  @Bean
+  @Primary
+  HazelcastInstance hazelcastInstance(Config config) {
+    return Hazelcast.newHazelcastInstance(config);
+  }
 }

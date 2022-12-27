@@ -38,11 +38,11 @@ import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 @SpringBootTest
 @Testcontainers
 @Slf4j
-@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 class ExchangeServiceTest {
 
     @Container
-    private static final KafkaContainer KAFKA_CONTAINER = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
+    private static final KafkaContainer KAFKA_CONTAINER =
+            new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest"));
 
     @Autowired
     ExchangeService service;
@@ -68,8 +68,14 @@ class ExchangeServiceTest {
         var latch = new CountDownLatch(1);
         composite.add(service.subscribe().subscribe(r -> latch.countDown()));
 
-        var message = new ExchangeOrderBook(100, LocalTime.now(), ExchangeEnum.KRAKEN, "123", BTC_USD,
-                new Orders(Collections.emptyList(), Collections.emptyList()));
+        var message =
+                new ExchangeOrderBook(
+                        100,
+                        LocalTime.now(),
+                        ExchangeEnum.KRAKEN,
+                        "123",
+                        BTC_USD,
+                        new Orders(Collections.emptyList(), Collections.emptyList()));
         kafkaTemplate.send(TopicUtils.INPUT_ORDERBOOK, objectMapper.writeValueAsString(message));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
@@ -92,9 +98,18 @@ class ExchangeServiceTest {
 
         @PostConstruct
         public void init() {
-            ac.registerBean(TopicUtils.INPUT_ORDERBOOK, NewTopic.class, () -> TopicBuilder.name(TopicUtils.INPUT_ORDERBOOK).build());
-            ac.registerBean(TopicUtils.INPUT_TICKER, NewTopic.class, () -> TopicBuilder.name(TopicUtils.INPUT_TICKER).build());
-            ac.registerBean(TopicUtils.OPPORTUNITIES, NewTopic.class, () -> TopicBuilder.name(TopicUtils.OPPORTUNITIES).build());
+            ac.registerBean(
+                    TopicUtils.INPUT_ORDERBOOK,
+                    NewTopic.class,
+                    () -> TopicBuilder.name(TopicUtils.INPUT_ORDERBOOK).build());
+            ac.registerBean(
+                    TopicUtils.INPUT_TICKER,
+                    NewTopic.class,
+                    () -> TopicBuilder.name(TopicUtils.INPUT_TICKER).build());
+            ac.registerBean(
+                    TopicUtils.OPPORTUNITIES,
+                    NewTopic.class,
+                    () -> TopicBuilder.name(TopicUtils.OPPORTUNITIES).build());
         }
     }
 }

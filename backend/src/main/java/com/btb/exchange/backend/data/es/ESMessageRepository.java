@@ -4,5 +4,4 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import org.springframework.stereotype.Repository;
 
 @Repository
-interface ESMessageRepository extends ElasticsearchRepository<Message, String> {
-}
+interface ESMessageRepository extends ElasticsearchRepository<Message, String> {}

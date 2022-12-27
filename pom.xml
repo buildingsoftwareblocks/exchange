@@ -22,7 +22,7 @@
         <docker.repo>local</docker.repo>
 
         <docker.app.tag>latest</docker.app.tag>
-        
+
         <xchange.version>5.0.14</xchange.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
@@ -428,6 +428,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>com.spotify.fmt</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
             </plugin>
 
             <plugin>

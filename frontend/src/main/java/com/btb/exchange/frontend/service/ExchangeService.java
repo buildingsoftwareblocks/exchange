@@ -71,17 +71,18 @@ public class ExchangeService {
     /**
      *
      */
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public ExchangeService(HazelcastInstance hazelcastInstance, ObjectMapper objectMapper, MeterRegistry registry) {
+    public ExchangeService(
+            HazelcastInstance hazelcastInstance, ObjectMapper objectMapper, MeterRegistry registry) {
         this.dtoUtils = new DTOUtils(objectMapper);
         opportunities = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
         updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
         orderBooks = hazelcastInstance.getMap(HAZELCAST_ORDERBOOKS);
         tickers = hazelcastInstance.getMap(HAZELCAST_TICKERS);
 
-        kafkaMessagesCounter = DistributionSummary.builder("frontend.kafka.queue")
-                .description("indicates number of message read form the kafka queue")
-                .register(registry);
+        kafkaMessagesCounter =
+                DistributionSummary.builder("frontend.kafka.queue")
+                        .description("indicates number of message read form the kafka queue")
+                        .register(registry);
 
         orderBookDelay = DistributionSummary.builder("frontend.orderbook.delay").register(registry);
         opportunityDelay = DistributionSummary.builder("frontend.opportunity.delay").register(registry);
@@ -91,28 +92,41 @@ public class ExchangeService {
         opportunities.init();
     }
 
-    @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "frontend")
+    @KafkaListener(
+            topics = TopicUtils.INPUT_ORDERBOOK,
+            containerFactory = "batchFactory",
+            groupId = "frontend")
     void processOrderBooks(List<String> messages) {
         log.debug("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
         final var now = LocalTime.now();
-        messages.forEach(msg -> {
-            ExchangeOrderBook orderBook = dtoUtils.fromDTO(msg, ExchangeOrderBook.class);
-            updated(orderBook, now);
-            orderBook(new ExchangeCPKey(orderBook.getExchange(), orderBook.getCurrencyPair()), now, orderBook, msg);
-            orderBookReceived.onNext(msg);
-        });
+        messages.forEach(
+                msg -> {
+                    ExchangeOrderBook orderBook = dtoUtils.fromDTO(msg, ExchangeOrderBook.class);
+                    updated(orderBook, now);
+                    orderBook(
+                            new ExchangeCPKey(orderBook.getExchange(), orderBook.getCurrencyPair()),
+                            now,
+                            orderBook,
+                            msg);
+                    orderBookReceived.onNext(msg);
+                });
     }
 
-    @KafkaListener(topics = TopicUtils.INPUT_TICKER, containerFactory = "batchFactory", groupId = "frontend")
+    @KafkaListener(
+            topics = TopicUtils.INPUT_TICKER,
+            containerFactory = "batchFactory",
+            groupId = "frontend")
     void processTickers(List<String> messages) {
         log.debug("process {} messages", messages.size());
         kafkaMessagesCounter.record(messages.size());
         final var now = LocalTime.now();
-        messages.forEach(msg -> {
-            ExchangeTicker ticker = dtoUtils.fromDTO(msg, ExchangeTicker.class);
-            ticker(new ExchangeCPKey(ticker.getExchange(), ticker.getCurrencyPair()), now, ticker, msg);
-        });
+        messages.forEach(
+                msg -> {
+                    ExchangeTicker ticker = dtoUtils.fromDTO(msg, ExchangeTicker.class);
+                    ticker(
+                            new ExchangeCPKey(ticker.getExchange(), ticker.getCurrencyPair()), now, ticker, msg);
+                });
     }
 
     void updated(ExchangeOrderBook orderBook, LocalTime localTime) {
@@ -124,7 +138,8 @@ public class ExchangeService {
 
     void orderBook(ExchangeCPKey key, LocalTime localTime, ExchangeOrderBook orderBook, String msg) {
         if (orderBook.getTimestamp() != null) {
-            orderBookDelay.record(orderBook.getTimestamp().until(LocalDateTime.now(), ChronoUnit.SECONDS));
+            orderBookDelay.record(
+                    orderBook.getTimestamp().until(LocalDateTime.now(), ChronoUnit.SECONDS));
         }
         orderBooks.set(key, new ExchangeData(localTime, orderBook.getOrder(), msg));
     }
@@ -146,7 +161,8 @@ public class ExchangeService {
 
     void update(ReferenceData data, long orderNr, Opportunities opportunities) {
         if (opportunities.getTimestamp() != null) {
-            opportunityDelay.record(opportunities.getTimestamp().until(LocalDateTime.now(), ChronoUnit.MILLIS));
+            opportunityDelay.record(
+                    opportunities.getTimestamp().until(LocalDateTime.now(), ChronoUnit.MILLIS));
         }
         update(data, orderNr, dtoUtils.toDTO(opportunities));
     }
@@ -171,12 +187,13 @@ public class ExchangeService {
         } else {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(EXCHANGES_TIME_FORMAT);
             Map<String, Map<String, String>> message = new TreeMap<>();
-            updated.forEach((k, v) -> {
-                Map<String, String> map = new HashMap<>();
-                map.put("timestamp", v.timestamp.format(formatter));
-                map.put("cps", v.cps.toString());
-                message.put(k.exchange.toString(), map);
-            });
+            updated.forEach(
+                    (k, v) -> {
+                        Map<String, String> map = new HashMap<>();
+                        map.put("timestamp", v.timestamp.format(formatter));
+                        map.put("cps", v.cps.toString());
+                        message.put(k.exchange.toString(), map);
+                    });
             return Optional.of(dtoUtils.toDTO(message));
         }
     }
@@ -202,12 +219,14 @@ public class ExchangeService {
         if (tickers.isEmpty()) {
             return Optional.empty();
         } else {
-            Comparator<ExchangeTicker> comparator = Comparator.comparing(ExchangeTicker::getCurrencyPair)
-                    .thenComparing(ExchangeTicker::getExchange);
-            List<ExchangeTicker> result = tickers.values().stream()
-                    .map(t -> (dtoUtils.fromDTO(t.message, ExchangeTicker.class)))
-                    .sorted(comparator)
-                    .toList();
+            Comparator<ExchangeTicker> comparator =
+                    Comparator.comparing(ExchangeTicker::getCurrencyPair)
+                            .thenComparing(ExchangeTicker::getExchange);
+            List<ExchangeTicker> result =
+                    tickers.values().stream()
+                            .map(t -> (dtoUtils.fromDTO(t.message, ExchangeTicker.class)))
+                            .sorted(comparator)
+                            .toList();
             return Optional.of(dtoUtils.toDTO(result));
         }
     }
@@ -339,8 +358,10 @@ public class ExchangeService {
         @Override
         public void readData(ObjectDataInput in) throws IOException {
             timestamp = LocalTime.ofNanoOfDay(in.readLong());
-            cps = Arrays.stream(Objects.requireNonNull(in.readStringArray()))
-                    .map(CurrencyPair::new).collect(Collectors.toSet());
+            cps =
+                    Arrays.stream(Objects.requireNonNull(in.readStringArray()))
+                            .map(CurrencyPair::new)
+                            .collect(Collectors.toSet());
         }
     }
 

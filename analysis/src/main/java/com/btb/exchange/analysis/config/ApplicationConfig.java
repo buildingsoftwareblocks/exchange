@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 public class ApplicationConfig {
 
-    private boolean replay = false;
-    private double buyfees = 0.0015;
-    private double sellfees = 0.0015;
-    private double transportfees = 0.1;
+  private boolean replay = false;
+  private double buyfees = 0.0015;
+  private double sellfees = 0.0015;
+  private double transportfees = 0.1;
 }

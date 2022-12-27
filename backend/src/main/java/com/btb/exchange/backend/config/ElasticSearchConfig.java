@@ -6,17 +6,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfiguration;
 
-//@Configuration
+// @Configuration
 @Slf4j
 public class ElasticSearchConfig extends ElasticsearchConfiguration {
 
-    @Value("${spring.elasticsearch.uris:localhost:9200}")
-    private String elasticsearchHost;
+  @Value("${spring.elasticsearch.uris:localhost:9200}")
+  private String elasticsearchHost;
 
-    @Override
-    public @NotNull ClientConfiguration clientConfiguration() {
-        return ClientConfiguration.builder()
-                .connectedTo(elasticsearchHost)
-                .build();
-    }
+  @Override
+  public @NotNull ClientConfiguration clientConfiguration() {
+    return ClientConfiguration.builder().connectedTo(elasticsearchHost).build();
+  }
 }

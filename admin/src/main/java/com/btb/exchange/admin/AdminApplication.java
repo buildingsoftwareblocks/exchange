@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableAdminServer
 @Generated // prevent JoCoCo from complaining
 public class AdminApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(AdminApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(AdminApplication.class, args);
+  }
 }

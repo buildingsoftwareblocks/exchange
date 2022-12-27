@@ -21,6 +21,8 @@
         <java.version>17</java.version>
         <docker.repo>local</docker.repo>
 
+        <docker.app.tag>latest</docker.app.tag>
+        
         <xchange.version>5.0.14</xchange.version>
         <testcontainers.version>1.17.6</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
@@ -32,9 +34,7 @@
         <logstash-gelf.version>1.15.0</logstash-gelf.version>
         <spring-boot-admin.version>2.6.6</spring-boot-admin.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
-        <!--        <spring-cloud.version>2022.0.0</spring-cloud.version>-->
         <javamelody.version>1.91.0</javamelody.version>
-        <snakeyaml.version>1.33</snakeyaml.version>
         <rxjava3.version>3.1.5</rxjava3.version>
 
         <!-- plugins -->
@@ -383,6 +383,9 @@
                             <image>
                                 <name>${docker.repo}/exchange-${project.artifactId}</name>
                                 <build>
+                                    <tags>
+                                        <tag>${docker.app.tag}</tag>
+                                    </tags>
                                     <contextDir>${project.basedir}</contextDir>
                                     <dockerFile>${project.basedir}/../Dockerfile</dockerFile>
                                     <buildOptions>

@@ -71,7 +71,7 @@ class MessageHandlerTest {
     private final CompositeDisposable composite = new CompositeDisposable();
 
     @BeforeEach
-    public void beforeTest() {
+    void beforeTest() {
         kafkaListenerEndpointRegistry
                 .getListenerContainers()
                 .forEach(

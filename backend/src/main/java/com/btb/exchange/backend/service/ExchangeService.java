@@ -196,7 +196,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
   Collection<CurrencyPair> symbols(StreamingExchange exchange) {
     try {
-      return exchange.getExchangeSymbols().stream()
+      return exchange.getExchangeInstruments().stream()
+          .filter(CurrencyPair.class::isInstance)
+          .map(CurrencyPair.class::cast)
           .filter(currencyPairs::contains)
           .collect(Collectors.toSet());
     } catch (Exception e) {

@@ -87,6 +87,7 @@ function disconnect() {
     // clear environment
     $("#exchange").html("");
     $("#cp").html("");
+    $("#orderbook_timestamp").html("");
     $("#asks").html("");
     $("#bids").html("");
     $("#opportunities").html("");

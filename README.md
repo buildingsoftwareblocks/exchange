@@ -12,6 +12,8 @@ A PoC to retrieve real-time Crypto Exchange data, as a first step for an orderin
 
 ## Run Application
 
+### Docker Compose
+
 A docker compose script is provided. Start the application with:
 
 ``docker compose --profile full up -d``
@@ -19,6 +21,12 @@ A docker compose script is provided. Start the application with:
 With scaling:
 
 ``docker compose --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d``
+
+### Kubernetes
+
+...
+
+### Links
 
 | System   | link                   |
 |----------|------------------------|
@@ -138,10 +146,11 @@ To make sure that you have the latest images, use: ``docker compose --profile fu
 - [x] scalable docker frontend
 - [x] scalable analysis module
 - [x] better logging
-- [ ] Triangular Arbitrage
+- [ ] triangular Arbitrage
 - [x] better frontend GUI
-- [ ] Binary messages in Kafka
+- [ ] binary messages in Kafka
 - [x] more robust error handling
+- [x] run on Kubernetes
 
 ## Related
 

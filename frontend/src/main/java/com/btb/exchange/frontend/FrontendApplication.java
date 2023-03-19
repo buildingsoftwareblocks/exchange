@@ -1,13 +1,12 @@
 package com.btb.exchange.frontend;
 
-import com.btb.exchange.Base;
+import com.btb.exchange.shared.annotation.EnableCommonComponents;
 import lombok.Generated;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackageClasses = Base.class)
+@EnableCommonComponents
 @Generated // prevent JoCoCo from complaining
 public class FrontendApplication {
 

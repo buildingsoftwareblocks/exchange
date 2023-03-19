@@ -14,13 +14,13 @@ import java.net.URL;
 @Slf4j
 public class ApmConfig {
 
-    @Value("${cnl.apm.enabled:false}")
+    @Value("${exchange.apm.enabled:false}")
     private boolean enabled;
 
-    @Value("${cnl.apm.server:}")
+    @Value("${exchange.apm.server:}")
     private String server;
 
-    @Value("${cnl.apm.node:}")
+    @Value("${exchange.apm.node:}")
     private String node;
 
     @Value("${spring.application.name}")

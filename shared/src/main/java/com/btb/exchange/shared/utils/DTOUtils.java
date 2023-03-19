@@ -6,19 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class DTOUtils {
-    private final ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
 
-    public DTOUtils(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+  public DTOUtils(ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
+  }
 
-    @SneakyThrows
-    public <T> T fromDTO(String content, Class<T> valueType) {
-        return objectMapper.readValue(content, valueType);
-    }
+  @SneakyThrows
+  public <T> T fromDTO(String content, Class<T> valueType) {
+    return objectMapper.readValue(content, valueType);
+  }
 
-    @SneakyThrows
-    public String toDTO(Object value) {
-        return objectMapper.writeValueAsString(value);
-    }
+  @SneakyThrows
+  public String toDTO(Object value) {
+    return objectMapper.writeValueAsString(value);
+  }
 }

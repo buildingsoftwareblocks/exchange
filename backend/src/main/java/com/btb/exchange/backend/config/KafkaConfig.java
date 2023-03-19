@@ -13,28 +13,30 @@ import org.springframework.kafka.core.ConsumerFactory;
 @RequiredArgsConstructor
 public class KafkaConfig {
 
-    private final ConsumerFactory<String, String> consumerFactory;
+  private final ConsumerFactory<String, String> consumerFactory;
 
-    @Value("${backend.kafka.partitions:1}")
-    private int partitions;
-    @Value("${backend.kafka.replication:1}")
-    private short replication;
+  @Value("${backend.kafka.partitions:1}")
+  private int partitions;
 
-    @Bean
-    public NewTopic orderbook() {
-        return new NewTopic(TopicUtils.INPUT_ORDERBOOK, partitions, replication);
-    }
+  @Value("${backend.kafka.replication:1}")
+  private short replication;
 
-    @Bean
-    public NewTopic ticker() {
-        return new NewTopic(TopicUtils.INPUT_TICKER, partitions, replication);
-    }
+  @Bean
+  public NewTopic orderbook() {
+    return new NewTopic(TopicUtils.INPUT_ORDERBOOK, partitions, replication);
+  }
 
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, String> batchFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory);
-        factory.setBatchListener(true);
-        return factory;
-    }
+  @Bean
+  public NewTopic ticker() {
+    return new NewTopic(TopicUtils.INPUT_TICKER, partitions, replication);
+  }
+
+  @Bean
+  public ConcurrentKafkaListenerContainerFactory<String, String> batchFactory() {
+    ConcurrentKafkaListenerContainerFactory<String, String> factory =
+        new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(consumerFactory);
+    factory.setBatchListener(true);
+    return factory;
+  }
 }

@@ -13,7 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @Generated // prevent JoCoCo from complaining
 public class BackendApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(BackendApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(BackendApplication.class, args);
+  }
 }

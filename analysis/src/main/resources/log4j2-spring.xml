@@ -17,7 +17,7 @@
         </Console>
 
         <Gelf name="gelf"
-              host="tcp:${env:LOGSTASH_HOST:-localhost}"
+              host="tcp:${env:LOGSTASH_SERVER:-localhost}"
               port="${env:LOGSTASH_PORT:-5000}"
               version="1.0"
               extractStackTrace="true"

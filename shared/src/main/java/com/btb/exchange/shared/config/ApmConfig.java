@@ -14,7 +14,7 @@ import java.net.URL;
 @Slf4j
 public class ApmConfig {
 
-    @Value("${exchange.apm.enabled:false}")
+    @Value("${exchange.apm.enabled:true}")
     private boolean enabled;
 
     @Value("${exchange.apm.server:}")

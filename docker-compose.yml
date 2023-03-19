@@ -64,6 +64,7 @@ services:
       - ADMIN_SERVER=admin
       - LOGSTASH_SERVER=logstash
       - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+      - APM="http://apm:8080/"
     depends_on:
       - config
       - kafka
@@ -82,6 +83,7 @@ services:
       - MONGO_DB_SERVER=mongo
       - ES_SERVER=elasticsearch
       - LOGSTASH_SERVER=logstash
+      - APM="http://apm:8080/"
       - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
       - ADMIN_SERVER=admin
       - BACKEND_RECORDING=false
@@ -111,6 +113,7 @@ services:
       - LOGSTASH_SERVER=logstash
       - ADMIN_SERVER=admin
       - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+      - APM="http://apm:8080/"
       - ANALYSIS_BUYFEES=0
       - ANALYSIS_SELLFEES=0
       - ANALYSIS_TRANSPORTFEES=0.1
@@ -170,3 +173,10 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
+
+  apm:
+    image: ghcr.io/buildingsoftwareblocks/apm
+    ports:
+      - "7777:8080"
+    environment:
+      APM_RESOLUTION: 30

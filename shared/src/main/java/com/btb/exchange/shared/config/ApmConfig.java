@@ -30,13 +30,14 @@ public class ApmConfig {
      * Use event listener instead of PostContruct to support lazy loaded applications as well
      */
     @EventListener
-    public void postConstruct(ContextRefreshedEvent event) {
+    public void postConstruct(ContextRefreshedEvent ignoredEvent) {
         if (enabled) {
             try {
                 final URL collectServerUrl = new URL(server);
                 final URL applicationNodeUrl = new URL(node);
                 log.info("Connect ({}) to : {}", applicationNodeUrl, collectServerUrl);
-                MonitoringFilter.registerApplicationNodeInCollectServer(applicationName, collectServerUrl, applicationNodeUrl);
+                MonitoringFilter.registerApplicationNodeInCollectServer(
+                        applicationName, collectServerUrl, applicationNodeUrl);
             } catch (Throwable e) {
                 log.warn("Exception", e);
             }

@@ -1,7 +1,4 @@
 package com.btb.exchange.shared;
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
-public class CommonBase {
+public final class CommonBase {
 }

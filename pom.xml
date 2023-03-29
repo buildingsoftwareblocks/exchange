@@ -45,6 +45,8 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>7.4.1</dependency-check-maven.version>
         <spotify.fmt.version>2.19</spotify.fmt.version>
+        <cyclonedx-maven-plugin.version>2.7.5</cyclonedx-maven-plugin.version>
+        <cyclonedx-core-java.version>7.2.0</cyclonedx-core-java.version>
     </properties>
 
     <scm>
@@ -244,6 +246,13 @@
                 <version>${javamelody.version}</version>
             </dependency>
 
+            <!-- SBOM functionality -->
+            <dependency>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-core-java</artifactId>
+                <version>${cyclonedx-core-java.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>junit-jupiter</artifactId>
@@ -383,7 +392,23 @@
                         </execution>
                     </executions>
                 </plugin>
-
+                <plugin>
+                    <groupId>org.cyclonedx</groupId>
+                    <artifactId>cyclonedx-maven-plugin</artifactId>
+                    <version>${cyclonedx-maven-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>makeAggregateBom</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <outputFormat>json</outputFormat>
+                        <outputName>classes/bom</outputName>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -415,6 +440,10 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

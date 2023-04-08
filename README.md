@@ -150,7 +150,7 @@ To make sure that you have the latest images, use: ``docker compose --profile fu
 - [x] better frontend GUI
 - [ ] binary messages in Kafka
 - [x] more robust error handling
-- [x] run on Kubernetes
+- [ ] run on Kubernetes
 
 ## Related
 

@@ -1,7 +1,7 @@
 package com.btb.exchange.shared.config;
 
+import jakarta.annotation.PreDestroy;
 import java.net.URL;
-import javax.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import net.bull.javamelody.MonitoringFilter;
 import org.springframework.beans.factory.annotation.Value;

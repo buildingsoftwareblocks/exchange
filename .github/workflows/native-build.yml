@@ -24,4 +24,4 @@ jobs:
           native-image-job-reports: "true"
 
       - name: Build with Maven
-        run: mvn -Pnative spring-boot:build-image
+        run: mvn -Pnative clean package

@@ -12,6 +12,11 @@
 
     <artifactId>config</artifactId>
 
+    <properties>
+        <start-class>com.btb.exchange.config.ConfigApplication</start-class>
+    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>

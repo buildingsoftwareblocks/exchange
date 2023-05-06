@@ -1,4 +1,4 @@
-package config;
+package com.btb.exchange.config;
 
 import com.btb.exchange.shared.annotation.EnableCommonComponents;
 import lombok.Generated;

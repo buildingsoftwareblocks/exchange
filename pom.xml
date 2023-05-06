@@ -318,10 +318,10 @@
     <modules>
         <module>shared</module>
         <module>config</module>
-        <module>admin</module>
-        <module>frontend</module>
-        <module>backend</module>
-        <module>analysis</module>
+        <!--        <module>admin</module>-->
+        <!--        <module>frontend</module>-->
+        <!--        <module>backend</module>-->
+        <!--        <module>analysis</module>-->
     </modules>
 
     <build>
@@ -457,6 +457,32 @@
     </build>
 
     <profiles>
+
+        <profile>
+            <id>native</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-maven-plugin</artifactId>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.graalvm.buildtools</groupId>
+                            <artifactId>native-maven-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>build-image</id>
+                                    <goals>
+                                        <goal>compile-no-fork</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
         <profile>
             <id>docker</id>
             <build>

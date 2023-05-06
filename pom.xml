@@ -49,6 +49,9 @@
         <cyclonedx-maven-plugin.version>2.7.6</cyclonedx-maven-plugin.version>
         <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
         <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
+
+        <!-- The main class to start by executing "java -jar" -->
+        <start-class>com.btb.exchange.config.ConfigApplication</start-class>
     </properties>
 
     <scm>
@@ -483,6 +486,7 @@
                 </pluginManagement>
             </build>
         </profile>
+
         <profile>
             <id>docker</id>
             <build>

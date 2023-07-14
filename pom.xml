@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.6</version>
+        <version>3.1.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -24,31 +24,31 @@
         <docker.app.tag>latest</docker.app.tag>
 
         <xchange.version>5.1.0</xchange.version>
-        <testcontainers.version>1.18.0</testcontainers.version>
+        <testcontainers.version>1.18.3</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
         <stomp-websocket.version>2.3.4</stomp-websocket.version>
         <bootstrap.version>4.5.3</bootstrap.version>
         <jquery.version>3.6.4</jquery.version>
         <disruptor.version>3.4.4</disruptor.version>
-        <curator.version>5.4.0</curator.version>
-        <logstash-gelf.version>1.15.0</logstash-gelf.version>
-        <spring-boot-admin.version>3.0.2</spring-boot-admin.version>
-        <spring-cloud.version>2022.0.2</spring-cloud.version>
+        <curator.version>5.5.0</curator.version>
+        <logstash-gelf.version>1.15.1</logstash-gelf.version>
+        <spring-boot-admin.version>3.1.2</spring-boot-admin.version>
+        <spring-cloud.version>2022.0.3</spring-cloud.version>
         <javamelody.version>2.0.0</javamelody.version>
         <rxjava3.version>3.1.6</rxjava3.version>
         <cyclonedx-core-java.version>7.3.2</cyclonedx-core-java.version>
 
         <!-- plugins -->
         <sonar.version>3.9.1.2184</sonar.version>
-        <jacoco.version>0.8.7</jacoco.version>
-        <surefire.version>2.22.2</surefire.version>
+        <jacoco.version>0.8.10</jacoco.version>
+        <surefire.version>3.1.2</surefire.version>
         <code.coverage.exclusions/>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
-        <dependency-check-maven.version>7.4.1</dependency-check-maven.version>
-        <spotify.fmt.version>2.19</spotify.fmt.version>
-        <cyclonedx-maven-plugin.version>2.7.6</cyclonedx-maven-plugin.version>
-        <maven-release-plugin.version>3.0.0</maven-release-plugin.version>
-        <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
+        <dependency-check-maven.version>8.3.1</dependency-check-maven.version>
+        <spotify.fmt.version>2.20</spotify.fmt.version>
+        <cyclonedx-maven-plugin.version>2.7.9</cyclonedx-maven-plugin.version>
+        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+        <maven-enforcer-plugin.version>3.3.0</maven-enforcer-plugin.version>
     </properties>
 
     <scm>

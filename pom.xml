@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.1</version>
+        <version>3.1.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -27,14 +27,14 @@
         <testcontainers.version>1.18.3</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
         <stomp-websocket.version>2.3.4</stomp-websocket.version>
-        <bootstrap.version>4.5.3</bootstrap.version>
-        <jquery.version>3.6.4</jquery.version>
+        <bootstrap.version>5.3.1</bootstrap.version>
+        <jquery.version>3.7.0</jquery.version>
         <disruptor.version>3.4.4</disruptor.version>
         <curator.version>5.5.0</curator.version>
         <logstash-gelf.version>1.15.1</logstash-gelf.version>
-        <spring-boot-admin.version>3.1.2</spring-boot-admin.version>
-        <spring-cloud.version>2022.0.3</spring-cloud.version>
-        <javamelody.version>2.0.0</javamelody.version>
+        <spring-boot-admin.version>3.1.4</spring-boot-admin.version>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
+        <javamelody.version>2.0.1</javamelody.version>
         <rxjava3.version>3.1.6</rxjava3.version>
         <cyclonedx-core-java.version>7.3.2</cyclonedx-core-java.version>
 
@@ -386,6 +386,9 @@
                     <groupId>com.spotify.fmt</groupId>
                     <artifactId>fmt-maven-plugin</artifactId>
                     <version>${spotify.fmt.version}</version>
+                    <configuration>
+                        <style>google</style>
+                    </configuration>
                     <executions>
                         <execution>
                             <goals>

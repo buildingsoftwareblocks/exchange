@@ -162,7 +162,8 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
   void init() {
     // only realtime data if we are not replaying database content
     if (!config.isReplay()) {
-      // set counter to initial value to let the readers know that the counter is reset as well
+      // set counter to initial value to let the readers know that the counter is reset as
+      // well
       counter.set(1);
 
       // set symbol, but due to the different Exchange implementations this is not always

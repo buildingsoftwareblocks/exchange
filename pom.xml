@@ -27,28 +27,28 @@
         <testcontainers.version>1.18.3</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
         <stomp-websocket.version>2.3.4</stomp-websocket.version>
-        <bootstrap.version>5.3.1</bootstrap.version>
-        <jquery.version>3.7.0</jquery.version>
+        <bootstrap.version>5.3.2</bootstrap.version>
+        <jquery.version>3.7.1</jquery.version>
         <disruptor.version>3.4.4</disruptor.version>
         <curator.version>5.5.0</curator.version>
         <logstash-gelf.version>1.15.1</logstash-gelf.version>
-        <spring-boot-admin.version>3.1.4</spring-boot-admin.version>
+        <spring-boot-admin.version>3.1.6</spring-boot-admin.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
         <javamelody.version>1.95.0</javamelody.version>
-        <rxjava3.version>3.1.6</rxjava3.version>
+        <rxjava3.version>3.1.7</rxjava3.version>
         <cyclonedx-core-java.version>7.3.2</cyclonedx-core-java.version>
 
         <!-- plugins -->
-        <sonar.version>3.9.1.2184</sonar.version>
+        <sonar.version>3.10.0.2594</sonar.version>
         <jacoco.version>0.8.10</jacoco.version>
         <surefire.version>3.1.2</surefire.version>
         <code.coverage.exclusions/>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
-        <dependency-check-maven.version>8.3.1</dependency-check-maven.version>
+        <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
         <spotify.fmt.version>2.20</spotify.fmt.version>
         <cyclonedx-maven-plugin.version>2.7.9</cyclonedx-maven-plugin.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
-        <maven-enforcer-plugin.version>3.3.0</maven-enforcer-plugin.version>
+        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     </properties>
 
     <scm>

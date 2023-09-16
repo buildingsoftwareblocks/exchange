@@ -1,0 +1,14 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: configmap
+data:
+  backend.properties: |
+    spring.boot.admin.client.url:http://admin:8080
+    backend.recording=true
+    #
+    backend.multicast.enabled=false
+    backend.orders.max=20
+    #
+    backend.exchanges=BITFINEX,BITMEX,GEMINI,KRAKEN
+    backend.exchange.currencypairs=BTC/USD, ETH/BTC

@@ -1,0 +1,55 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: config
+  labels:
+    app: config
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: config
+  template:
+    metadata:
+      labels:
+        app: config
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: configmap
+        - name: secretmap
+          secret:
+            secretName: secretmap
+      containers:
+        - image: ghcr.io/buildingsoftwareblocks/exchange-config
+          name: config
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8888
+          volumeMounts:
+            - name: config
+              mountPath: "/config"
+              readOnly: true
+            - name: secretmap
+              mountPath: "/config/secret"
+              readOnly: true
+          env:
+            - name: CONFIG_PATH
+              value: "file:///config,file:///config/secret"
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: config
+spec:
+  selector:
+    app: config
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8888
+      targetPort: 8888
+

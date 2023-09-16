@@ -32,7 +32,7 @@
         <disruptor.version>3.4.4</disruptor.version>
         <curator.version>5.5.0</curator.version>
         <logstash-gelf.version>1.15.1</logstash-gelf.version>
-        <spring-boot-admin.version>3.1.6</spring-boot-admin.version>
+        <spring-boot-admin.version>2.7.11</spring-boot-admin.version>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <javamelody.version>1.95.0</javamelody.version>
         <rxjava3.version>3.1.7</rxjava3.version>

@@ -1,6 +1,6 @@
 package com.btb.exchange.backend.config;
 
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

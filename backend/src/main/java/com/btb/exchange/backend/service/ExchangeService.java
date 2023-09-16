@@ -264,14 +264,16 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                         new Orders(
                             orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
 
-        future.whenComplete(
-            (result, ex) -> {
-              if (ex == null) {
-                messageSent.onNext(result.getRecordMetadata().topic());
-              } else {
-                log.error("Exception-1", ex);
-              }
-            });
+        future
+            .completable()
+            .whenComplete(
+                (result, ex) -> {
+                  if (ex == null) {
+                    messageSent.onNext(result.getRecordMetadata().topic());
+                  } else {
+                    log.error("Exception-1", ex);
+                  }
+                });
       } catch (JsonProcessingException e) {
         log.error("Exception-2", e);
       }
@@ -294,14 +296,16 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                         currencyPair,
                         ticker)));
 
-        future.whenComplete(
-            (result, ex) -> {
-              if (ex == null) {
-                messageSent.onNext(result.getRecordMetadata().topic());
-              } else {
-                log.error("Exception-1", ex);
-              }
-            });
+        future
+            .completable()
+            .whenComplete(
+                (result, ex) -> {
+                  if (ex == null) {
+                    messageSent.onNext(result.getRecordMetadata().topic());
+                  } else {
+                    log.error("Exception-1", ex);
+                  }
+                });
       } catch (JsonProcessingException e) {
         log.error("Exception-2", e);
       }

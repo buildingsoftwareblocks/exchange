@@ -28,11 +28,12 @@ With scaling:
 
 ### Links
 
-| System   | link                   |
-|----------|------------------------|
-| admin    | http://localhost:8080/ |
-| frontend | http://localhost:8081/ |
-| log GUI  | http://localhost:5601/ |
+| System        | link                   |
+|---------------|------------------------|
+| admin         | http://localhost:8080/ |
+| frontend      | http://localhost:8081/ |
+| log GUI       | http://localhost:5601/ |
+| Kafka console | http://localhost:8181/ | 
 
 ## Test Performance
 
@@ -130,7 +131,12 @@ You can build the application locally via a [maven](https://maven.apache.org/) c
 To use the created local docker image, replace ``ghcr.io/buildingsoftwareblocks/``with``local``in
 the used *docker-compose.yml* file.
 
-To make sure that you have the latest images, use: ``docker compose --profile full pull``.
+To make sure that you have the latest images, use: ``docker compose --profile=full pull``.
+
+The profiles can be used in every call ``--profile=full`` for example, or by setting the environment variable
+*COMPOSE_PROFILES*.
+
+For example in Window/Powershell: ``$Env:COMPOSE_PROFILES="full"``.
 
 ## TODO List
 

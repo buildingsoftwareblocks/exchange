@@ -46,5 +46,3 @@ jobs:
         run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/exchange-frontend:latest
       - name: Publish Docker image Analysis
         run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/exchange-analysis:latest
-      - name: Publish Docker image Admin
-        run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/exchange-admin:latest

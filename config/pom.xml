@@ -16,6 +16,12 @@
         <dependency>
             <groupId>com.btb</groupId>
             <artifactId>shared</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.hazelcast</groupId>
+                    <artifactId>hazelcast-spring</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

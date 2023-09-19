@@ -5,5 +5,5 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackageClasses = CommonBase.class)
+@ComponentScan(basePackageClasses = {CommonBase.class})
 public class CommonConfig {}

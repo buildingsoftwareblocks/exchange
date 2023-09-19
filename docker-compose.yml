@@ -8,13 +8,8 @@ services:
     volumes:
       - ./configuration:/configuration
 
-  exchange_zk:
+  zookeeper:
     image: zookeeper
-    ports:
-      - "2182:2181"
-
-  kafka_zk:
-    image: wurstmeister/zookeeper
     ports:
       - "2181:2181"
 
@@ -69,9 +64,9 @@ services:
       - redpanda
 
   mongo:
-    image: mongo:4.4
+    image: mongo:4
     ports:
-      - "27017-27019"
+      - "17017:27017"
     restart: always
     volumes:
       - ./data/mongo:/data/db
@@ -93,16 +88,10 @@ services:
     ports:
       - "8081"
     environment:
-      - CONFIG_HOST=config
-      - KAFKA_SERVER=redpanda
-      - ADMIN_SERVER=admin
-      - LOGSTASH_SERVER=logstash
-      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
-      - APM="http://apm:8080/"
+      - SPRING_CLOUD_CONFIG_URI="http://config:8888"
     depends_on:
       - config
       - redpanda
-      - logstash
 
   backend:
     image: ghcr.io/buildingsoftwareblocks/exchange-backend
@@ -111,17 +100,7 @@ services:
     ports:
       - "8082"
     environment:
-      - CONFIG_HOST=config
-      - KAFKA_SERVER=redpanda
-      - BACKEND_ZOOKEEPER_HOST=exchange_zk:2181
-      - MONGO_DB_SERVER=mongo
-      - ES_SERVER=elasticsearch
-      - LOGSTASH_SERVER=logstash
-      - APM="http://apm:8080/"
-      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
-      - ADMIN_SERVER=admin
-      - BACKEND_RECORDING=false
-      - BACKEND_REPLAY=false
+      - SPRING_CLOUD_CONFIG_URI="http://config:8888"
     depends_on:
       config:
         condition: service_started
@@ -129,9 +108,7 @@ services:
         condition: service_started
       redpanda:
         condition: service_started
-      exchange_zk:
-        condition: service_started
-      logstash:
+      zookeeper:
         condition: service_started
       elasticsearch:
         condition: service_healthy
@@ -142,32 +119,18 @@ services:
     ports:
       - "8083"
     environment:
-      - CONFIG_HOST=config
+      - SPRING_CLOUD_CONFIG_URI="http://config:8888"
       - KAFKA_SERVER=redpanda
-      - LOGSTASH_SERVER=logstash
       - ADMIN_SERVER=admin
-      - JAVA_OPTS=-XX:MaxDirectMemorySize=128m -Dlog4j2.contextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
-      - APM="http://apm:8080/"
-      - ANALYSIS_BUYFEES=0
-      - ANALYSIS_SELLFEES=0
-      - ANALYSIS_TRANSPORTFEES=0.1
     depends_on:
       - config
       - redpanda
-      - logstash
-
-  admin:
-    image: ghcr.io/buildingsoftwareblocks/exchange-admin
-    depends_on:
-      - config
-    ports:
-      - "8080:8080"
 
   #
   # https://github.com/deviantony/docker-elk
   #
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
     volumes:
       - ./configuration/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       - ./data/elasticsearch:/usr/share/elasticsearch/data
@@ -185,28 +148,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 50
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.17.8
-    volumes:
-      - ./configuration/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./configuration/pipeline:/usr/share/logstash/pipeline
-    ports:
-      - "5044:5044"
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-      - "9600:9600"
-    environment:
-      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.8
-    volumes:
-      - ./configuration/kibana.yml:/usr/share/kibana/config/kibana.yml
-    ports:
-      - "5601:5601"
-    depends_on:
-      - elasticsearch
 
   apm:
     image: ghcr.io/buildingsoftwareblocks/apm

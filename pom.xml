@@ -298,7 +298,6 @@
     <modules>
         <module>shared</module>
         <module>config</module>
-        <module>admin</module>
         <module>frontend</module>
         <module>backend</module>
         <module>analysis</module>

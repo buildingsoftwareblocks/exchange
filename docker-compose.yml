@@ -88,7 +88,7 @@ services:
     ports:
       - "8081"
     environment:
-      - SPRING_CLOUD_CONFIG_URI="http://config:8888"
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
     depends_on:
       - config
       - redpanda
@@ -100,7 +100,7 @@ services:
     ports:
       - "8082"
     environment:
-      - SPRING_CLOUD_CONFIG_URI="http://config:8888"
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
     depends_on:
       config:
         condition: service_started
@@ -119,9 +119,7 @@ services:
     ports:
       - "8083"
     environment:
-      - SPRING_CLOUD_CONFIG_URI="http://config:8888"
-      - KAFKA_SERVER=redpanda
-      - ADMIN_SERVER=admin
+      - SPRING_CLOUD_CONFIG_URI=http://config:8888
     depends_on:
       - config
       - redpanda

@@ -31,12 +31,9 @@
         <jquery.version>3.7.1</jquery.version>
         <disruptor.version>3.4.4</disruptor.version>
         <curator.version>5.5.0</curator.version>
-        <logstash-gelf.version>1.15.1</logstash-gelf.version>
-        <spring-boot-admin.version>2.7.11</spring-boot-admin.version>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <javamelody.version>1.95.0</javamelody.version>
         <rxjava3.version>3.1.7</rxjava3.version>
-        <cyclonedx-core-java.version>7.3.2</cyclonedx-core-java.version>
 
         <!-- plugins -->
         <sonar.version>3.10.0.2594</sonar.version>
@@ -46,7 +43,6 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
         <spotify.fmt.version>2.20</spotify.fmt.version>
-        <cyclonedx-maven-plugin.version>2.7.9</cyclonedx-maven-plugin.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     </properties>
@@ -218,30 +214,12 @@
                 <artifactId>curator-recipes</artifactId>
                 <version>${curator.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>de.codecentric</groupId>
-                <artifactId>spring-boot-admin-starter-server</artifactId>
-                <version>${spring-boot-admin.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.codecentric</groupId>
-                <artifactId>spring-boot-admin-starter-client</artifactId>
-                <version>${spring-boot-admin.version}</version>
-            </dependency>
-
+            
             <!-- Application monitoring -->
             <dependency>
                 <groupId>net.bull.javamelody</groupId>
                 <artifactId>javamelody-spring-boot-starter</artifactId>
                 <version>${javamelody.version}</version>
-            </dependency>
-
-            <!-- SBOM functionality -->
-            <dependency>
-                <groupId>org.cyclonedx</groupId>
-                <artifactId>cyclonedx-core-java</artifactId>
-                <version>${cyclonedx-core-java.version}</version>
             </dependency>
 
             <dependency>
@@ -376,24 +354,6 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.cyclonedx</groupId>
-                    <artifactId>cyclonedx-maven-plugin</artifactId>
-                    <version>${cyclonedx-maven-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>cyclonedx-aggregate</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>makeBom</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <outputFormat>json</outputFormat>
-                        <outputName>classes/bom</outputName>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -426,10 +386,6 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.cyclonedx</groupId>
-                <artifactId>cyclonedx-maven-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
 
@@ -444,7 +400,6 @@
                         <configuration>
                             <image>
                                 <name>${docker.repo}/exchange-${project.artifactId}</name>
-                                <name>${docker.repo}/exchange-${project.artifactId}:${docker.app.tag}</name>
                                 <publish>false</publish>
                             </image>
                         </configuration>

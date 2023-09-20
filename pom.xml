@@ -214,7 +214,7 @@
                 <artifactId>curator-recipes</artifactId>
                 <version>${curator.version}</version>
             </dependency>
-            
+
             <!-- Application monitoring -->
             <dependency>
                 <groupId>net.bull.javamelody</groupId>

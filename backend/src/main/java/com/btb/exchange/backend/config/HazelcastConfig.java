@@ -8,7 +8,6 @@ import com.hazelcast.core.HazelcastInstance;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class HazelcastConfig {
@@ -18,7 +17,7 @@ public class HazelcastConfig {
 
   @Bean
   Config hazelCastConfig() {
-    Config config = new Config().setClusterName("backend-hz");
+    Config config = new Config().setClusterName("dev");
     config
         .getCPSubsystemConfig()
         .addSemaphoreConfig(new SemaphoreConfig(MongoDBDatabaseService.HAZELCAST_DB, true, 1));
@@ -28,11 +27,11 @@ public class HazelcastConfig {
       config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
       config.getNetworkConfig().getJoin().getTcpIpConfig().addMember("127.0.0.1").setEnabled(true);
     }
+
     return config;
   }
 
   @Bean
-  @Primary
   HazelcastInstance hazelcastInstance(Config config) {
     return Hazelcast.newHazelcastInstance(config);
   }

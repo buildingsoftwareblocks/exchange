@@ -33,7 +33,7 @@ public class ESDatabaseService {
   @KafkaListener(
       topics = TopicUtils.INPUT_ORDERBOOK,
       containerFactory = "batchFactory",
-      groupId = "elasticsearch",
+      groupId = "backend.elasticsearch",
       autoStartup = "${backend.es:false}")
   public void store(List<String> messages) {
     log.debug("save {} records", messages.size());

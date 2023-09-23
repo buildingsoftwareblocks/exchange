@@ -90,8 +90,10 @@ services:
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
     depends_on:
-      - config
-      - redpanda
+      config:
+        condition: service_started
+      redpanda:
+        condition: service_started
 
   backend:
     image: ghcr.io/buildingsoftwareblocks/exchange-backend
@@ -121,8 +123,10 @@ services:
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
     depends_on:
-      - config
-      - redpanda
+      config:
+        condition: service_started
+      redpanda:
+        condition: service_started
 
   #
   # https://github.com/deviantony/docker-elk

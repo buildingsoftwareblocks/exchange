@@ -64,7 +64,7 @@ public class MongoDBDatabaseService {
   @KafkaListener(
       topics = TopicUtils.INPUT_ORDERBOOK,
       containerFactory = "batchFactory",
-      groupId = "mongodb",
+      groupId = "backend.mongodb",
       autoStartup = "${backend.recording:false}")
   void store(List<String> messages) {
     log.debug("save {} records", messages.size());

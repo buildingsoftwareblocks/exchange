@@ -120,7 +120,7 @@ public class LeaderService {
                 clients.put(e, exchangeService);
                 exchangeService.start();
               } else {
-                log.warn("Cant;t create streaming exchange: {}", e);
+                log.warn("Can't create streaming exchange: {}", e);
               }
             });
 
@@ -158,7 +158,7 @@ public class LeaderService {
         exchangesLogged = leaders;
         log.info("Handling exchanges : {}", leaders);
       } else {
-        log.debug("No reshuffle needed : {} / {}", leaders.size(), exchangePerMember);
+        log.info("No reshuffle needed : {} | Per member: {}", leaders, exchangePerMember);
       }
     }
   }

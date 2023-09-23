@@ -12,13 +12,13 @@ import org.knowm.xchange.currency.CurrencyPair;
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class ExchangeOrderBook {
-  long order;
+    long order;
 
-  @JsonFormat(pattern = "HH:mm:ss.SSS")
-  LocalTime timestamp;
+    @JsonFormat(pattern = "HH:mm:ss.SSS")
+    LocalTime timestamp;
 
-  ExchangeEnum exchange;
-  String id;
-  CurrencyPair currencyPair;
-  Orders orders;
+    ExchangeEnum exchange;
+    String id;
+    CurrencyPair currencyPair;
+    Orders orders;
 }

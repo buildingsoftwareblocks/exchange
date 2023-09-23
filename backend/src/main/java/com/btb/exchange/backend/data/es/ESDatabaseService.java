@@ -18,46 +18,46 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class ESDatabaseService {
 
-  private final ESMessageRepository repository;
-  private final DTOUtils dtoUtils;
+    private final ESMessageRepository repository;
+    private final DTOUtils dtoUtils;
 
-  // for testing purposes, to subscribe to the event that records are saved to the database
-  private final Subject<List<String>> stored = PublishSubject.create();
+    // for testing purposes, to subscribe to the event that records are saved to the database
+    private final Subject<List<String>> stored = PublishSubject.create();
 
-  /** */
-  public ESDatabaseService(ESMessageRepository repository, ObjectMapper objectMapper) {
-    this.repository = repository;
-    this.dtoUtils = new DTOUtils(objectMapper);
-  }
+    /** */
+    public ESDatabaseService(ESMessageRepository repository, ObjectMapper objectMapper) {
+        this.repository = repository;
+        this.dtoUtils = new DTOUtils(objectMapper);
+    }
 
-  @KafkaListener(
-      topics = TopicUtils.INPUT_ORDERBOOK,
-      containerFactory = "batchFactory",
-      groupId = "backend.elasticsearch",
-      autoStartup = "${backend.es:false}")
-  public void store(List<String> messages) {
-    log.debug("save {} records", messages.size());
-    var records = messages.stream().map(this::createRecord).toList();
-    repository.saveAll(records);
-    stored.onNext(messages);
-  }
+    @KafkaListener(
+            topics = TopicUtils.INPUT_ORDERBOOK,
+            containerFactory = "batchFactory",
+            groupId = "backend.elasticsearch",
+            autoStartup = "${backend.es:false}")
+    public void store(List<String> messages) {
+        log.debug("save {} records", messages.size());
+        var records = messages.stream().map(this::createRecord).toList();
+        repository.saveAll(records);
+        stored.onNext(messages);
+    }
 
-  void store(String message) {
-    store(List.of(message));
-  }
+    void store(String message) {
+        store(List.of(message));
+    }
 
-  @SneakyThrows
-  Message createRecord(String orderBook) {
-    ExchangeOrderBook exchangeOrderBook = dtoUtils.fromDTO(orderBook, ExchangeOrderBook.class);
-    return Message.builder()
-        .created(new Date())
-        .exchange(exchangeOrderBook.getExchange())
-        .currencyPair(Objects.toString(exchangeOrderBook.getCurrencyPair()))
-        .orders(exchangeOrderBook.getOrders())
-        .build();
-  }
+    @SneakyThrows
+    Message createRecord(String orderBook) {
+        ExchangeOrderBook exchangeOrderBook = dtoUtils.fromDTO(orderBook, ExchangeOrderBook.class);
+        return Message.builder()
+                .created(new Date())
+                .exchange(exchangeOrderBook.getExchange())
+                .currencyPair(Objects.toString(exchangeOrderBook.getCurrencyPair()))
+                .orders(exchangeOrderBook.getOrders())
+                .build();
+    }
 
-  Subject<List<String>> subscribe() {
-    return stored;
-  }
+    Subject<List<String>> subscribe() {
+        return stored;
+    }
 }

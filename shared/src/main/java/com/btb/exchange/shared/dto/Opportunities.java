@@ -12,10 +12,11 @@ import lombok.extern.jackson.Jacksonized;
 @Builder
 @Jacksonized
 public class Opportunities {
-  long order;
+    long order;
 
-  @JsonFormat(pattern = "HH:mm:ss.SSS")
-  LocalTime timestamp;
+    @JsonFormat(pattern = "HH:mm:ss.SSS")
+    LocalTime timestamp;
 
-  @Singular List<Opportunity> values;
+    @Singular
+    List<Opportunity> values;
 }

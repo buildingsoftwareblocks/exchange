@@ -15,28 +15,28 @@ import org.knowm.xchange.currency.CurrencyPair;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExchangeCPKey implements IdentifiedDataSerializable {
-  private ExchangeEnum exchange;
-  private CurrencyPair currencyPair;
+    private ExchangeEnum exchange;
+    private CurrencyPair currencyPair;
 
-  @Override
-  public int getFactoryId() {
-    return ExchangeDataSerializableFactory.FACTORY_ID;
-  }
+    @Override
+    public int getFactoryId() {
+        return ExchangeDataSerializableFactory.FACTORY_ID;
+    }
 
-  @Override
-  public int getClassId() {
-    return ExchangeDataSerializableFactory.KEY_TYPE;
-  }
+    @Override
+    public int getClassId() {
+        return ExchangeDataSerializableFactory.KEY_TYPE;
+    }
 
-  @Override
-  public void writeData(ObjectDataOutput out) throws IOException {
-    out.writeString(exchange.toString());
-    CurrencyPairUtils.writeData(out, currencyPair);
-  }
+    @Override
+    public void writeData(ObjectDataOutput out) throws IOException {
+        out.writeString(exchange.toString());
+        CurrencyPairUtils.writeData(out, currencyPair);
+    }
 
-  @Override
-  public void readData(ObjectDataInput in) throws IOException {
-    exchange = ExchangeEnum.valueOf(in.readString());
-    currencyPair = CurrencyPairUtils.readData(in);
-  }
+    @Override
+    public void readData(ObjectDataInput in) throws IOException {
+        exchange = ExchangeEnum.valueOf(in.readString());
+        currencyPair = CurrencyPairUtils.readData(in);
+    }
 }

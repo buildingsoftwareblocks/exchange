@@ -43,6 +43,8 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
         <spotify.fmt.version>2.20</spotify.fmt.version>
+        <spotless.version>2.39.0</spotless.version>
+        <palantirJavaFormat.version>2.36.0</palantirJavaFormat.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     </properties>
@@ -267,11 +269,6 @@
         </dependency>
 
         <dependency>
-            <groupId>net.bull.javamelody</groupId>
-            <artifactId>javamelody-spring-boot-starter</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -359,6 +356,28 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
+                    <configuration>
+                        <java>
+                            <palantirJavaFormat>
+                                <!-- Optionally specify a version -->
+                                <version>${palantirJavaFormat.version}</version>
+                                <style>PALANTIR</style>
+                            </palantirJavaFormat>
+                        </java>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>apply</goal>
+                            </goals>
+                            <phase>process-sources</phase>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -373,9 +392,14 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
 
+            <!--            <plugin>-->
+            <!--                <groupId>com.spotify.fmt</groupId>-->
+            <!--                <artifactId>fmt-maven-plugin</artifactId>-->
+            <!--            </plugin>-->
+
             <plugin>
-                <groupId>com.spotify.fmt</groupId>
-                <artifactId>fmt-maven-plugin</artifactId>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
             </plugin>
 
             <plugin>

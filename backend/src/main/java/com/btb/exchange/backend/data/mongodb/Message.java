@@ -19,10 +19,14 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @AllArgsConstructor
 class Message {
 
-  @Id private String id;
-  @Indexed private Date created;
-  private ExchangeEnum exchange;
-  private long order;
-  private @Field(targetType = STRING) CurrencyPair currencyPair;
-  private String data;
+    @Id
+    private String id;
+
+    @Indexed
+    private Date created;
+
+    private ExchangeEnum exchange;
+    private long order;
+    private @Field(targetType = STRING) CurrencyPair currencyPair;
+    private String data;
 }

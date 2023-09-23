@@ -12,18 +12,18 @@ import org.springframework.kafka.listener.ContainerProperties;
 @RequiredArgsConstructor
 public class KafkaConfig {
 
-  private final ConsumerFactory<String, String> consumerFactory;
+    private final ConsumerFactory<String, String> consumerFactory;
 
-  @Value("${frontend.kafka.concurrency:5}")
-  private int concurrency;
+    @Value("${frontend.kafka.concurrency:5}")
+    private int concurrency;
 
-  @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, String> batchFactory() {
-    ConcurrentKafkaListenerContainerFactory<String, String> factory =
-        new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(consumerFactory);
-    factory.setConcurrency(concurrency);
-    factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
-    return factory;
-  }
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> batchFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory);
+        factory.setConcurrency(concurrency);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
+        return factory;
+    }
 }

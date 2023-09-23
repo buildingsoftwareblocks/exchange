@@ -12,33 +12,32 @@ import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 @Configuration
 public class MongodbConfig {
 
-  /** Make CurrencyPair storable in the MongoDB database */
-  @Bean
-  MongoCustomConversions mongoCustomConversions() {
-    var list =
-        List.of(CurrencyPairToStringConverter.INSTANCE, StringToCurrencyPairConverter.INSTANCE);
-    return new MongoCustomConversions(list);
-  }
-
-  @WritingConverter
-  enum CurrencyPairToStringConverter implements Converter<CurrencyPair, String> {
-    INSTANCE;
-
-    CurrencyPairToStringConverter() {}
-
-    public String convert(CurrencyPair source) {
-      return source.toString();
+    /** Make CurrencyPair storable in the MongoDB database */
+    @Bean
+    MongoCustomConversions mongoCustomConversions() {
+        var list = List.of(CurrencyPairToStringConverter.INSTANCE, StringToCurrencyPairConverter.INSTANCE);
+        return new MongoCustomConversions(list);
     }
-  }
 
-  @ReadingConverter
-  enum StringToCurrencyPairConverter implements Converter<String, CurrencyPair> {
-    INSTANCE;
+    @WritingConverter
+    enum CurrencyPairToStringConverter implements Converter<CurrencyPair, String> {
+        INSTANCE;
 
-    StringToCurrencyPairConverter() {}
+        CurrencyPairToStringConverter() {}
 
-    public CurrencyPair convert(String source) {
-      return new CurrencyPair(source);
+        public String convert(CurrencyPair source) {
+            return source.toString();
+        }
     }
-  }
+
+    @ReadingConverter
+    enum StringToCurrencyPairConverter implements Converter<String, CurrencyPair> {
+        INSTANCE;
+
+        StringToCurrencyPairConverter() {}
+
+        public CurrencyPair convert(String source) {
+            return new CurrencyPair(source);
+        }
+    }
 }

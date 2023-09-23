@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @Generated // prevent JoCoCo from complaining
 public class FrontendApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(FrontendApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(FrontendApplication.class, args);
+    }
 }

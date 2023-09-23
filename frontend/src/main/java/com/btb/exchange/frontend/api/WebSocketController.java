@@ -15,17 +15,17 @@ import org.springframework.stereotype.Controller;
 @Slf4j
 public class WebSocketController {
 
-  private final WebSocketService webSocketService;
+    private final WebSocketService webSocketService;
 
-  @MessageMapping("/exchange")
-  public void changeExchange(@Payload ExchangeEnum message, Principal principal) {
-    log.info("changeExchange({}) : {}", principal.getName(), message);
-    webSocketService.register(principal, message);
-  }
+    @MessageMapping("/exchange")
+    public void changeExchange(@Payload ExchangeEnum message, Principal principal) {
+        log.info("changeExchange({}) : {}", principal.getName(), message);
+        webSocketService.register(principal, message);
+    }
 
-  @MessageMapping("/cp")
-  public void changeCurrencyPair(@Payload CurrencyPair message, Principal principal) {
-    log.info("changeCurrencyPair({}) : {}", principal.getName(), message);
-    webSocketService.register(principal, message);
-  }
+    @MessageMapping("/cp")
+    public void changeCurrencyPair(@Payload CurrencyPair message, Principal principal) {
+        log.info("changeCurrencyPair({}) : {}", principal.getName(), message);
+        webSocketService.register(principal, message);
+    }
 }

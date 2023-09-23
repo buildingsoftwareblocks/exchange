@@ -12,30 +12,33 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HazelcastConfig {
 
-  @Value("${backend.hazelcast.multicast.enabled:true}")
-  private boolean multicast;
+    @Value("${backend.hazelcast.multicast.enabled:true}")
+    private boolean multicast;
 
-  @Value("${backend.hazelcast.cluster.name:dev}")
-  private String clusterName;
+    @Value("${backend.hazelcast.cluster.name:dev}")
+    private String clusterName;
 
-  @Bean
-  public Config hazelCastConfig() {
-    Config config = new Config().setClusterName(clusterName);
-    config
-        .getCPSubsystemConfig()
-        .addSemaphoreConfig(new SemaphoreConfig(MongoDBDatabaseService.HAZELCAST_DB, true, 1));
-    if (multicast) {
-      config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);
-    } else {
-      config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-      config.getNetworkConfig().getJoin().getTcpIpConfig().addMember("127.0.0.1").setEnabled(true);
+    @Bean
+    public Config hazelCastConfig() {
+        Config config = new Config().setClusterName(clusterName);
+        config.getCPSubsystemConfig()
+                .addSemaphoreConfig(new SemaphoreConfig(MongoDBDatabaseService.HAZELCAST_DB, true, 1));
+        if (multicast) {
+            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(true);
+        } else {
+            config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
+            config.getNetworkConfig()
+                    .getJoin()
+                    .getTcpIpConfig()
+                    .addMember("127.0.0.1")
+                    .setEnabled(true);
+        }
+
+        return config;
     }
 
-    return config;
-  }
-
-  @Bean
-  public HazelcastInstance hazelcastInstance(Config config) {
-    return Hazelcast.newHazelcastInstance(config);
-  }
+    @Bean
+    public HazelcastInstance hazelcastInstance(Config config) {
+        return Hazelcast.newHazelcastInstance(config);
+    }
 }

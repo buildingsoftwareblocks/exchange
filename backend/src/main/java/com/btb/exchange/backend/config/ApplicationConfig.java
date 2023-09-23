@@ -13,25 +13,25 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 public class ApplicationConfig {
 
-  @Value("${backend.recording:false}")
-  private boolean recording;
+    @Value("${backend.recording:false}")
+    private boolean recording;
 
-  @Value("${backend.replay:false}")
-  private boolean replay;
+    @Value("${backend.replay:false}")
+    private boolean replay;
 
-  @Value("${backend.es:true}")
-  private boolean es;
+    @Value("${backend.es:true}")
+    private boolean es;
 
-  @Value("${backend.orders.max:5}")
-  private int maxOrders;
+    @Value("${backend.orders.max:5}")
+    private int maxOrders;
 
-  @PostConstruct
-  void validate() {
-    if (recording && replay) {
-      throw new IllegalArgumentException("Recording AND replaying is not supported!");
+    @PostConstruct
+    void validate() {
+        if (recording && replay) {
+            throw new IllegalArgumentException("Recording AND replaying is not supported!");
+        }
+        if (maxOrders < 0) {
+            throw new IllegalArgumentException("maxOrders must be >= 0");
+        }
     }
-    if (maxOrders < 0) {
-      throw new IllegalArgumentException("maxOrders must be >= 0");
-    }
-  }
 }

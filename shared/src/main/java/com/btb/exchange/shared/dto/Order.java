@@ -10,6 +10,6 @@ import lombok.Value;
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class Order {
-  BigDecimal limitPrice;
-  BigDecimal originalAmount;
+    BigDecimal limitPrice;
+    BigDecimal originalAmount;
 }

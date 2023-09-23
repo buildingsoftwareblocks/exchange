@@ -9,17 +9,19 @@ import com.hazelcast.core.HazelcastInstance;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class HazelcastConfig {
 
-  @Value("${frontend.multicast.enabled:true}")
+  @Value("${frontend.hazelcast.multicast.enabled:true}")
   private boolean multicast;
 
+  @Value("${frontend.hazelcast.cluster.name:dev}")
+  private String clusterName;
+
   @Bean
-  Config hazelCastConfig() {
-    Config config = new Config().setClusterName("frontend-hz");
+  public Config hazelCastConfig() {
+    Config config = new Config().setClusterName(clusterName);
     config
         .getSerializationConfig()
         .addDataSerializableFactory(
@@ -37,8 +39,7 @@ public class HazelcastConfig {
   }
 
   @Bean
-  @Primary
-  HazelcastInstance hazelcastInstance(Config config) {
+  public HazelcastInstance hazelcastInstance(Config config) {
     return Hazelcast.newHazelcastInstance(config);
   }
 }

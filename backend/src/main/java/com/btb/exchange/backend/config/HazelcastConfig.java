@@ -12,12 +12,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HazelcastConfig {
 
-  @Value("${backend.multicast.enabled:true}")
+  @Value("${backend.hazelcast.multicast.enabled:true}")
   private boolean multicast;
 
+  @Value("${backend.hazelcast.cluster.name:dev}")
+  private String clusterName;
+
   @Bean
-  Config hazelCastConfig() {
-    Config config = new Config().setClusterName("dev");
+  public Config hazelCastConfig() {
+    Config config = new Config().setClusterName(clusterName);
     config
         .getCPSubsystemConfig()
         .addSemaphoreConfig(new SemaphoreConfig(MongoDBDatabaseService.HAZELCAST_DB, true, 1));
@@ -32,7 +35,7 @@ public class HazelcastConfig {
   }
 
   @Bean
-  HazelcastInstance hazelcastInstance(Config config) {
+  public HazelcastInstance hazelcastInstance(Config config) {
     return Hazelcast.newHazelcastInstance(config);
   }
 }

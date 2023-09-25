@@ -130,7 +130,7 @@ public class ExchangeService {
 
     @KafkaListener(topics = OPPORTUNITIES, containerFactory = "batchFactory", groupId = "frontend")
     public void processOpportunities(String msg) {
-        log.info("process {} message", msg);
+        log.debug("process {} message", msg);
         Opportunities opportunities = dtoUtils.fromDTO(msg, Opportunities.class);
         update(this.opportunities, opportunities.getOrder(), opportunities);
     }

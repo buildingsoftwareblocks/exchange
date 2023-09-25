@@ -39,7 +39,9 @@ import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-/** Handle a Exchange */
+/**
+ * Handle a Exchange
+ */
 @Service
 @Slf4j
 public class ExchangeService {
@@ -65,7 +67,9 @@ public class ExchangeService {
     // for testing purposes, to subscribe to the event that an orderbook is received
     private final Subject<String> orderBookReceived = PublishSubject.create();
 
-    /** */
+    /**
+     *
+     */
     public ExchangeService(HazelcastInstance hazelcastInstance, ObjectMapper objectMapper, MeterRegistry registry) {
         this.dtoUtils = new DTOUtils(objectMapper);
         opportunities = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
@@ -87,7 +91,7 @@ public class ExchangeService {
     }
 
     @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "frontend")
-    void processOrderBooks(String msg) {
+    public void processOrderBooks(String msg) {
         log.debug("process {}", msg);
         kafkaMessagesCounter.record(1);
         final var now = LocalTime.now();
@@ -98,7 +102,7 @@ public class ExchangeService {
     }
 
     @KafkaListener(topics = TopicUtils.INPUT_TICKER, containerFactory = "batchFactory", groupId = "frontend")
-    void processTickers(String msg) {
+    public void processTickers(String msg) {
         log.debug("process {} message", msg);
         kafkaMessagesCounter.record(1);
         final var now = LocalTime.now();
@@ -125,8 +129,8 @@ public class ExchangeService {
     }
 
     @KafkaListener(topics = OPPORTUNITIES, containerFactory = "batchFactory", groupId = "frontend")
-    void processOpportunities(String msg) {
-        // only get the last value and add it to the reference
+    public void processOpportunities(String msg) {
+        log.info("process {} message", msg);
         Opportunities opportunities = dtoUtils.fromDTO(msg, Opportunities.class);
         update(this.opportunities, opportunities.getOrder(), opportunities);
     }
@@ -138,7 +142,9 @@ public class ExchangeService {
         update(data, orderNr, dtoUtils.toDTO(opportunities));
     }
 
-    /** Update reference data in an atomic way */
+    /**
+     * Update reference data in an atomic way
+     */
     @SneakyThrows
     void update(ReferenceData data, long orderNr, String message) {
         try {

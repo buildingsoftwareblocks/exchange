@@ -89,6 +89,7 @@ services:
       - "8081"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - JAVA_TOOL_OPTIONS=-XX:MaxDirectMemorySize=128m
     depends_on:
       config:
         condition: service_started
@@ -103,6 +104,7 @@ services:
       - "8082"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - JAVA_TOOL_OPTIONS=-XX:MaxDirectMemorySize=128m
     depends_on:
       config:
         condition: service_started
@@ -122,6 +124,7 @@ services:
       - "8083"
     environment:
       - SPRING_CLOUD_CONFIG_URI=http://config:8888
+      - JAVA_TOOL_OPTIONS=-XX:MaxDirectMemorySize=128m
     depends_on:
       config:
         condition: service_started

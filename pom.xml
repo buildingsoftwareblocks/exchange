@@ -392,11 +392,6 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
 
-            <!--            <plugin>-->
-            <!--                <groupId>com.spotify.fmt</groupId>-->
-            <!--                <artifactId>fmt-maven-plugin</artifactId>-->
-            <!--            </plugin>-->
-
             <plugin>
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>

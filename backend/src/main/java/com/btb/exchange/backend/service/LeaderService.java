@@ -138,7 +138,7 @@ public class LeaderService {
                 .map(ExchangeService::leaderOf)
                 .collect(Collectors.toSet());
         if (leaders.size() > exchangePerMember) {
-            log.debug("reshuffle needed : {} / {}", leaders.size(), exchangePerMember);
+            log.info("reshuffle needed : {} / {}", leaders.size(), exchangePerMember);
             // we must reschedule: number of exchanges we should not have
             var toReschedule = leaders.size() - exchangePerMember;
             clients.values().stream()
@@ -153,7 +153,7 @@ public class LeaderService {
                 exchangesLogged = leaders;
                 log.info("Handling exchanges : {}", leaders);
             } else {
-                log.info("No reshuffle needed : {} | Per member: {}", leaders, exchangePerMember);
+                log.debug("No reshuffle needed : {} | Per member: {}", leaders, exchangePerMember);
             }
         }
     }

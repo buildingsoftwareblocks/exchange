@@ -30,9 +30,7 @@ With scaling:
 
 | System        | link                   |
 |---------------|------------------------|
-| admin         | http://localhost:8080/ |
 | frontend      | http://localhost:8081/ |
-| log GUI       | http://localhost:5601/ |
 | Kafka console | http://localhost:8181/ | 
 
 ## Test Performance

@@ -164,7 +164,9 @@ public class MongoDBDatabaseService {
                         });
     }
 
-    /** for testing purposes */
+    /**
+     * for testing purposes
+     */
     public void deleteAll() {
         repository.deleteAll().blockingAwait();
     }

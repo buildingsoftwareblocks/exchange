@@ -40,14 +40,18 @@ public class OrderService {
                 .register(registry);
     }
 
-    /** */
+    /**
+     *
+     */
     public void processSimpleExchangeArbitrage(Opportunities currencyPairOpportunities) {
         // TODO better asset management
         messageCounter.increment();
         processSimpleExchangeArbitrage(BigDecimal.valueOf(100000), currencyPairOpportunities);
     }
 
-    /** */
+    /**
+     *
+     */
     void processSimpleExchangeArbitrage(BigDecimal amount, Opportunities opportunities) {
         var opportunitiesBuilder = Opportunities.builder();
 

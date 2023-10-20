@@ -3,7 +3,6 @@ package com.btb.exchange.analysis.services;
 import com.btb.exchange.analysis.config.ApplicationConfig;
 import java.math.BigDecimal;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
@@ -40,14 +39,16 @@ public class ExchangeService {
         return validData(LocalTime.now(), time);
     }
 
-    /** max acceptable delay in ms of received data */
+    /**
+     * max acceptable delay in ms of received data
+     */
     // TODO better config per exchange/currencypair
     public boolean validData(@NonNull LocalTime now, LocalTime time) {
         if (config.isReplay()) {
             return true;
         } else {
             if (time != null) {
-                return now.minus(2, ChronoUnit.MINUTES).isBefore(time);
+                return now.minusMinutes(2).isBefore(time);
             } else {
                 return true;
             }

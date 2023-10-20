@@ -53,10 +53,14 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
 
     private final Set<CurrencyPair> currencyPairs;
 
-    /** for testing purposes, to subscribe to broadcast events. */
+    /**
+     * for testing purposes, to subscribe to broadcast events.
+     */
     private final Subject<String> messageSent = PublishSubject.create();
 
-    /** */
+    /**
+     *
+     */
     public ExchangeService(
             CuratorFramework client,
             StreamingExchange exchange,
@@ -229,7 +233,9 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
         }
     }
 
-    /** for testing purposes */
+    /**
+     * for testing purposes
+     */
     final Observable<String> subscribe() {
         return messageSent;
     }

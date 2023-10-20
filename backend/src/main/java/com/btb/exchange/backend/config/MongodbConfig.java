@@ -12,7 +12,9 @@ import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 @Configuration
 public class MongodbConfig {
 
-    /** Make CurrencyPair storable in the MongoDB database */
+    /**
+     * Make CurrencyPair storable in the MongoDB database
+     */
     @Bean
     MongoCustomConversions mongoCustomConversions() {
         var list = List.of(CurrencyPairToStringConverter.INSTANCE, StringToCurrencyPairConverter.INSTANCE);

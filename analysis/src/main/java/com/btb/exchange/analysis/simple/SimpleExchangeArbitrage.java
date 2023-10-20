@@ -43,7 +43,9 @@ public class SimpleExchangeArbitrage {
         return merge(opportunitiesList);
     }
 
-    /** Merge opportunities of same currency pair, from, to together. */
+    /**
+     * Merge opportunities of same currency pair, from, to together.
+     */
     Opportunities merge(List<Opportunities> opportunitiesList) {
         var opportunitiesBuilder = Opportunities.builder();
         var opportunities =

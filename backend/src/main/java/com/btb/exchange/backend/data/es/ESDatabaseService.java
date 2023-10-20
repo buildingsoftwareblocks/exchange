@@ -24,7 +24,9 @@ public class ESDatabaseService {
     // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<List<String>> stored = PublishSubject.create();
 
-    /** */
+    /**
+     *
+     */
     public ESDatabaseService(ESMessageRepository repository, ObjectMapper objectMapper) {
         this.repository = repository;
         this.dtoUtils = new DTOUtils(objectMapper);

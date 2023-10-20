@@ -27,7 +27,9 @@ public class MessageHandler {
     // for testing purposes
     private final Subject<String> processed = PublishSubject.create();
 
-    /** */
+    /**
+     *
+     */
     public MessageHandler(
             ObjectMapper objectMapper,
             SimpleExchangeArbitrage simpleExchangeArbitrage,
@@ -52,7 +54,9 @@ public class MessageHandler {
         messages.forEach(processed::onNext);
     }
 
-    /** for testing purposes */
+    /**
+     * for testing purposes
+     */
     Observable<String> subscribe() {
         return processed;
     }

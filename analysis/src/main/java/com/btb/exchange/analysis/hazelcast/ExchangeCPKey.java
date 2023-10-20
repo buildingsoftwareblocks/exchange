@@ -5,12 +5,11 @@ import com.btb.exchange.shared.utils.CurrencyPairUtils;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.IdentifiedDataSerializable;
+import java.io.IOException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.knowm.xchange.currency.CurrencyPair;
-
-import java.io.IOException;
 
 @Data
 @AllArgsConstructor

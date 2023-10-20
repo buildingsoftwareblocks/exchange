@@ -1,5 +1,9 @@
 package com.btb.exchange.backend.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
+
 import com.btb.exchange.backend.config.ApplicationConfig;
 import com.btb.exchange.backend.data.mongodb.MongoDBDatabaseService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
@@ -7,6 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
@@ -27,14 +34,6 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-
-import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 
 @SpringBootTest
 @Testcontainers

@@ -7,10 +7,6 @@ import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.dto.Opportunity;
 import com.btb.exchange.shared.dto.Order;
 import com.hazelcast.core.HazelcastInstance;
-import lombok.extern.slf4j.Slf4j;
-import org.knowm.xchange.currency.CurrencyPair;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -20,6 +16,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import lombok.extern.slf4j.Slf4j;
+import org.knowm.xchange.currency.CurrencyPair;
+import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j

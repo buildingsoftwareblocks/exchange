@@ -2,14 +2,13 @@ package com.btb.exchange.frontend.api;
 
 import com.btb.exchange.frontend.service.WebSocketService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
-
-import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor

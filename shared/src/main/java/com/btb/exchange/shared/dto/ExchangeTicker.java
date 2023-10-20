@@ -13,13 +13,13 @@ import org.knowm.xchange.dto.marketdata.Ticker;
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class ExchangeTicker {
-  long order;
+    long order;
 
-  @JsonFormat(pattern = "HH:mm:ss.SSS")
-  LocalTime timestamp;
+    @JsonFormat(pattern = "HH:mm:ss.SSS")
+    LocalTime timestamp;
 
-  ExchangeEnum exchange;
-  String id;
-  CurrencyPair currencyPair;
-  Ticker ticker;
+    ExchangeEnum exchange;
+    String id;
+    CurrencyPair currencyPair;
+    Ticker ticker;
 }

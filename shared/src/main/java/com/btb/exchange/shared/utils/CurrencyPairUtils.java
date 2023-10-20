@@ -9,11 +9,11 @@ import org.knowm.xchange.currency.CurrencyPair;
 @UtilityClass
 public class CurrencyPairUtils {
 
-  public static void writeData(ObjectDataOutput out, CurrencyPair currencyPair) throws IOException {
-    out.writeString(currencyPair.toString());
-  }
+    public static void writeData(ObjectDataOutput out, CurrencyPair currencyPair) throws IOException {
+        out.writeString(currencyPair.toString());
+    }
 
-  public static CurrencyPair readData(ObjectDataInput in) throws IOException {
-    return new CurrencyPair(in.readString());
-  }
+    public static CurrencyPair readData(ObjectDataInput in) throws IOException {
+        return new CurrencyPair(in.readString());
+    }
 }

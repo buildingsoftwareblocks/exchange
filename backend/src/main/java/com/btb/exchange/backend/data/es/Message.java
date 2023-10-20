@@ -18,17 +18,18 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @AllArgsConstructor
 class Message {
 
-  @Id private String id;
+    @Id
+    private String id;
 
-  @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
-  private Date created;
+    @Field(type = FieldType.Date, format = DateFormat.basic_date_time)
+    private Date created;
 
-  @Field(type = FieldType.Text)
-  private ExchangeEnum exchange;
+    @Field(type = FieldType.Text)
+    private ExchangeEnum exchange;
 
-  @Field(type = FieldType.Text)
-  private String currencyPair;
+    @Field(type = FieldType.Text)
+    private String currencyPair;
 
-  @Field(type = FieldType.Nested)
-  private Orders orders;
+    @Field(type = FieldType.Nested)
+    private Orders orders;
 }

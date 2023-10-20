@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.2</version>
+        <version>2.7.17</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -23,32 +23,30 @@
         <docker.repo>local</docker.repo>
         <docker.app.tag>latest</docker.app.tag>
 
+        <btb.shared.version>0.0.1-SNAPSHOT</btb.shared.version>
         <xchange.version>5.1.0</xchange.version>
-        <testcontainers.version>1.18.3</testcontainers.version>
+        <testcontainers.version>1.19.1</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
         <stomp-websocket.version>2.3.4</stomp-websocket.version>
-        <bootstrap.version>5.3.1</bootstrap.version>
-        <jquery.version>3.7.0</jquery.version>
+        <bootstrap.version>5.3.2</bootstrap.version>
+        <jquery.version>3.7.1</jquery.version>
         <disruptor.version>3.4.4</disruptor.version>
         <curator.version>5.5.0</curator.version>
-        <logstash-gelf.version>1.15.1</logstash-gelf.version>
-        <spring-boot-admin.version>3.1.4</spring-boot-admin.version>
-        <spring-cloud.version>2022.0.4</spring-cloud.version>
-        <javamelody.version>2.0.1</javamelody.version>
-        <rxjava3.version>3.1.6</rxjava3.version>
-        <cyclonedx-core-java.version>7.3.2</cyclonedx-core-java.version>
+        <spring-cloud.version>2021.0.8</spring-cloud.version>
+        <javamelody.version>1.95.0</javamelody.version>
+        <rxjava3.version>3.1.8</rxjava3.version>
 
         <!-- plugins -->
-        <sonar.version>3.9.1.2184</sonar.version>
-        <jacoco.version>0.8.10</jacoco.version>
+        <sonar.version>3.10.0.2594</sonar.version>
+        <jacoco.version>0.8.11</jacoco.version>
         <surefire.version>3.1.2</surefire.version>
         <code.coverage.exclusions/>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
-        <dependency-check-maven.version>8.3.1</dependency-check-maven.version>
-        <spotify.fmt.version>2.20</spotify.fmt.version>
-        <cyclonedx-maven-plugin.version>2.7.9</cyclonedx-maven-plugin.version>
+        <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
+        <spotless.version>2.40.0</spotless.version>
+        <palantirJavaFormat.version>2.36.0</palantirJavaFormat.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
-        <maven-enforcer-plugin.version>3.3.0</maven-enforcer-plugin.version>
+        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     </properties>
 
     <scm>
@@ -60,7 +58,7 @@
             <dependency>
                 <groupId>com.btb</groupId>
                 <artifactId>shared</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${btb.shared.version}</version>
             </dependency>
 
             <!-- spring boot vs spring cloud https://spring.io/projects/spring-cloud -->
@@ -72,26 +70,15 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- Exclude Spring Boot's Default Logging -->
+            <!-- Exclude Spring Boot's -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-starter-logging</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.lmax</groupId>
                 <artifactId>disruptor</artifactId>
                 <version>${disruptor.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>biz.paluch.logging</groupId>
-                <artifactId>logstash-gelf</artifactId>
-                <version>${logstash-gelf.version}</version>
             </dependency>
 
             <dependency>
@@ -230,29 +217,11 @@
                 <version>${curator.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>de.codecentric</groupId>
-                <artifactId>spring-boot-admin-starter-server</artifactId>
-                <version>${spring-boot-admin.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.codecentric</groupId>
-                <artifactId>spring-boot-admin-starter-client</artifactId>
-                <version>${spring-boot-admin.version}</version>
-            </dependency>
-
             <!-- Application monitoring -->
             <dependency>
                 <groupId>net.bull.javamelody</groupId>
                 <artifactId>javamelody-spring-boot-starter</artifactId>
                 <version>${javamelody.version}</version>
-            </dependency>
-
-            <!-- SBOM functionality -->
-            <dependency>
-                <groupId>org.cyclonedx</groupId>
-                <artifactId>cyclonedx-core-java</artifactId>
-                <version>${cyclonedx-core-java.version}</version>
             </dependency>
 
             <dependency>
@@ -288,18 +257,9 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
-        <!-- Add Log4j2 Dependency -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.lmax</groupId>
             <artifactId>disruptor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>biz.paluch.logging</groupId>
-            <artifactId>logstash-gelf</artifactId>
         </dependency>
 
         <dependency>
@@ -318,7 +278,6 @@
     <modules>
         <module>shared</module>
         <module>config</module>
-        <module>admin</module>
         <module>frontend</module>
         <module>backend</module>
         <module>analysis</module>
@@ -363,12 +322,26 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire.version}</version>
                 </plugin>
+
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
                     <version>${dependency-check-maven.version}</version>
+                    <configuration>
+                        <suppressionFiles>
+                            <suppressionFile>owasp-project-suppression.xml</suppressionFile>
+                        </suppressionFiles>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.btb</groupId>
+                            <artifactId>shared</artifactId>
+                            <version>${btb.shared.version}</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
+                            <id>check-dependencies</id>
                             <goals>
                                 <goal>check</goal>
                             </goals>
@@ -383,37 +356,24 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>com.spotify.fmt</groupId>
-                    <artifactId>fmt-maven-plugin</artifactId>
-                    <version>${spotify.fmt.version}</version>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless.version}</version>
                     <configuration>
-                        <style>google</style>
+                        <java>
+                            <palantirJavaFormat>
+                                <style>PALANTIR</style>
+                            </palantirJavaFormat>
+                        </java>
                     </configuration>
                     <executions>
                         <execution>
                             <goals>
-                                <goal>format</goal>
+                                <goal>apply</goal>
                             </goals>
+                            <phase>process-sources</phase>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.cyclonedx</groupId>
-                    <artifactId>cyclonedx-maven-plugin</artifactId>
-                    <version>${cyclonedx-maven-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>cyclonedx-aggregate</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>makeBom</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <outputFormat>json</outputFormat>
-                        <outputName>classes/bom</outputName>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -430,11 +390,6 @@
             </plugin>
 
             <plugin>
-                <groupId>com.spotify.fmt</groupId>
-                <artifactId>fmt-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
@@ -446,10 +401,6 @@
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.cyclonedx</groupId>
-                <artifactId>cyclonedx-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -465,7 +416,6 @@
                         <configuration>
                             <image>
                                 <name>${docker.repo}/exchange-${project.artifactId}</name>
-                                <name>${docker.repo}/exchange-${project.artifactId}:${docker.app.tag}</name>
                                 <publish>false</publish>
                             </image>
                         </configuration>
@@ -532,6 +482,30 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>formatter</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>owasp</id>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>

@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Test;
 
 class IDUtilsTest {
 
-  @Test
-  void generateId() {
-    String id = IDUtils.generateID();
-    assertThat(id, is(notNullValue()));
-    assertThat(id, hasLength(3));
-  }
+    @Test
+    void generateId() {
+        String id = IDUtils.generateID();
+        assertThat(id, is(notNullValue()));
+        assertThat(id, hasLength(3));
+    }
 }

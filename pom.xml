@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.15</version>
+        <version>2.7.16</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -24,7 +24,7 @@
         <docker.app.tag>latest</docker.app.tag>
 
         <xchange.version>5.1.0</xchange.version>
-        <testcontainers.version>1.18.3</testcontainers.version>
+        <testcontainers.version>1.19.1</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
         <stomp-websocket.version>2.3.4</stomp-websocket.version>
         <bootstrap.version>5.3.2</bootstrap.version>
@@ -33,17 +33,16 @@
         <curator.version>5.5.0</curator.version>
         <spring-cloud.version>2021.0.8</spring-cloud.version>
         <javamelody.version>1.95.0</javamelody.version>
-        <rxjava3.version>3.1.7</rxjava3.version>
+        <rxjava3.version>3.1.8</rxjava3.version>
 
         <!-- plugins -->
         <sonar.version>3.10.0.2594</sonar.version>
-        <jacoco.version>0.8.10</jacoco.version>
+        <jacoco.version>0.8.11</jacoco.version>
         <surefire.version>3.1.2</surefire.version>
         <code.coverage.exclusions/>
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
-        <spotify.fmt.version>2.20</spotify.fmt.version>
-        <spotless.version>2.39.0</spotless.version>
+        <spotless.version>2.40.0</spotless.version>
         <palantirJavaFormat.version>2.36.0</palantirJavaFormat.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
@@ -322,12 +321,25 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire.version}</version>
                 </plugin>
+
                 <plugin>
                     <groupId>org.owasp</groupId>
                     <artifactId>dependency-check-maven</artifactId>
                     <version>${dependency-check-maven.version}</version>
+                    <configuration>
+                        <suppressionFiles>
+                            <suppressionFile>owasp-project-suppression.xml</suppressionFile>
+                        </suppressionFiles>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.btb</groupId>
+                            <artifactId>shared</artifactId>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
+                            <id>check-dependencies</id>
                             <goals>
                                 <goal>check</goal>
                             </goals>
@@ -342,29 +354,12 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>com.spotify.fmt</groupId>
-                    <artifactId>fmt-maven-plugin</artifactId>
-                    <version>${spotify.fmt.version}</version>
-                    <configuration>
-                        <style>google</style>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>format</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>com.diffplug.spotless</groupId>
                     <artifactId>spotless-maven-plugin</artifactId>
                     <version>${spotless.version}</version>
                     <configuration>
                         <java>
                             <palantirJavaFormat>
-                                <!-- Optionally specify a version -->
-                                <version>${palantirJavaFormat.version}</version>
                                 <style>PALANTIR</style>
                             </palantirJavaFormat>
                         </java>
@@ -390,11 +385,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
             </plugin>
 
             <plugin>
@@ -490,6 +480,30 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>formatter</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>owasp</id>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>

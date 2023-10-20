@@ -1,12 +1,11 @@
 package com.btb.exchange.shared.dto;
 
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.Value;
 import org.knowm.xchange.dto.trade.LimitOrder;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Value
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)

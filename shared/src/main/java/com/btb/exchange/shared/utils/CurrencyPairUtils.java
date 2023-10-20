@@ -2,10 +2,9 @@ package com.btb.exchange.shared.utils;
 
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
+import java.io.IOException;
 import lombok.experimental.UtilityClass;
 import org.knowm.xchange.currency.CurrencyPair;
-
-import java.io.IOException;
 
 @UtilityClass
 public class CurrencyPairUtils {

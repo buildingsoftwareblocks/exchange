@@ -23,6 +23,7 @@
         <docker.repo>local</docker.repo>
         <docker.app.tag>latest</docker.app.tag>
 
+        <btb.shared.version>0.0.1-SNAPSHOT</btb.shared.version>
         <xchange.version>5.1.0</xchange.version>
         <testcontainers.version>1.19.1</testcontainers.version>
         <sockjs-client.version>1.5.1</sockjs-client.version>
@@ -57,7 +58,7 @@
             <dependency>
                 <groupId>com.btb</groupId>
                 <artifactId>shared</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${btb.shared.version}</version>
             </dependency>
 
             <!-- spring boot vs spring cloud https://spring.io/projects/spring-cloud -->
@@ -335,6 +336,7 @@
                         <dependency>
                             <groupId>com.btb</groupId>
                             <artifactId>shared</artifactId>
+                            <version>${btb.shared.version}</version>
                         </dependency>
                     </dependencies>
                     <executions>

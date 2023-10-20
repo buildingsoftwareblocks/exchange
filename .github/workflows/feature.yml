@@ -24,5 +24,26 @@ jobs:
           distribution: 'liberica'
           cache: 'maven'
 
+      - name: Run formatter
+        run: mvn -B process-sources --file pom.xml -P formatter
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [[ -n "$(git diff --exit-code)" ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit formatting changes
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config user.email "noreply@buildingsoftwareblocks.com"
+          git config user.name "buildingSoftwareBlocks"
+          git add .
+          git commit -m "committed formatting changes"
+          git push
+
       - name: Build with Maven
         run: mvn -B package --file pom.xml

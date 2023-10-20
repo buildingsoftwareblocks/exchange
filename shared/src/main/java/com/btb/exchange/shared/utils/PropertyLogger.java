@@ -1,22 +1,30 @@
 package com.btb.exchange.shared.utils;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
-import org.springframework.context.event.EventListener;
+import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.*;
-import org.springframework.stereotype.Component;
 
-/** Log all application properties */
+/**
+ * Log all application properties
+ */
 @Slf4j
-@Component
-public class PropertyLogger {
+class PropertyLogger implements ApplicationListener<ApplicationPreparedEvent> {
 
-    @EventListener
-    public void handleContextRefreshed(ApplicationPreparedEvent event) {
-        final Environment env = event.getApplicationContext().getEnvironment();
+    private static final AtomicBoolean RUN_ONCE = new AtomicBoolean(false);
+
+    @Override
+    public void onApplicationEvent(ApplicationPreparedEvent event) {
+        if (!RUN_ONCE.getAndSet(true)) {
+            show((event.getApplicationContext().getEnvironment()));
+        }
+    }
+
+    private void show(Environment env) {
         log.info("====== Environment and configuration ======");
         log.info("Active profiles: {}", Arrays.toString(env.getActiveProfiles()));
         final MutablePropertySources sources = ((AbstractEnvironment) env).getPropertySources();
@@ -29,7 +37,7 @@ public class PropertyLogger {
 
         StreamSupport.stream(sources.stream().spliterator(), false)
                 .filter(EnumerablePropertySource.class::isInstance)
-                .map(ps -> ((EnumerablePropertySource<?>) ps).getPropertyNames())
+                .map(ps -> ((EnumerablePropertySource) ps).getPropertyNames())
                 .flatMap(Arrays::stream)
                 .distinct()
                 .sorted()

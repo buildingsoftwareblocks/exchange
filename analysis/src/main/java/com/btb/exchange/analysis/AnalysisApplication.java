@@ -1,8 +1,8 @@
 package com.btb.exchange.analysis;
 
 import com.btb.exchange.shared.annotation.EnableCommonComponents;
+import com.btb.exchange.shared.utils.CommonApplication;
 import lombok.Generated;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -13,6 +13,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 public class AnalysisApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AnalysisApplication.class, args);
+        CommonApplication.run(AnalysisApplication.class, args);
     }
 }

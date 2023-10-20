@@ -10,11 +10,6 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
-import java.time.Duration;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.stream.StreamSupport;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -29,6 +24,12 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
+
+import java.time.Duration;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
@@ -164,7 +165,9 @@ public class MongoDBDatabaseService {
                         });
     }
 
-    /** for testing purposes */
+    /**
+     * for testing purposes
+     */
     public void deleteAll() {
         repository.deleteAll().blockingAwait();
     }

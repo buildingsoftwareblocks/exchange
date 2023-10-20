@@ -1,9 +1,6 @@
 package com.btb.exchange.backend.data.mongodb;
 
-import static org.springframework.data.mongodb.core.mapping.FieldType.STRING;
-
 import com.btb.exchange.shared.dto.ExchangeEnum;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +9,10 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.util.Date;
+
+import static org.springframework.data.mongodb.core.mapping.FieldType.STRING;
 
 @Data
 @Builder

@@ -1,12 +1,13 @@
 package com.btb.exchange.shared.config;
 
 import com.hazelcast.core.HazelcastInstance;
-import javax.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PreDestroy;
 
 @Component("shared.hazelcastConfig")
 @Slf4j

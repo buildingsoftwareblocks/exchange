@@ -1,9 +1,10 @@
 package com.btb.exchange.shared.utils;
 
-import java.security.SecureRandom;
-import java.util.Random;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+
+import java.security.SecureRandom;
+import java.util.Random;
 
 @Slf4j
 @UtilityClass

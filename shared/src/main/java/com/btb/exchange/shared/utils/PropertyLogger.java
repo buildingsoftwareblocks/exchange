@@ -1,14 +1,13 @@
 package com.btb.exchange.shared.utils;
 
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.*;
-
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.StreamSupport;
 
 /**
  * Log all application properties
@@ -16,9 +15,7 @@ import java.util.stream.StreamSupport;
 @Slf4j
 class PropertyLogger implements ApplicationListener<ApplicationPreparedEvent> {
 
-    private
-    static
-    final AtomicBoolean RUN_ONCE = new AtomicBoolean(false);
+    private static final AtomicBoolean RUN_ONCE = new AtomicBoolean(false);
 
     @Override
     public void onApplicationEvent(ApplicationPreparedEvent event) {

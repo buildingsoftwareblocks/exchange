@@ -20,9 +20,9 @@
     <nav class="navbar navbar-light bg-light justify-content-between">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" id="opportunities-tab" data-toggle="tab" href="#opportunities-ref" role="tab"
+                <a class="nav-link" id="opportunities-tab" data-toggle="tab" href="#opportunities-ref" role="tab"
                    aria-controls="opportunities-ref"
-                   aria-selected="true">Opportunities</a>
+                   aria-selected="false">Opportunities</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="orderbook-tab" data-toggle="tab" href="#orderbook-ref" role="tab"
@@ -30,9 +30,9 @@
                    aria-selected="false">Order Book</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="tickers-tab" data-toggle="tab" href="#tickers-ref" role="tab"
+                <a class="nav-link active" id="tickers-tab" data-toggle="tab" href="#tickers-ref" role="tab"
                    aria-controls="tickers-ref"
-                   aria-selected="false">Tickers</a>
+                   aria-selected="true">Tickers</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" id="timestamps-tab" data-toggle="tab" href="#timestamps-ref" role="tab"
@@ -50,7 +50,7 @@
     </nav>
 
     <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="opportunities-ref" role="tabpanel"
+        <div class="tab-pane fade" id="opportunities-ref" role="tabpanel"
              aria-labelledby="opportunities-tab">
             <div class="row text-nowrap">
                 <div class="col-7">
@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        <div class="tab-pane fade show" id="tickers-ref" role="tabpanel" aria-labelledby="tickers-tab">
+        <div class="tab-pane fade show active" id="tickers-ref" role="tabpanel" aria-labelledby="tickers-tab">
             <div class="row text-nowrap">
                 <div class="col-12">
                     <table class="table table-striped">

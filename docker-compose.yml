@@ -66,7 +66,7 @@ services:
   mongo:
     image: mongo:4
     ports:
-      - "17017:27017"
+      - "27017:27017"
     restart: always
     volumes:
       - ./data/mongo:/data/db

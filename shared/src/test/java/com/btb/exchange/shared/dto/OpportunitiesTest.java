@@ -1,17 +1,18 @@
 package com.btb.exchange.shared.dto;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.math.BigDecimal;
-import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.knowm.xchange.currency.CurrencyPair;
+
+import java.math.BigDecimal;
+import java.time.LocalTime;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 class OpportunitiesTest {
 

@@ -22,6 +22,11 @@ With scaling:
 
 ``docker compose --profile full up --scale frontend=2 --scale backend=2 --scale analysis=2 -d``
 
+The profiles can be used in every call `--profile=full` for example, or by setting the environment variable
+*COMPOSE_PROFILES*.
+
+For example in Window/Powershell: `$Env:COMPOSE_PROFILES="full"`.
+
 ### Kubernetes
 
 ...

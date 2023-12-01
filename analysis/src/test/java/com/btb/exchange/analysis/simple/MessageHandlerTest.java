@@ -1,8 +1,5 @@
 package com.btb.exchange.analysis.simple;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
-
 import com.btb.exchange.analysis.services.OrderService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
@@ -13,11 +10,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import java.time.LocalTime;
-import java.util.Collections;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -40,6 +32,15 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import javax.annotation.PostConstruct;
+import java.time.LocalTime;
+import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 
 @SpringBootTest
 @Testcontainers

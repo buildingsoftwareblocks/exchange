@@ -1,7 +1,5 @@
 package com.btb.exchange.frontend.service;
 
-import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
-
 import com.btb.exchange.frontend.hazelcast.ExchangeDataSerializableFactory;
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
@@ -23,13 +21,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -38,6 +29,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 
 /**
  * Handle a Exchange
@@ -92,7 +93,7 @@ public class ExchangeService {
 
     @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "frontend")
     public void processOrderBooks(String msg) {
-        log.debug("process {}", msg);
+        log.debug("processOrderBooks: {}", msg);
         kafkaMessagesCounter.record(1);
         final var now = LocalTime.now();
         ExchangeOrderBook orderBook = dtoUtils.fromDTO(msg, ExchangeOrderBook.class);
@@ -103,7 +104,7 @@ public class ExchangeService {
 
     @KafkaListener(topics = TopicUtils.INPUT_TICKER, containerFactory = "batchFactory", groupId = "frontend")
     public void processTickers(String msg) {
-        log.debug("process {} message", msg);
+        log.debug("processTickers: {} message", msg);
         kafkaMessagesCounter.record(1);
         final var now = LocalTime.now();
         ExchangeTicker ticker = dtoUtils.fromDTO(msg, ExchangeTicker.class);
@@ -130,7 +131,7 @@ public class ExchangeService {
 
     @KafkaListener(topics = OPPORTUNITIES, containerFactory = "batchFactory", groupId = "frontend")
     public void processOpportunities(String msg) {
-        log.debug("process {} message", msg);
+        log.debug("processOpportunities: {} message", msg);
         Opportunities opportunities = dtoUtils.fromDTO(msg, Opportunities.class);
         update(this.opportunities, opportunities.getOrder(), opportunities);
     }

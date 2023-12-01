@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 interface MongodbMessageRepository
-        extends RxJava3SortingRepository<Message, String>, RxJava3CrudRepository<Message, String> {}
+        extends RxJava3SortingRepository<Message, String>, RxJava3CrudRepository<Message, String> {
+}

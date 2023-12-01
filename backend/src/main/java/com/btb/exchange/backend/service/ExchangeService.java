@@ -15,13 +15,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
-import java.io.Closeable;
-import java.time.LocalTime;
-import java.util.Collection;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.leader.LeaderSelector;
@@ -32,6 +25,14 @@ import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.marketdata.Ticker;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.lang.NonNull;
+
+import java.io.Closeable;
+import java.time.LocalTime;
+import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ExchangeService extends LeaderSelectorListenerAdapter implements Closeable {
@@ -255,7 +256,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                                 currencyPair,
                                 new Orders(orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
 
-                future.completable().whenComplete((result, ex) -> {
+                future.whenComplete((result, ex) -> {
                     if (ex == null) {
                         messageSent.onNext(result.getRecordMetadata().topic());
                     } else {
@@ -277,7 +278,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                         objectMapper.writeValueAsString(new ExchangeTicker(
                                 counter.getAndIncrement(), LocalTime.now(), exchangeEnum, id, currencyPair, ticker)));
 
-                future.completable().whenComplete((result, ex) -> {
+                future.whenComplete((result, ex) -> {
                     if (ex == null) {
                         messageSent.onNext(result.getRecordMetadata().topic());
                     } else {

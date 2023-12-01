@@ -2,8 +2,6 @@ package com.btb.exchange.frontend.api;
 
 import com.btb.exchange.frontend.service.ExchangeService;
 import com.btb.exchange.shared.dto.ExchangeEnum;
-import java.util.Collections;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
@@ -11,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @RequestMapping("/exchange")

@@ -1,14 +1,15 @@
 package com.btb.exchange.analysis.services;
 
+import com.btb.exchange.analysis.config.ApplicationConfig;
+import org.junit.jupiter.api.Test;
+import org.knowm.xchange.currency.CurrencyPair;
+
+import java.math.BigDecimal;
+import java.time.LocalTime;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.number.BigDecimalCloseTo.closeTo;
-
-import com.btb.exchange.analysis.config.ApplicationConfig;
-import java.math.BigDecimal;
-import java.time.LocalTime;
-import org.junit.jupiter.api.Test;
-import org.knowm.xchange.currency.CurrencyPair;
 
 class ExchangeServiceTest {
 

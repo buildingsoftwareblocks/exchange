@@ -1,3 +1,4 @@
 package com.btb.exchange.shared;
 
-public final class CommonBase {}
+public final class CommonBase {
+}

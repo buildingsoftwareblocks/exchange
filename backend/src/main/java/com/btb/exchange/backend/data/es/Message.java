@@ -2,6 +2,7 @@ package com.btb.exchange.backend.data.es;
 
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.Orders;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,8 +11,6 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-
-import java.util.Date;
 
 @Data
 @Document(indexName = "orderbook-#{T(java.time.LocalDate).now().toString()}")

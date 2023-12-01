@@ -1,5 +1,7 @@
 package com.btb.exchange.analysis.services;
 
+import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
+
 import com.btb.exchange.shared.dto.Opportunities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,14 +9,11 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-
-import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 
 @Service
 @Slf4j

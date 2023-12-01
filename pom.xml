@@ -44,7 +44,6 @@
         <aggregate.report.dir>exchange/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
         <dependency-check-maven.version>8.4.0</dependency-check-maven.version>
         <spotless.version>2.41.0</spotless.version>
-        <palantirJavaFormat.version>2.38.0</palantirJavaFormat.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     </properties>
@@ -363,6 +362,7 @@
                         <java>
                             <palantirJavaFormat>
                                 <style>PALANTIR</style>
+                                <version>2.38.0</version>
                             </palantirJavaFormat>
                         </java>
                     </configuration>

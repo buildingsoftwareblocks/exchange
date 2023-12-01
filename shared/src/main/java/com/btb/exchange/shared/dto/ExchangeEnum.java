@@ -1,6 +1,8 @@
 package com.btb.exchange.shared.dto;
 
-/** All possible exchanges */
+/**
+ * All possible exchanges
+ */
 public enum ExchangeEnum {
     BINANCE,
     BITFINEX,

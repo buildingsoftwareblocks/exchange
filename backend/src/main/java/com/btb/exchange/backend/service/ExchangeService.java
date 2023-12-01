@@ -255,7 +255,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                                 currencyPair,
                                 new Orders(orderBook.getAsks(), orderBook.getBids(), config.getMaxOrders()))));
 
-                future.completable().whenComplete((result, ex) -> {
+                future.whenComplete((result, ex) -> {
                     if (ex == null) {
                         messageSent.onNext(result.getRecordMetadata().topic());
                     } else {
@@ -277,7 +277,7 @@ public class ExchangeService extends LeaderSelectorListenerAdapter implements Cl
                         objectMapper.writeValueAsString(new ExchangeTicker(
                                 counter.getAndIncrement(), LocalTime.now(), exchangeEnum, id, currencyPair, ticker)));
 
-                future.completable().whenComplete((result, ex) -> {
+                future.whenComplete((result, ex) -> {
                     if (ex == null) {
                         messageSent.onNext(result.getRecordMetadata().topic());
                     } else {

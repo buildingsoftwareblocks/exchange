@@ -92,7 +92,7 @@ public class ExchangeService {
 
     @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "frontend")
     public void processOrderBooks(String msg) {
-        log.debug("process {}", msg);
+        log.debug("processOrderBooks: {}", msg);
         kafkaMessagesCounter.record(1);
         final var now = LocalTime.now();
         ExchangeOrderBook orderBook = dtoUtils.fromDTO(msg, ExchangeOrderBook.class);
@@ -103,7 +103,7 @@ public class ExchangeService {
 
     @KafkaListener(topics = TopicUtils.INPUT_TICKER, containerFactory = "batchFactory", groupId = "frontend")
     public void processTickers(String msg) {
-        log.debug("process {} message", msg);
+        log.debug("processTickers: {} message", msg);
         kafkaMessagesCounter.record(1);
         final var now = LocalTime.now();
         ExchangeTicker ticker = dtoUtils.fromDTO(msg, ExchangeTicker.class);
@@ -130,7 +130,7 @@ public class ExchangeService {
 
     @KafkaListener(topics = OPPORTUNITIES, containerFactory = "batchFactory", groupId = "frontend")
     public void processOpportunities(String msg) {
-        log.debug("process {} message", msg);
+        log.debug("processOpportunities: {} message", msg);
         Opportunities opportunities = dtoUtils.fromDTO(msg, Opportunities.class);
         update(this.opportunities, opportunities.getOrder(), opportunities);
     }

@@ -2,7 +2,9 @@ package com.btb.exchange.shared.utils;
 
 import lombok.experimental.UtilityClass;
 
-/** Utilities for Kafka topics */
+/**
+ * Utilities for Kafka topics
+ */
 @UtilityClass
 public class TopicUtils {
 

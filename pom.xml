@@ -18,7 +18,7 @@
     <description>PoC Data of Crypto Exchange</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
 
         <docker.repo>local</docker.repo>
         <docker.app.tag>latest</docker.app.tag>

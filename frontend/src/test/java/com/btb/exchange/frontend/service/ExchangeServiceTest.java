@@ -1,20 +1,13 @@
 package com.btb.exchange.frontend.service;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
-
 import com.btb.exchange.shared.dto.ExchangeEnum;
 import com.btb.exchange.shared.dto.ExchangeOrderBook;
+import com.btb.exchange.shared.dto.Opportunities;
 import com.btb.exchange.shared.dto.Orders;
 import com.btb.exchange.shared.utils.TopicUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import java.time.LocalTime;
-import java.util.Collections;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -35,6 +28,15 @@ import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import javax.annotation.PostConstruct;
+import java.time.LocalTime;
+import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.knowm.xchange.currency.CurrencyPair.BTC_USD;
 
 @SpringBootTest
 @Testcontainers
@@ -74,9 +76,9 @@ class ExchangeServiceTest {
     }
 
     @Test
-    void process() throws InterruptedException, JsonProcessingException {
+    void processOrderBook() throws InterruptedException, JsonProcessingException {
         var latch = new CountDownLatch(1);
-        composite.add(service.subscribe().subscribe(r -> latch.countDown()));
+        composite.add(service.subscribeOrderBook().subscribe(r -> latch.countDown()));
 
         var message = new ExchangeOrderBook(
                 100,
@@ -91,6 +93,22 @@ class ExchangeServiceTest {
 
         assertThat("Result before timeout", waitResult);
     }
+
+    @Test
+    void processOpportunities() throws InterruptedException, JsonProcessingException {
+        var latch = new CountDownLatch(1);
+        composite.add(service.subscribeOpportunities().subscribe(r -> latch.countDown()));
+
+        var message = Opportunities.builder()
+                .timestamp(LocalTime.now())
+                .values(Collections.emptyList()).build();
+        kafkaTemplate.send(TopicUtils.OPPORTUNITIES, objectMapper.writeValueAsString(message));
+
+        var waitResult = latch.await(10, TimeUnit.SECONDS);
+
+        assertThat("Result before timeout", waitResult);
+    }
+
 
     @DynamicPropertySource
     static void datasourceConfig(DynamicPropertyRegistry registry) {

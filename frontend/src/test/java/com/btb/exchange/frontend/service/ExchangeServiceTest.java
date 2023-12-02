@@ -96,13 +96,13 @@ class ExchangeServiceTest {
 
     @Test
     void processOpportunities() throws InterruptedException, JsonProcessingException {
-        var latch = new CountDownLatch(1);
+        var latch = new CountDownLatch(2);
         composite.add(service.subscribeOpportunities().subscribe(r -> latch.countDown()));
-
-        var message = Opportunities.builder()
-                .timestamp(LocalTime.now())
-                .values(Collections.emptyList()).build();
-        kafkaTemplate.send(TopicUtils.OPPORTUNITIES, objectMapper.writeValueAsString(message));
+        
+        var message1 = Opportunities.builder().timestamp(LocalTime.now()).values(Collections.emptyList()).build();
+        kafkaTemplate.send(TopicUtils.OPPORTUNITIES, objectMapper.writeValueAsString(message1));
+        var message2 = Opportunities.builder().timestamp(null).values(Collections.emptyList()).build();
+        kafkaTemplate.send(TopicUtils.OPPORTUNITIES, objectMapper.writeValueAsString(message2));
 
         var waitResult = latch.await(10, TimeUnit.SECONDS);
 

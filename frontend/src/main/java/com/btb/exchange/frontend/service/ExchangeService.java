@@ -38,8 +38,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
-
 /**
  * Handle a Exchange
  */
@@ -53,6 +51,7 @@ public class ExchangeService {
     public static final String HAZELCAST_UPDATED = "frontend.updated";
 
     private static final String EXCHANGES_TIME_FORMAT = "HH:mm:ss.SSS";
+    private static final String GROUP_ID = "frontend";
 
     private final DTOUtils dtoUtils;
 
@@ -92,7 +91,7 @@ public class ExchangeService {
         opportunities.init();
     }
 
-    @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "frontend")
+    @KafkaListener(id = "orderBooks", topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = GROUP_ID)
     public void processOrderBooks(String msg) {
         log.debug("processOrderBooks: {}", msg);
         kafkaMessagesCounter.record(1);
@@ -103,7 +102,7 @@ public class ExchangeService {
         orderBookReceived.onNext(msg);
     }
 
-    @KafkaListener(topics = TopicUtils.INPUT_TICKER, containerFactory = "batchFactory", groupId = "frontend")
+    @KafkaListener(id = "tickers", topics = TopicUtils.INPUT_TICKER, containerFactory = "batchFactory", groupId = GROUP_ID)
     public void processTickers(String msg) {
         log.debug("processTickers: {} message", msg);
         kafkaMessagesCounter.record(1);
@@ -130,7 +129,7 @@ public class ExchangeService {
         tickers.set(key, new ExchangeData(localTime, ticker.getOrder(), msg));
     }
 
-    @KafkaListener(topics = OPPORTUNITIES, containerFactory = "batchFactory", groupId = "frontend")
+    @KafkaListener(id = "opportunities", topics = TopicUtils.OPPORTUNITIES, containerFactory = "batchFactory", groupId = "frontend")
     public void processOpportunities(String msg) {
         log.debug("processOpportunities: {} message", msg);
         Opportunities opportunities = dtoUtils.fromDTO(msg, Opportunities.class);

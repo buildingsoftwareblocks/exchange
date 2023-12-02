@@ -1,7 +1,5 @@
 package com.btb.exchange.analysis.services;
 
-import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
-
 import com.btb.exchange.shared.dto.Opportunities;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,11 +7,15 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.cp.IAtomicLong;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import java.math.BigDecimal;
-import java.math.MathContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.time.LocalTime;
+
+import static com.btb.exchange.shared.utils.TopicUtils.OPPORTUNITIES;
 
 @Service
 @Slf4j
@@ -53,7 +55,7 @@ public class OrderService {
      *
      */
     void processSimpleExchangeArbitrage(BigDecimal amount, Opportunities opportunities) {
-        var opportunitiesBuilder = Opportunities.builder();
+        var opportunitiesBuilder = Opportunities.builder().timestamp(LocalTime.now());
 
         opportunities.getValues().forEach(opportunity -> {
             // TODO we assume that all these assets are available in the ask order!

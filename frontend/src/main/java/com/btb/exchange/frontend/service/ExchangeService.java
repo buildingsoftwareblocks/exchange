@@ -21,12 +21,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.knowm.xchange.currency.CurrencyPair;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -71,7 +69,7 @@ public class ExchangeService {
     /**
      *
      */
-    public ExchangeService(HazelcastInstance hazelcastInstance, ObjectMapper objectMapper, MeterRegistry registry) {
+    ExchangeService(@Qualifier("hazelcastInstance") HazelcastInstance hazelcastInstance, ObjectMapper objectMapper, MeterRegistry registry) {
         this.dtoUtils = new DTOUtils(objectMapper);
         opportunities = new ReferenceData(hazelcastInstance, HAZELCAST_OPPORTUNITIES);
         updated = hazelcastInstance.getMap(HAZELCAST_UPDATED);
@@ -218,7 +216,7 @@ public class ExchangeService {
         }
     }
 
-    @lombok.Value
+    @Value
     static class ReferenceData {
         IAtomicReference<String> ref;
         IAtomicLong counter;

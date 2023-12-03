@@ -10,10 +10,11 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -43,7 +44,7 @@ public class MessageHandler {
                 .register(registry);
     }
 
-    @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "analysis")
+    @KafkaListener(id = "orderBooks", topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "analysis")
     public void process(List<String> messages) {
         log.debug("process {} messages", messages.size());
         messagesCounter.record(messages.size());

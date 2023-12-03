@@ -10,13 +10,9 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
-import java.time.Duration;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.stream.StreamSupport;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -29,6 +25,12 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
+
+import java.time.Duration;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.stream.StreamSupport;
 
 @Service
 @Slf4j
@@ -46,13 +48,13 @@ public class MongoDBDatabaseService {
     // for testing purposes, to subscribe to the event that records are saved to the database
     private final Subject<Message> stored = PublishSubject.create();
 
-    public MongoDBDatabaseService(
+    MongoDBDatabaseService(
             MongodbMessageRepository repository,
             KafkaTemplate<String, String> kafkaTemplate,
             ApplicationConfig config,
             ObjectMapper objectMapper,
             ReactiveMongoTemplate mongoTemplate,
-            HazelcastInstance hazelcastInstance) {
+            @Qualifier("hazelcastInstance") HazelcastInstance hazelcastInstance) {
         this.repository = repository;
         this.kafkaTemplate = kafkaTemplate;
         this.config = config;
@@ -62,6 +64,7 @@ public class MongoDBDatabaseService {
     }
 
     @KafkaListener(
+            id = "mongodb",
             topics = TopicUtils.INPUT_ORDERBOOK,
             containerFactory = "batchFactory",
             groupId = "backend.mongodb",
@@ -167,7 +170,7 @@ public class MongoDBDatabaseService {
     /**
      * for testing purposes
      */
-    public void deleteAll() {
+    void deleteAll() {
         repository.deleteAll().blockingAwait();
     }
 }

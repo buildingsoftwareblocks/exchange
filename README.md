@@ -160,6 +160,7 @@ For example in Window/Powershell: ``$Env:COMPOSE_PROFILES="full"``.
 - [ ] binary messages in Kafka
 - [x] more robust error handling
 - [ ] run on Kubernetes
+- [ ] ElasticSearch to version 8 (SB3 supported version)
 
 ## Related
 

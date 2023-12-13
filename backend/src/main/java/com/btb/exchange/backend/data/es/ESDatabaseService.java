@@ -34,7 +34,6 @@ public class ESDatabaseService {
     }
 
     @KafkaListener(
-            id = "elasticsearch",
             topics = TopicUtils.INPUT_ORDERBOOK,
             containerFactory = "batchFactory",
             groupId = "backend.elasticsearch",

@@ -25,6 +25,8 @@ public class MessageHandler {
     private final DTOUtils dtoUtils;
     private final DistributionSummary messagesCounter;
 
+    private static final String GROUP_ID = "analysis";
+
     // for testing purposes
     private final Subject<String> processed = PublishSubject.create();
 
@@ -44,7 +46,7 @@ public class MessageHandler {
                 .register(registry);
     }
 
-    @KafkaListener(id = "orderBooks", topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = "analysis")
+    @KafkaListener(topics = TopicUtils.INPUT_ORDERBOOK, containerFactory = "batchFactory", groupId = GROUP_ID)
     public void process(List<String> messages) {
         log.debug("process {} messages", messages.size());
         messagesCounter.record(messages.size());

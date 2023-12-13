@@ -64,7 +64,6 @@ public class MongoDBDatabaseService {
     }
 
     @KafkaListener(
-            id = "mongodb",
             topics = TopicUtils.INPUT_ORDERBOOK,
             containerFactory = "batchFactory",
             groupId = "backend.mongodb",

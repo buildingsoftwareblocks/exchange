@@ -31,3 +31,4 @@ jobs:
         run: mvn -B verify -Pcoverage,sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          nvdApiKey: ${{ secrets.NVDAPIKEY }}

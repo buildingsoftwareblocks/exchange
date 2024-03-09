@@ -1,0 +1,39 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: apm
+  labels:
+    app: apm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apm
+  template:
+    metadata:
+      labels:
+        app: apm
+    spec:
+      containers:
+        - image: 'ghcr.io/buildingsoftwareblocks/apm:1.95.0'
+          name: apm
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APM_RESOLUTION
+              value: "120"
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: apm
+spec:
+  selector:
+    app: apm
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

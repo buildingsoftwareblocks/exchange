@@ -1,0 +1,41 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: configmap
+data:
+  frontend.properties: |
+    spring.kafka.bootstrap-servers=redpanda:9092
+    #
+    frontend.hazelcast.multicast.enabled=true
+    exchange.apm.enabled=true
+    exchange.apm.server=http://apm:8080/
+    #
+    frontend.refreshrate=1000
+
+  backend.properties: |
+    spring.kafka.bootstrap-servers=redpanda:9092
+    spring.data.mongodb.uri=mongodb://mongo:27017/exchange
+    spring.elasticsearch.uris=elasticsearch:9200
+    backend.zookeeper.host=zookeeper:2181
+    #
+    backend.hazelcast.multicast.enabled=true
+    exchange.apm.enabled=true
+    exchange.apm.server=http://apm:8080/
+    #
+    backend.recording=false
+    #
+    backend.orders.max=20
+    #
+    backend.exchanges=BITFINEX,BITMEX,GEMINI,KRAKEN
+    backend.exchange.currencypairs=BTC/USD, ETH/BTC
+
+  analysis.properties: |
+    spring.kafka.bootstrap-servers=redpanda:9092
+    #
+    analysis.hazelcast.multicast.enabled=true
+    exchange.apm.enabled=true
+    exchange.apm.server=http://apm:8080/
+    #
+    analysis.buyfees=0
+    analysis.sellfees=0
+    analysis.transportfees=0.1

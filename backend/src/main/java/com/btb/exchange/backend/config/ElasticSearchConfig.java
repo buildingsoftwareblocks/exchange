@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 @Slf4j
 public class ElasticSearchConfig extends ElasticsearchConfiguration {
 
-    @Value("${spring.elasticsearch.uris:localhost:9200}")
+    @Value("${spring.elasticsearch.uris:'localhost:9200'}")
     private String elasticsearchHost;
 
     @Override

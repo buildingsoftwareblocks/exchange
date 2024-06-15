@@ -83,8 +83,7 @@ services:
       - "8081:4000"
 
   frontend:
-    #image: ghcr.io/buildingsoftwareblocks/exchange-frontend
-    image: local/exchange-frontend
+    image: ghcr.io/buildingsoftwareblocks/exchange-frontend
     profiles: [ "full" ]
     ports:
       - "8081"

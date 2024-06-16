@@ -46,3 +46,12 @@ jobs:
         run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/exchange-frontend:latest
       - name: Publish Docker image Analysis
         run: docker push ${{ env.REGISTRY }}/${{ github.actor }}/exchange-analysis:latest
+
+      - uses: quartx-analytics/ghcr-cleaner@v1
+        with:
+          owner-type: user
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository_owner: ${{ github.actor }}
+          repository-name: ${{ github.repository }}
+          delete-untagged: false
+          keep-at-most: 5

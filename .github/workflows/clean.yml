@@ -1,0 +1,31 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Publish Docker images
+
+on:
+  push:
+    branches: [ develop ]
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    name: Publish to Docker Registry
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Cleaning by removing old images
+        uses: quartx-analytics/ghcr-cleaner@v1
+        with:
+          owner-type: user
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository-owner: ${{ github.actor }}
+          repository-name: ${{ github.repository }}
+          delete-untagged: false
+          keep-at-most: 5
+          skip-tags: latest

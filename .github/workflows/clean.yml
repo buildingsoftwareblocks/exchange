@@ -17,13 +17,3 @@ jobs:
           filter-tags: "v*.*.*"
           account-type: personal
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Delete old pre-release images
-        uses: snok/container-retention-policy@v2
-        with:
-          image-names: dev/*
-          cut-off: One week ago UTC
-          keep-at-least: 1
-          filter-tags: "rc*", "dev*"
-          account-type: personal
-          token: ${{ secrets.GITHUB_TOKEN }}

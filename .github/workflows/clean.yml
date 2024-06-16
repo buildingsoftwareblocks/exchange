@@ -1,31 +1,29 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
-
-name: Clean Docker images
+name: Delete old container images
 
 on:
-  push:
-    branches: [ develop ]
-
-env:
-  REGISTRY: ghcr.io
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Clean Docker Registry
+  clean-ghcr:
+    name: Delete old unused container images
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      - name: Cleaning by removing old images
-        uses: quartx-analytics/ghcr-cleaner@v1
+      - name: Delete old released images
+        uses: snok/container-retention-policy@v2
         with:
-          owner-type: user
+          image-names: dev/*
+          cut-off: One month ago UTC
+          keep-at-least: 5
+          filter-tags: "v*.*.*"
+          account-type: personal
           token: ${{ secrets.GITHUB_TOKEN }}
-          repository-owner: ${{ github.repository_owner }}
-          repository-name: ${{ github.repository }}
-          delete-untagged: false
-          keep-at-most: 5
-          skip-tags: latest
+
+      - name: Delete old pre-release images
+        uses: snok/container-retention-policy@v2
+        with:
+          image-names: dev/*
+          cut-off: One week ago UTC
+          keep-at-least: 1
+          filter-tags: "rc*", "dev*"
+          account-type: personal
+          token: ${{ secrets.GITHUB_TOKEN }}

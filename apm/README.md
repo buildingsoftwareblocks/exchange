@@ -18,3 +18,4 @@ The following environment parameter can be set:
 | APM_RESOLUTION   | period in seconds the server request the data | 120     |
 | APM_SERVICE_PORT | port the server listens on                    | 8080    |
 | APM_PARAMS       | additional parameters for the server          |         |
+

@@ -28,12 +28,7 @@ jobs:
       - name: build shared
         run: mvn -pl shared install
 
-      #      - name: SonarCloud Scan
-      #        run: mvn -B verify -Pcoverage,sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }} -DnvdApiKey=${{ secrets.NVDAPIKEY }}
-      #        env:
-      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: SonarCloud Scan
-        run: mvn -B verify -Psonar -Dsonar.login=${{ secrets.SONAR_TOKEN }} -DnvdApiKey=${{ secrets.NVDAPIKEY }}
+        run: mvn -B verify -Pcoverage,sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }} -DnvdApiKey=${{ secrets.NVDAPIKEY }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

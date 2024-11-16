@@ -7,7 +7,7 @@ server [JavaMelody Server](https://github.com/javamelody/javamelody/wiki/UserGui
 
 Use the following command to add it to our local repository.
 
-``docker build -t "ghcr.io/buildingsoftwareblocks/apm" .``
+`docker build -t "ghcr.io/buildingsoftwareblocks/apm" .`
 
 ## Parameters
 

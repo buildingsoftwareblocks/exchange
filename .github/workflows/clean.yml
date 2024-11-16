@@ -13,7 +13,7 @@ jobs:
         uses: snok/container-retention-policy@v3.0.0
         with:
           account: ${{ github.repository_owner }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REPO_PAT }}
           image-names: "exchange-backend"
           cut-off: 4w
           image-tags: "!test* !main* !v* !latest 202*"

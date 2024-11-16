@@ -16,6 +16,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           image-names: "exchange-*"
           cut-off: One month ago UTC
-          image-tags: "!test* !main* !rel* !latest 202*"
+          image-tags: "!test* !main* !v* !latest 202*"
           keep-n-most-recent: 5
 

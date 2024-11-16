@@ -1,6 +1,6 @@
 # APM image
 
-Create a container image of the APM
+Create a container image of the APM (Application Performance Monitoring)
 server [JavaMelody Server](https://github.com/javamelody/javamelody/wiki/UserGuideAdvanced).
 
 ## Build

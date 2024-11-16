@@ -1,5 +1,13 @@
-FROM eclipse-temurin:17-jre-jammy
+ARG WAR_FILE=*.war
+COPY ${WAR_FILE} /usr/local/tomcat/webapps/ROOT.war
 
-ADD javamelody-collector-server-1.99.0.war /
+EXPOSE 8080
 
-CMD java -server -Xmx128m -Djavamelody.resolution-seconds=${APM_RESOLUTION:-120} -jar /javamelody-collector-server-1.99.0.war --httpPort=${APM_SERVICE_PORT:-8080} ${APM_PARAMS:-}
+# Copy a custom startup script
+COPY startup.sh /usr/local/tomcat/bin/
+
+# Make the script executable
+RUN chmod +x /usr/local/tomcat/bin/startup.sh
+
+# Use the custom startup script as the entry point
+ENTRYPOINT ["/usr/local/tomcat/bin/startup.sh"]

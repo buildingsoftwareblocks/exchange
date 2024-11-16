@@ -425,7 +425,6 @@
                                 <publish>false</publish>
                                 <tags>
                                     <tag>latest</tag>
-                                    <tag>${project.version}</tag>
                                     <tag>${git.commit.id.abbrev}</tag>
                                 </tags>
                             </image>

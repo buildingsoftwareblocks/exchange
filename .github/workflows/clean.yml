@@ -15,7 +15,7 @@ jobs:
           account: ${{ github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}
           image-names: "exchange-*"
-          cut-off: One month ago UTC
+          cut-off: 4w
           image-tags: "!test* !main* !v* !latest 202*"
           keep-n-most-recent: 5
 

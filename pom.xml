@@ -384,6 +384,12 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
+            <!-- Add GIT info to /actuator/info -->
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
@@ -417,6 +423,11 @@
                             <image>
                                 <name>${docker.repo}/exchange-${project.artifactId}</name>
                                 <publish>false</publish>
+                                <tags>
+                                    <tag>latest</tag>
+                                    <tag>${project.version}</tag>
+                                    <tag>${git.commit.id.abbrev}</tag>
+                                </tags>
                             </image>
                         </configuration>
                         <executions>

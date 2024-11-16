@@ -6,8 +6,7 @@ on:
   workflow_dispatch:  # Allow manual triggering
 
 jobs:
-  clean-ghcr:
-    name: Delete old unused container images
+  clean:
     runs-on: ubuntu-latest
     steps:
       - name: Delete old released images

@@ -425,7 +425,7 @@
                                 <publish>false</publish>
                                 <tags>
                                     <tag>latest</tag>
-                                    <tag>${git.commit.id.abbrev}</tag>
+                                    <tag>git-${git.commit.id.abbrev}</tag>
                                 </tags>
                             </image>
                         </configuration>

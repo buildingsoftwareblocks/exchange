@@ -1,5 +1,5 @@
 #
-# Make sure that over stable Develop version has a Docker images
+# Application Performance Management
 #
 name: Release APM
 

@@ -9,11 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Delete old released images
-        uses: snok/container-retention-policy@v2
+        uses: snok/container-retention-policy@v3.0.0
         with:
-          image-names: dev/*
-          cut-off: One month ago UTC
-          keep-at-least: 5
-          filter-tags: "v*.*.*"
-          account-type: personal
+          account: ${{ github.repository_owner }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          image-names: *
+          cut-off: One month ago UTC
+          image-tags: "!test* !main* !rel* !latest 202*"
+          keep-n-most-recent: 5
+

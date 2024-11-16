@@ -42,13 +42,14 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ steps.repository_owner.outputs.lowercase }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ env.IMAGE_TAG }}
-            type=raw,value=latest
-            type=sha,prefix={{date 'YYYYMMDD'}}-
+            type=sha
+            type=raw,latest
+            type=raw,value={{date 'YYYYMMDD-HHmm'}}
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: apm
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -15,7 +15,7 @@ jobs:
           account: ${{ github.repository_owner }}
           token: ${{ secrets.REPO_PAT }}
           image-names: "exchange-backend exchange-frontend exchange-analysis exchange-admin exchange-config apm"
-          cut-off: 4w
+          cut-off: 26w
           image-tags: "!test* !main* !v* !latest 202*"
           keep-n-most-recent: 5
 
